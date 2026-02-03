@@ -1,22 +1,20 @@
-Package: template
-Title: Package Title (one line, title case)
+Package: metamet
+Title: Meta Data for Met Data
 Version: 0.0.0.9000
 Authors@R: person("Peter", "Levy", 
                   email = "plevy@ceh.ac.uk", 
                   role = c("aut", "cre", "cph"),
                   comment=c(ORCID = "https://orcid.org/0000-0002-8505-1901"))
-Description: This package is a template for my research projects using the R
-             package structure (research compendium).  This package also includes
-             a helpful template function to deploy the template as a new repository
-             with a different name.  
-Depends: R (>= 3.1.2)
+Description: This package is defines a data structure for met data and its meta 
+  data, and functions for manipulation and quality control. 
 License: MIT + file LICENSE
 LazyData: true
+VignetteBuilder: knitr
+RoxygenNote: 7.3.3
+Encoding: UTF-8
 Suggests: testthat,
     knitr,
     covr
-VignetteBuilder: knitr
-Imports: 
-    git2r,
-    gh
-RoxygenNote: 6.0.1
+Depends: 
+    R (>= 3.5),
+    data.table

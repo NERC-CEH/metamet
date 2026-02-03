@@ -6,3 +6,5 @@
 ^\.Rproj\.user$
 ^CONTRIBUTING\.md$
 
+^\.vscode$
+^[.]?air[.]toml$

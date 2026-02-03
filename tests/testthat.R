@@ -1,4 +1,4 @@
 library(testthat)
-library(template)
+library(metamet)
 
-test_check("template")
+test_check("dummy")

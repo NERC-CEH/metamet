@@ -12,6 +12,7 @@ use_data_table()
 use_package("data.table", "Depends")
 use_package("fs", "Imports", min_version = "1.5.0")
 use_package("here", "Imports")
+use_package("readxl", "Imports")
 use_package("openair", "Imports")
 use_package("lubridate", "Imports")
 
@@ -82,15 +83,21 @@ summary(mm$dt)
 dim(mm$dt)
 
 # recreate from files only
-fname_dt <- "data-raw/UK-AMO/UK-AMo_BM_20250822_L03_F02.dat"
+fname_dt <- "data-raw/UK-AMO/UK-AMo_BM_20260203_L03_F02.dat"
 fname_meta <- "data-raw/UK-AMO/dt_meta.csv"
+fname_meta <- "data-raw/UK-AMO/dt_meta.xlsx"
 fname_site <- "data-raw/UK-AMO/dt_site.csv"
+
 mm <- metamet(
   dt = fname_dt,
   dt_meta = fname_meta,
   dt_site = fname_site
 )
-mm <- time_average(mm, avg.time = "2 hour")
+dim(mm$dt)
+summary(mm$dt)
+sum(mm$dt$P_12_1_1)
+mm <- time_average(mm, avg.time = "6 hour")
+sum(mm$dt$P_12_1_1)
 dim(mm$dt)
 print(mm$dt)
 class(mm)
@@ -98,5 +105,7 @@ str(mm)
 summary(mm$dt)
 
 # tested
+print(mm)
+summary(mm)
 mm <- restrict(mm)
 mm <- convert_time_char_to_posix(mm)

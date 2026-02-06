@@ -22,4 +22,5 @@ Imports:
     here,
     fs (>= 1.5.0),
     openair,
-    lubridate
+    lubridate,
+    readxl

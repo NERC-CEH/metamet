@@ -1,5 +1,6 @@
-#' metamet.
-#'
-#' @name metamet
-#' @docType _PACKAGE
+#' @keywords internal
+"_PACKAGE"
+
+## usethis namespace: start
+## usethis namespace: end
 NULL

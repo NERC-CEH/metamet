@@ -145,12 +145,13 @@ convert_time_char_to_posix <- function(mm) {
   return(mm)
 }
 
-##* Note that timeAverage associates the mean with the start of the averaging period,
+# Note that timeAverage associates the mean with the start of the averaging period,
 # so for hourly data the mean value for 00:00:00 is the mean of values from 00:00:00 to 00:59:59.
 # ICOS reports values at the time of sampling, so any online averagin applies to the previous time interval.
 # We should decide on a consistent approach, or report interval start and end times in the output data table.
 # For now, we will just use the default behaviour of timeAverage, which is to associate the mean with the start of the averaging period.
-time_average <- function(mm, avg.time = "hour") {
+
+time_average <- function(mm, avg.time = "30 min", report_end_interval = TRUE) {
   # get the name and format of the time, precip, ws & wd variables
   time_name <- mm$dt_meta[type == "time", name_dt]
   precip_name <- mm$dt_meta[type == "precipitation", name_dt]
@@ -178,12 +179,14 @@ time_average <- function(mm, avg.time = "hour") {
 
   df_mean <- openair::timeAverage(
     openair::selectByDate(mm$dt, start = start.date, end = end.date),
+    start.date = start.date,
     avg.time = avg.time
   )
   # if the data contains precipitation, we want to sum instead of average
   if (length(precip_name) > 0) {
     df_sum <- openair::timeAverage(
       openair::selectByDate(mm$dt, start = start.date, end = end.date),
+      start.date = start.date,
       avg.time = avg.time,
       statistic = "sum"
     )
@@ -193,6 +196,12 @@ time_average <- function(mm, avg.time = "hour") {
     df_mean[, eval(precip_name)] <- v_ppt
   }
   mm$dt <- data.table::setDT(df_mean) # openair returns a data frame - upgrade to dt
+
+  if (report_end_interval) {
+    # report the end time of the interval instead of the start time
+    interval_length <- difftime(mm$dt[2, date], mm$dt[1, date])
+    mm$dt[, date := date + interval_length]
+  }
 
   # restore original time name
   setnames(mm$dt, "date", eval(time_name))

@@ -151,7 +151,12 @@ convert_time_char_to_posix <- function(mm) {
 # We should decide on a consistent approach, or report interval start and end times in the output data table.
 # For now, we will just use the default behaviour of timeAverage, which is to associate the mean with the start of the averaging period.
 
-time_average <- function(mm, avg.time = "30 min", report_end_interval = TRUE) {
+time_average <- function(
+  mm_in,
+  avg.time = "30 min",
+  report_end_interval = TRUE
+) {
+  mm <- copy(mm_in) # we need this to avoid modifying the original object
   # get the name and format of the time, precip, ws & wd variables
   time_name <- mm$dt_meta[type == "time", name_dt]
   precip_name <- mm$dt_meta[type == "precipitation", name_dt]
@@ -177,6 +182,8 @@ time_average <- function(mm, avg.time = "30 min", report_end_interval = TRUE) {
   # run up to 1 second before the next hour to avoid creating an extra interval with only 1 value
   end.date <- lubridate::ceiling_date(last_date, unit = "hour") - 1
 
+  # a data.table time averaging function would presumably be quicker
+  # intervalaverage exists but only does IDate i.e. whole days
   df_mean <- openair::timeAverage(
     openair::selectByDate(mm$dt, start = start.date, end = end.date),
     start.date = start.date,
@@ -195,7 +202,7 @@ time_average <- function(mm, avg.time = "30 min", report_end_interval = TRUE) {
     # and put it into the dt of mean values
     df_mean[, eval(precip_name)] <- v_ppt
   }
-  mm$dt <- data.table::setDT(df_mean) # openair returns a data frame - upgrade to dt
+  mm$dt <- data.table::as.data.table(df_mean) # openair returns a data frame - upgrade to dt
 
   if (report_end_interval) {
     # report the end time of the interval instead of the start time
@@ -241,4 +248,68 @@ summary.metamet <- function(object, ...) {
   print(summary(object$dt_meta))
   cat("\nSite information (dt_site):\n")
   print(summary(object$dt_site))
+}
+
+#' Combine metamet Objects by Columns
+#'
+#' Combines multiple metamet objects by column-binding their data tables,
+#' while merging metadata tables by variable name.
+#'
+#' @param ... metamet objects to combine
+#' @param deparse.level Integer determining the naming of combined data tables
+#'   (unused for metamet objects, included for S3 method compatibility)
+#'
+#' @return A new metamet object containing:
+#'   \item{dt}{Combined data table with columns from all input objects,
+#'     merged by TIMESTAMP}
+#'   \item{dt_meta}{Unique rows from metadata tables of all input objects}
+#'   \item{dt_site}{Unique rows from site information tables of all input objects}
+#'
+#' @export
+#' @method cbind metamet
+#'
+#' @examples
+#' \dontrun{
+#'   mm_combined <- cbind(mm1, mm2, mm3)
+#' }
+#'
+cbind.metamet <- function(..., deparse.level = 1) {
+  # get the list of metamet objects
+  l_mm <- list(...)
+  # check that all objects are of class metamet
+  if (!all(sapply(l_mm, function(x) "metamet" %in% class(x)))) {
+    stop("All objects must be of class metamet")
+  }
+
+  # combine the data tables by column
+  # merge the metadata tables by name_dt
+  ##* WIP: Change TIMESTAMP to time_name variable - needs to be made consistent
+  # in the list
+  dt_combined <- Reduce(
+    function(x, y) merge(x, y, by = "TIMESTAMP", all = TRUE),
+    lapply(l_mm, function(x) x$dt)
+  )
+
+  l_dt_meta <- lapply(l_mm, with, dt_meta)
+  dt_meta_combined <- data.table::rbindlist(
+    l_dt_meta,
+    use.names = TRUE,
+    fill = TRUE
+  )
+  dt_meta_combined <- unique(dt_meta_combined)
+
+  l_dt_site <- lapply(l_mm, with, dt_site)
+  dt_site_combined <- data.table::rbindlist(
+    l_dt_site,
+    use.names = TRUE,
+    fill = TRUE
+  )
+  dt_site_combined <- unique(dt_site_combined)
+
+  # create a new metamet object with the combined data and metadata
+  new_metamet(
+    dt = dt_combined,
+    dt_meta = dt_meta_combined,
+    dt_site = dt_site_combined
+  )
 }

@@ -3,4 +3,5 @@
 .RData
 inst/doc
 vignettes/*_cache/
-data-raw
+data-raw/*
+!data-raw/make_data-sets.R

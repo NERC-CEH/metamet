@@ -18,6 +18,7 @@ use_package("lubridate", "Imports")
 
 
 document()
+devtools::test()
 build(vignettes = FALSE)
 check(vignettes = FALSE)
 pkgload::load_all()

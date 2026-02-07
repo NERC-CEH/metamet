@@ -12,7 +12,8 @@ LazyData: true
 VignetteBuilder: knitr
 RoxygenNote: 7.3.3
 Encoding: UTF-8
-Suggests: testthat,
+Suggests: 
+    testthat (>= 3.0.0),
     knitr,
     covr
 Depends: 
@@ -24,3 +25,4 @@ Imports:
     openair,
     lubridate,
     readxl
+Config/testthat/edition: 3

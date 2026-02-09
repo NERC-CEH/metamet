@@ -141,14 +141,15 @@ metamet.data.table <- function(
 
 # restrict dt and dt_meta variables to only those that occur in both
 restrict <- function(mm) {
+  v_site_dt <- unique(mm$dt[, site])
   v_name_meta <- mm$dt_meta$name_dt
   v_name_dt <- colnames(mm$dt)
   # subset dt to only those that exist in metadata
   v_name_dt <- v_name_dt[v_name_dt %in% v_name_meta]
   mm$dt <- mm$dt[, ..v_name_dt]
 
-  # subset metadata to only variables that exist in dt
-  mm$dt_meta <- mm$dt_meta[name_dt %in% v_name_dt]
+  # subset metadata to only variables that exist in dt and correspond to that site
+  mm$dt_meta <- mm$dt_meta[site %in% v_site_dt & name_dt %in% v_name_dt]
 
   # subset site to only those that exist in dt
   v_site_dt <- unique(mm$dt[, site])

@@ -3,7 +3,7 @@
 
 test_that("metamet reading from files works", {
   fname_dt <- testthat::test_path("data-raw/UK-AMo_BM_20260126_L03_F02.dat")
-  fname_meta <- testthat::test_path("data-raw/dt_meta.csv")
+  fname_meta <- testthat::test_path("data-raw/dt_meta.xlsx")
   fname_site <- testthat::test_path("data-raw/dt_site.csv")
   mm_t1 <- metamet(
     dt = fname_dt,

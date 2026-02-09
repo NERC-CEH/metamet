@@ -36,8 +36,8 @@ class(mm1)
 # test the helper
 # test with file paths as argument
 fname_dt <- "data-raw/UK-AMO/UK-AMo_BM_20250822_L03_F02.dat"
-fname_meta <- "data-raw/UK-AMO/dt_meta.csv"
-fname_site <- "data-raw/UK-AMO/dt_site.csv"
+fname_meta <- "data-raw/dt_meta.xlsx"
+fname_site <- "data-raw/dt_site.csv"
 mm_from_files <- metamet(
   dt = fname_dt,
   dt_meta = fname_meta,
@@ -86,9 +86,9 @@ dim(mm$dt)
 
 # recreate from files only
 fname_dt <- "data-raw/UK-AMO/UK-AMo_BM_20260203_L03_F02.dat"
-fname_meta <- "data-raw/UK-AMO/dt_meta.csv"
-fname_meta <- "data-raw/UK-AMO/dt_meta.xlsx"
-fname_site <- "data-raw/UK-AMO/dt_site.csv"
+fname_meta <- "data-raw/dt_meta.xlsx"
+fname_meta <- "data-raw/dt_meta.xlsx"
+fname_site <- "data-raw/dt_site.csv"
 
 mm <- metamet(
   dt = fname_dt,
@@ -115,8 +115,8 @@ mm <- convert_time_char_to_posix(mm)
 # test existing Level 1 data
 fname_dt <- here("data-raw/UK-AMO/UK-AMO_BM_dt_2026.csv")
 fname_dt <- here("data-raw/UK-AMO/UK-AMo_BM_20260203_L03_F02.dat")
-fname_meta <- here("data-raw/UK-AMO/dt_meta.xlsx")
-fname_site <- here("data-raw/UK-AMO/dt_site.csv")
+fname_meta <- here("data-raw/dt_meta.xlsx")
+fname_site <- here("data-raw/dt_site.csv")
 rm(mm)
   dt = fname_dt
   dt_meta = fname_meta

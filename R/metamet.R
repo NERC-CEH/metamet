@@ -7,12 +7,21 @@
 new_metamet <- function(
   dt = data.table::data.table(),
   dt_meta = NULL,
-  dt_site = NULL
+  dt_site = NULL,
+  site_id = NULL
 ) {
   # Make sure `dt` is a data table
   if (!data.table::is.data.table(dt)) {
     stop("`dt` must be a data table")
   }
+  # Make sure `site_id` is a specified character
+  if (length(as.character(site_id)) < 1) {
+    stop("`site_id` must be provided")
+  }
+
+  # add site_id to the data as site column
+  # should this be ..site_id?
+  dt[, site := as.character(site_id)]
 
   # Make the metamet object
   new_metamet <- list(
@@ -39,7 +48,13 @@ metamet.default <- function(dt, ...) {
 
 # 3. Method for character strings (files)
 #' @export
-metamet.character <- function(dt, dt_meta = NULL, dt_site = NULL, ...) {
+metamet.character <- function(
+  dt,
+  dt_meta = NULL,
+  dt_site = NULL,
+  site_id = NULL,
+  ...
+) {
   message("Loading file: ", dt)
   dt <- data.table::fread(dt)
 
@@ -64,7 +79,7 @@ metamet.character <- function(dt, dt_meta = NULL, dt_site = NULL, ...) {
 
   # l_dt <- lapply(v_fname, import_campbell_data)
   # and then call the data table method
-  metamet(dt = dt, dt_meta = dt_meta, dt_site = dt_site)
+  metamet(dt = dt, dt_meta = dt_meta, dt_site = dt_site, site_id = site_id)
 }
 
 # 4. Method for data frames
@@ -91,7 +106,13 @@ metamet.data.frame <- function(dt, dt_meta = NULL, dt_site = NULL, ...) {
 
 # 4. Method for data tables
 #' @export
-metamet.data.table <- function(dt, dt_meta = NULL, dt_site = NULL, ...) {
+metamet.data.table <- function(
+  dt,
+  dt_meta = NULL,
+  dt_site = NULL,
+  site_id = NULL,
+  ...
+) {
   message("Reading data table ...")
 
   # read metadata from file if a path is specified
@@ -107,7 +128,12 @@ metamet.data.table <- function(dt, dt_meta = NULL, dt_site = NULL, ...) {
   }
   data.table::setDT(dt_site)
 
-  mm <- new_metamet(dt = dt, dt_meta = dt_meta, dt_site = dt_site)
+  mm <- new_metamet(
+    dt = dt,
+    dt_meta = dt_meta,
+    dt_site = dt_site,
+    site_id = site_id
+  )
   mm <- restrict(mm)
   mm <- convert_time_char_to_posix(mm)
   return(mm)
@@ -115,14 +141,19 @@ metamet.data.table <- function(dt, dt_meta = NULL, dt_site = NULL, ...) {
 
 # restrict dt and dt_meta variables to only those that occur in both
 restrict <- function(mm) {
+  v_site_dt <- unique(mm$dt[, site])
   v_name_meta <- mm$dt_meta$name_dt
   v_name_dt <- colnames(mm$dt)
   # subset dt to only those that exist in metadata
   v_name_dt <- v_name_dt[v_name_dt %in% v_name_meta]
   mm$dt <- mm$dt[, ..v_name_dt]
 
-  # subset metadata to only variables that exist in dt
-  mm$dt_meta <- mm$dt_meta[name_dt %in% v_name_dt]
+  # subset metadata to only variables that exist in dt and correspond to that site
+  mm$dt_meta <- mm$dt_meta[site %in% v_site_dt & name_dt %in% v_name_dt]
+
+  # subset site to only those that exist in dt
+  v_site_dt <- unique(mm$dt[, site])
+  mm$dt_site <- mm$dt_site[site %in% v_site_dt]
 
   return(mm)
 }
@@ -194,7 +225,8 @@ time_average <- function(
   df_mean <- openair::timeAverage(
     openair::selectByDate(mm$dt, start = start.date, end = end.date),
     start.date = start.date,
-    avg.time = avg.time
+    avg.time = avg.time,
+    type = "site"
   )
   # if the data contains precipitation, we want to sum instead of average
   if (length(precip_name) > 0) {
@@ -202,7 +234,8 @@ time_average <- function(
       openair::selectByDate(mm$dt, start = start.date, end = end.date),
       start.date = start.date,
       avg.time = avg.time,
-      statistic = "sum"
+      statistic = "sum", #
+      type = "site"
     )
     # extract the summed precip as a vector
     v_ppt <- df_sum[, eval(precip_name)][[1]]
@@ -255,74 +288,4 @@ summary.metamet <- function(object, ...) {
   print(summary(object$dt_meta))
   cat("\nSite information (dt_site):\n")
   print(summary(object$dt_site))
-}
-
-#' Combine metamet Objects by Columns
-#'
-#' Combines multiple metamet objects by column-binding their data tables,
-#' while merging metadata tables by variable name.
-#'
-#' @param ... metamet objects to combine
-#' @param deparse.level Integer determining the naming of combined data tables
-#'   (unused for metamet objects, included for S3 method compatibility)
-#'
-#' @return A new metamet object containing:
-#'   \item{dt}{Combined data table with columns from all input objects,
-#'     merged by TIMESTAMP}
-#'   \item{dt_meta}{Unique rows from metadata tables of all input objects}
-#'   \item{dt_site}{Unique rows from site information tables of all input objects}
-#'
-#' @export
-#' @method cbind metamet
-#'
-#' @examples
-#' \dontrun{
-#'   mm_combined <- cbind(mm1, mm2, mm3)
-#' }
-#'
-cbind.metamet <- function(..., deparse.level = 1) {
-  # get the list of metamet objects
-  l_mm <- list(...)
-  # check that all objects are of class metamet
-  if (!all(sapply(l_mm, function(x) "metamet" %in% class(x)))) {
-    stop("All objects must be of class metamet")
-  }
-
-  # Change time_name variable of the first in the list to be consistent
-  # throughout the list e.g. all "TIMESTAMP"
-  first_time_name <- l_mm[[1]]$dt_meta[type == "time", name_dt]
-  for (i in seq_along(l_mm)) {
-    this_time_name <- l_mm[[i]]$dt_meta[type == "time", name_dt]
-    setnames(l_mm[[i]]$dt, this_time_name, first_time_name)
-  }
-  # combine the data tables by column
-  # merge the metadata tables by name_dt
-
-  dt_combined <- Reduce(
-    function(x, y) merge(x, y, by = first_time_name, all = TRUE),
-    lapply(l_mm, function(x) x$dt)
-  )
-
-  l_dt_meta <- lapply(l_mm, with, dt_meta)
-  dt_meta_combined <- data.table::rbindlist(
-    l_dt_meta,
-    use.names = TRUE,
-    fill = TRUE
-  )
-  dt_meta_combined <- unique(dt_meta_combined)
-
-  l_dt_site <- lapply(l_mm, with, dt_site)
-  dt_site_combined <- data.table::rbindlist(
-    l_dt_site,
-    use.names = TRUE,
-    fill = TRUE
-  )
-  dt_site_combined <- unique(dt_site_combined)
-
-  # create a new metamet object with the combined data and metadata
-  new_metamet(
-    dt = dt_combined,
-    dt_meta = dt_meta_combined,
-    dt_site = dt_site_combined
-  )
 }

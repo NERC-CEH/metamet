@@ -19,6 +19,7 @@ use_package("lubridate", "Imports")
 
 
 document()
+pkgload::load_all()
 devtools::test()
 build(vignettes = FALSE)
 check(vignettes = FALSE)
@@ -28,7 +29,7 @@ s3_methods_generic("metamet")
 s3_methods_class("metamet")
 
 # test the constructor
-mm1 <- new_metamet(dt = data.table(x = 1:1000, y = 1:1000))
+mm1 <- new_metamet(dt = data.table(x = 1:1000, y = 1:1000), site_id = "UK-EBU")
 mm1
 str(mm1)
 class(mm1)
@@ -36,20 +37,20 @@ class(mm1)
 # test the helper
 # test with file paths as argument
 fname_dt <- "data-raw/UK-AMO/UK-AMo_BM_20250822_L03_F02.dat"
-fname_meta <- "data-raw/UK-AMO/dt_meta.csv"
-fname_site <- "data-raw/UK-AMO/dt_site.csv"
+fname_meta <- "data-raw/dt_meta.xlsx"
+fname_site <- "data-raw/dt_site.csv"
 mm_from_files <- metamet(
   dt = fname_dt,
   dt_meta = fname_meta,
-  dt_site = fname_site
+  dt_site = fname_site, site_id = "UK-AMO"
 )
 s3_dispatch(metamet(fname_dt))
 
 # test with data frames as argument
 df <- read.csv(fname_dt)
-df_meta <- read.csv(fname_meta)
+# df_meta <- read.csv(fname_meta)
 df_site <- read.csv(fname_site)
-mm_from_df <- metamet(df, dt_meta = df_meta, dt_site = df_site)
+mm_from_df <- metamet(df, dt_meta = fname_meta, dt_site = df_site)
 class(mm)
 str(mm)
 
@@ -78,7 +79,7 @@ identical(mm_from_files$dt_meta, mm_from_dt$dt_meta)
 identical(mm_from_df$dt_meta, mm_from_dt$dt_meta)
 
 # test with a mix of arguments
-mm <- metamet(dt = fname_dt, dt_meta = fname_meta, dt_site = dt_site)
+mm <- metamet(dt = fname_dt, dt_meta = fname_meta, dt_site = dt_site, site_id = "UK-AMO")
 class(mm)
 str(mm)
 summary(mm$dt)
@@ -86,25 +87,25 @@ dim(mm$dt)
 
 # recreate from files only
 fname_dt <- "data-raw/UK-AMO/UK-AMo_BM_20260203_L03_F02.dat"
-fname_meta <- "data-raw/UK-AMO/dt_meta.csv"
-fname_meta <- "data-raw/UK-AMO/dt_meta.xlsx"
-fname_site <- "data-raw/UK-AMO/dt_site.csv"
+fname_meta <- "data-raw/dt_meta.xlsx"
+fname_site <- "data-raw/dt_site.csv"
 
 mm <- metamet(
   dt = fname_dt,
   dt_meta = fname_meta,
-  dt_site = fname_site
+  dt_site = fname_site, 
+  site_id = "UK-AMO"
 )
 dim(mm$dt)
 summary(mm$dt)
 sum(mm$dt$P_12_1_1)
-mm <- time_average(mm, avg.time = "6 hour")
-sum(mm$dt$P_12_1_1)
-dim(mm$dt)
-print(mm$dt)
-class(mm)
-str(mm)
-summary(mm$dt)
+mm_avg <- time_average(mm, avg.time = "6 hour")
+sum(mm_avg$dt$P_12_1_1)
+dim(mm_avg$dt)
+print(mm_avg$dt)
+class(mm_avg)
+str(mm_avg)
+summary(mm_avg$dt)
 
 #  make formal tests for these:
 print(mm)
@@ -115,8 +116,8 @@ mm <- convert_time_char_to_posix(mm)
 # test existing Level 1 data
 fname_dt <- here("data-raw/UK-AMO/UK-AMO_BM_dt_2026.csv")
 fname_dt <- here("data-raw/UK-AMO/UK-AMo_BM_20260203_L03_F02.dat")
-fname_meta <- here("data-raw/UK-AMO/dt_meta.xlsx")
-fname_site <- here("data-raw/UK-AMO/dt_site.csv")
+fname_meta <- here("data-raw/dt_meta.xlsx")
+fname_site <- here("data-raw/dt_site.csv")
 rm(mm)
   dt = fname_dt
   dt_meta = fname_meta
@@ -124,7 +125,8 @@ rm(mm)
 mm <- metamet(
   dt = fname_dt,
   dt_meta = fname_meta,
-  dt_site = fname_site
+  dt_site = fname_site,
+  site_id = "UK-AMO"
 )
 
 as.POSIXct(strptime(as.2024-01-01 00:00:00, "%Y-%m-%d %H:%M:%S"))

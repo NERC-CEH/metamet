@@ -6,6 +6,8 @@ library(usethis)
 
 # add to .RBuildIgnore
 usethis::use_build_ignore(c("data-raw"))
+# add air to GitHub Actions
+# usethis::use_github_action(url = "https://github.com/posit-dev/setup-air/blob/main/examples/format-suggest.yaml")
 
 # # add the packages requiring importing to package.r
 use_tidy_eval()

@@ -1,8 +1,3 @@
-utils::globalVariables(c("errorMessage"))
-.datatable.aware <- TRUE
-# Use GMT, never BST
-Sys.setenv(TZ = "GMT")
-
 # This file defines the metamet class, its constructor, and some essential S3
 # methods. A metamet object is a list of data tables - one for the met data
 # itself, and additional ones for the meta-data needed to process and interpret
@@ -52,7 +47,7 @@ metamet.character <- function(dt, dt_meta = NULL, dt_site = NULL, ...) {
   # otherwise the argument is assumed to be a data table/frame
   if ("character" %in% class(dt_meta)) {
     # excel format
-    if (fs::path_ext(fname_meta) == "xlsx") {
+    if (fs::path_ext(dt_meta) == "xlsx") {
       dt_meta <- readxl::read_excel(dt_meta)
     } else {
       # .csv format
@@ -118,7 +113,7 @@ metamet.data.table <- function(dt, dt_meta = NULL, dt_site = NULL, ...) {
   return(mm)
 }
 
-# restrict dt and dt_meta tables to only those that occur in both
+# restrict dt and dt_meta variables to only those that occur in both
 restrict <- function(mm) {
   v_name_meta <- mm$dt_meta$name_dt
   v_name_dt <- colnames(mm$dt)
@@ -135,12 +130,24 @@ restrict <- function(mm) {
 convert_time_char_to_posix <- function(mm) {
   # get the name and format of the time variable
   time_name <- mm$dt_meta[type == "time", name_dt]
-  time_format <- mm$dt_meta[type == "time", time_char_format]
-  # convert character variable to POSIXct
-  mm$dt[, eval(time_name) := as.POSIXct(strptime(get(time_name), time_format))]
+
+  # sometimes time is automatically read as POSIXct; only convert if is not
+  if ("POSIXct" %!in% class(mm$dt[, get(time_name)])) {
+    time_format <- mm$dt_meta[type == "time", time_char_format]
+    # make sure time is a character variable - sometimes read as integer
+    mm$dt[, eval(time_name) := as.character(get(time_name))]
+    # convert character variable to POSIXct
+    mm$dt[,
+      eval(time_name) := as.POSIXct(
+        get(time_name),
+        tz = "GMT",
+        format = time_format
+      )
+    ]
+  }
 
   # remove duplicate rows - sometimes occur in Campbell files
-  mm$dt <- mm$dt[!duplicated(mm$dt[, TIMESTAMP]), ]
+  mm$dt <- mm$dt[!duplicated(mm$dt[, ..time_name]), ]
 
   return(mm)
 }
@@ -281,12 +288,18 @@ cbind.metamet <- function(..., deparse.level = 1) {
     stop("All objects must be of class metamet")
   }
 
+  # Change time_name variable of the first in the list to be consistent
+  # throughout the list e.g. all "TIMESTAMP"
+  first_time_name <- l_mm[[1]]$dt_meta[type == "time", name_dt]
+  for (i in seq_along(l_mm)) {
+    this_time_name <- l_mm[[i]]$dt_meta[type == "time", name_dt]
+    setnames(l_mm[[i]]$dt, this_time_name, first_time_name)
+  }
   # combine the data tables by column
   # merge the metadata tables by name_dt
-  ##* WIP: Change TIMESTAMP to time_name variable - needs to be made consistent
-  # in the list
+
   dt_combined <- Reduce(
-    function(x, y) merge(x, y, by = "TIMESTAMP", all = TRUE),
+    function(x, y) merge(x, y, by = first_time_name, all = TRUE),
     lapply(l_mm, function(x) x$dt)
   )
 

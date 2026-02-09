@@ -1,0 +1,101 @@
+﻿name_dt,standard_name,long_name,units,type,time_char_format,start_date,end_date,horizontal_id,vertical_id,replicate_id,gf_time,gf_era5,gf_night_zero,diff_ref_max,sensor_make,sensor_model
+D_SNOW,D_SNOW,Snow depth,cm,height,,01/01/2026 00:00,01/01/2027 00:00,4,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+D_SNOW_4_1_1,D_SNOW,Snow depth,cm,height,,01/01/2026 00:00,01/01/2027 00:00,4,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+DATECT,DATECT,timestamp,,time,%Y-%m-%d %H:%M:%S,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+G,G,Soil heat flux,W m-2,energy flux,,01/01/2026 00:00,01/01/2027 00:00,NA,NA,NA,FALSE,TRUE,FALSE,100,Campbell,CS-101
+G_4_1_1,G,Soil heat flux,W m-2,energy flux,,01/01/2026 00:00,01/01/2027 00:00,4,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+G_4_1_2,G,Soil heat flux,W m-2,energy flux,,01/01/2026 00:00,01/01/2027 00:00,4,1,2,FALSE,TRUE,FALSE,100,Campbell,CS-101
+LW_IN,LW_IN,LongWave incoming radiation,W m-2,arbitrary,,01/01/2026 00:00,01/01/2027 00:00,NA,NA,NA,FALSE,TRUE,FALSE,100,Campbell,CS-101
+LW_IN_5_1_1,LW_IN,LongWave incoming radiation,W m-2,arbitrary,,01/01/2026 00:00,01/01/2027 00:00,5,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+LW_OUT,LW_OUT,LongWave outgoing radiation,W m-2,energy flux,,01/01/2026 00:00,01/01/2027 00:00,NA,NA,NA,FALSE,TRUE,FALSE,100,Campbell,CS-101
+LW_OUT_5_1_1,LW_OUT,LongWave outgoing radiation,W m-2,energy flux,,01/01/2026 00:00,01/01/2027 00:00,5,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+LWS_4_1_1,LEAF_WET,Leaf Wetness,dimensionless,energy flux,,01/01/2026 00:00,01/01/2027 00:00,4,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+LWS_4_1_2,LEAF_WET,Leaf Wetness,dimensionless,energy flux,,01/01/2026 00:00,01/01/2027 00:00,4,1,2,FALSE,TRUE,FALSE,100,Campbell,CS-101
+NDVI_649IN_5_1_1,NDVI,Photosynthetic photon flux density incoming @649 nm,micromol m-2 s-1,energy flux,,01/01/2026 00:00,01/01/2027 00:00,5,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+NDVI_649OUT_5_1_1,NDVI,Photosynthetic photon flux density reflected @649 nm,micromol m-2 s-1,energy flux,,01/01/2026 00:00,01/01/2027 00:00,5,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+NDVI_797IN_5_1_1,NDVI,Photosynthetic photon flux density incoming @797 nm,micromol m-2 s-1,energy flux,,01/01/2026 00:00,01/01/2027 00:00,5,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+NDVI_797OUT_5_1_1,NDVI,Photosynthetic photon flux density reflected @797 nm,micromol m-2 s-1,energy flux,,01/01/2026 00:00,01/01/2027 00:00,5,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+P_12_1_1,P,Precipitation,mm/30 mins,precipitation,,01/01/2026 00:00,01/01/2027 00:00,12,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+P_13_1_1,P,Precipitation,mm/30 mins,precipitation,,01/01/2026 00:00,01/01/2027 00:00,13,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+PA_4_1_1,PA,Atmospheric pressure,kPa,pressure,,01/01/2026 00:00,01/01/2027 00:00,4,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+PPFD_DIF,PPFD_DIF,Photosynthetic photon flux density diffuse,micromol m-2 s-1,energy flux,,01/01/2026 00:00,01/01/2027 00:00,NA,NA,NA,FALSE,TRUE,FALSE,100,Campbell,CS-101
+PPFD_DIF_4_1_1,PPFD_DIF,Photosynthetic photon flux density diffuse,micromol m-2 s-1,energy flux,,01/01/2026 00:00,01/01/2027 00:00,4,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+PPFD_IN_4_1_1,PPFD_IN,Photosynthetic photon flux density incoming,micromol m-2 s-1,energy flux,,01/01/2026 00:00,01/01/2027 00:00,4,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+PPFD_IN_5_1_1,PPFD_IN,Photosynthetic photon flux density incoming,micromol m-2 s-1,energy flux,,01/01/2026 00:00,01/01/2027 00:00,5,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+PPFD_IN_5_1_2,PPFD_IN,Photosynthetic photon flux density incoming,micromol m-2 s-1,energy flux,,01/01/2026 00:00,01/01/2027 00:00,5,1,2,FALSE,TRUE,FALSE,100,Campbell,CS-101
+PPFD_OUT,PPFD_OUT,Photosynthetic photon flux density outgoing,micromol m-2 s-1,energy flux,,01/01/2026 00:00,01/01/2027 00:00,NA,NA,NA,FALSE,TRUE,FALSE,100,Campbell,CS-101
+PPFD_OUT_5_1_1,PPFD_OUT,Photosynthetic photon flux density outgoing,micromol m-2 s-1,energy flux,,01/01/2026 00:00,01/01/2027 00:00,5,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+RG_4_1_0,,Total global radiation,W m-2,energy flux,,01/01/2026 00:00,01/01/2027 00:00,4,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+RH_2_1_1,RH,Relative humidity,%,humidity,,01/01/2026 00:00,01/01/2027 00:00,2,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+RH_4_1_1,RH,Relative humidity,%,humidity,,01/01/2026 00:00,01/01/2027 00:00,4,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+RH_7_1_1,RH,Relative humidity,%,humidity,,01/01/2026 00:00,01/01/2027 00:00,7,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+RN_5_1_1,RN,Net radiation,W m-2,energy flux,,01/01/2026 00:00,01/01/2027 00:00,5,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+SW_IN,SW_IN,ShortWave incoming radiation,W m-2,energy flux,,01/01/2026 00:00,01/01/2027 00:00,NA,NA,NA,FALSE,TRUE,FALSE,100,Campbell,CS-101
+SW_IN_5_1_1,SW_IN,ShortWave incoming radiation,W m-2,energy flux,,01/01/2026 00:00,01/01/2027 00:00,5,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+SW_IN_7_1_1,SW_IN,ShortWave incoming radiation,W m-2,energy flux,,01/01/2026 00:00,01/01/2027 00:00,7,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+SW_OUT,SW_OUT,ShortWave outgoing radiation,W m-2,energy flux,,01/01/2026 00:00,01/01/2027 00:00,NA,NA,NA,FALSE,TRUE,FALSE,100,Campbell,CS-101
+SW_OUT_5_1_1,SW_OUT,ShortWave outgoing radiation,W m-2,energy flux,,01/01/2026 00:00,01/01/2027 00:00,5,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+SWC,SWC,Soil water content,%,soil moisture,,01/01/2026 00:00,01/01/2027 00:00,NA,NA,NA,FALSE,TRUE,FALSE,100,Campbell,CS-101
+SWC_4_1_1,SWC,Soil water content,%,soil moisture,,01/01/2026 00:00,01/01/2027 00:00,4,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+SWC_4_2_1,SWC,Soil water content,%,soil moisture,,01/01/2026 00:00,01/01/2027 00:00,4,2,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+SWC_4_3_1,SWC,Soil water content,%,soil moisture,,01/01/2026 00:00,01/01/2027 00:00,4,3,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+SWC_4_4_1,SWC,Soil water content,%,soil moisture,,01/01/2026 00:00,01/01/2027 00:00,4,4,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TA_2_1_1,TA,Air temperature,degC,temperature,,01/01/2026 00:00,01/01/2027 00:00,2,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TA_4_1_1,TA,Air temperature,degC,temperature,,01/01/2026 00:00,01/01/2027 00:00,4,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TA_7_1_1,TA,Air temperature,degC,temperature,,01/01/2026 00:00,01/01/2027 00:00,7,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TIMESTAMP,DATECT,timestamp,,time,%Y%m%d%H%M%S,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+WD_6_1_1,WD,Wind direction,degrees,wind direction,,01/01/2026 00:00,01/01/2027 00:00,6,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+WS_6_1_1,WS,Wind speed,m s-1,wind speed,,01/01/2026 00:00,01/01/2027 00:00,6,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+WD_7_1_1,WD,Wind direction,degrees,wind direction,,01/01/2026 00:00,01/01/2027 00:00,7,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+WS_7_1_1,WS,Wind speed,m s-1,wind speed,,01/01/2026 00:00,01/01/2027 00:00,7,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+WTD,WTD,Water table depth,m,height,,01/01/2026 00:00,01/01/2027 00:00,NA,NA,NA,FALSE,TRUE,FALSE,100,Campbell,CS-101
+WTD_4_1_1,WTD,Water table depth,m,height,,01/01/2026 00:00,01/01/2027 00:00,4,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TS,TS,Soil temperature,degC,temperature,,01/01/2026 00:00,01/01/2027 00:00,NA,NA,NA,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TS_4_1_1,TS,Soil temperature,degC,temperature,,01/01/2026 00:00,01/01/2027 00:00,4,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TS_4_2_1,TS,Soil temperature,degC,temperature,,01/01/2026 00:00,01/01/2027 00:00,4,2,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TS_4_3_1,TS,Soil temperature,degC,temperature,,01/01/2026 00:00,01/01/2027 00:00,4,3,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TS_4_4_1,TS,Soil temperature,degC,temperature,,01/01/2026 00:00,01/01/2027 00:00,4,4,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TS_8_1_1,TS,Soil temperature,degC,temperature,,01/01/2026 00:00,01/01/2027 00:00,8,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TS_8_2_1,TS,Soil temperature,degC,temperature,,01/01/2026 00:00,01/01/2027 00:00,8,2,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TS_8_3_1,TS,Soil temperature,degC,temperature,,01/01/2026 00:00,01/01/2027 00:00,8,3,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TS_8_4_1,TS,Soil temperature,degC,temperature,,01/01/2026 00:00,01/01/2027 00:00,8,4,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TS_8_5_1,TS,Soil temperature,degC,temperature,,01/01/2026 00:00,01/01/2027 00:00,8,5,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TS_9_1_1,TS,Soil temperature,degC,temperature,,01/01/2026 00:00,01/01/2027 00:00,9,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TS_9_2_1,TS,Soil temperature,degC,temperature,,01/01/2026 00:00,01/01/2027 00:00,9,2,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TS_9_3_1,TS,Soil temperature,degC,temperature,,01/01/2026 00:00,01/01/2027 00:00,9,3,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TS_9_4_1,TS,Soil temperature,degC,temperature,,01/01/2026 00:00,01/01/2027 00:00,9,4,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TS_9_5_1,TS,Soil temperature,degC,temperature,,01/01/2026 00:00,01/01/2027 00:00,9,5,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+G_8_1_1,G,Soil heat flux,W m-2,energy flux,,01/01/2026 00:00,01/01/2027 00:00,8,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+G_9_1_1,G,Soil heat flux,W m-2,energy flux,,01/01/2026 00:00,01/01/2027 00:00,9,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+G_10_1_1,G,Soil heat flux,W m-2,energy flux,,01/01/2026 00:00,01/01/2027 00:00,10,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+G_11_1_1,G,Soil heat flux,W m-2,energy flux,,01/01/2026 00:00,01/01/2027 00:00,11,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+WTD_8_1_1,WTD,Water table depth,m,height,,01/01/2026 00:00,01/01/2027 00:00,8,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+WTD_9_1_1,WTD,Water table depth,m,height,,01/01/2026 00:00,01/01/2027 00:00,9,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+WTD_10_1_1,WTD,Water table depth,m,height,,01/01/2026 00:00,01/01/2027 00:00,10,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+WTD_11_1_1,WTD,Water table depth,m,height,,01/01/2026 00:00,01/01/2027 00:00,11,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+SWC_8_1_1,SWC,Soil water content,%,soil moisture,,01/01/2026 00:00,01/01/2027 00:00,8,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+SWC_8_2_1,SWC,Soil water content,%,soil moisture,,01/01/2026 00:00,01/01/2027 00:00,8,2,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+SWC_8_3_1,SWC,Soil water content,%,soil moisture,,01/01/2026 00:00,01/01/2027 00:00,8,3,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+SWC_8_4_1,SWC,Soil water content,%,soil moisture,,01/01/2026 00:00,01/01/2027 00:00,8,4,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+SWC_9_1_1,SWC,Soil water content,%,soil moisture,,01/01/2026 00:00,01/01/2027 00:00,9,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+SWC_9_2_1,SWC,Soil water content,%,soil moisture,,01/01/2026 00:00,01/01/2027 00:00,9,2,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+SWC_9_3_1,SWC,Soil water content,%,soil moisture,,01/01/2026 00:00,01/01/2027 00:00,9,3,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+SWC_9_4_1,SWC,Soil water content,%,soil moisture,,01/01/2026 00:00,01/01/2027 00:00,9,4,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TS_10_1_1,TS,Soil temperature,degC,temperature,,01/01/2026 00:00,01/01/2027 00:00,10,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TS_10_2_1,TS,Soil temperature,degC,temperature,,01/01/2026 00:00,01/01/2027 00:00,10,2,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TS_10_3_1,TS,Soil temperature,degC,temperature,,01/01/2026 00:00,01/01/2027 00:00,10,3,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TS_10_4_1,TS,Soil temperature,degC,temperature,,01/01/2026 00:00,01/01/2027 00:00,10,4,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TS_10_5_1,TS,Soil temperature,degC,temperature,,01/01/2026 00:00,01/01/2027 00:00,10,5,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TS_11_1_1,TS,Soil temperature,degC,temperature,,01/01/2026 00:00,01/01/2027 00:00,11,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TS_11_2_1,TS,Soil temperature,degC,temperature,,01/01/2026 00:00,01/01/2027 00:00,11,2,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TS_11_3_1,TS,Soil temperature,degC,temperature,,01/01/2026 00:00,01/01/2027 00:00,11,3,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TS_11_4_1,TS,Soil temperature,degC,temperature,,01/01/2026 00:00,01/01/2027 00:00,11,4,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+TS_11_5_1,TS,Soil temperature,degC,temperature,,01/01/2026 00:00,01/01/2027 00:00,11,5,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+SWC_10_1_1,SWC,Soil water content,%,soil moisture,,01/01/2026 00:00,01/01/2027 00:00,10,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+SWC_10_2_1,SWC,Soil water content,%,soil moisture,,01/01/2026 00:00,01/01/2027 00:00,10,2,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+SWC_10_3_1,SWC,Soil water content,%,soil moisture,,01/01/2026 00:00,01/01/2027 00:00,10,3,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+SWC_10_4_1,SWC,Soil water content,%,soil moisture,,01/01/2026 00:00,01/01/2027 00:00,10,4,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+SWC_11_1_1,SWC,Soil water content,%,soil moisture,,01/01/2026 00:00,01/01/2027 00:00,11,1,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+SWC_11_2_1,SWC,Soil water content,%,soil moisture,,01/01/2026 00:00,01/01/2027 00:00,11,2,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+SWC_11_3_1,SWC,Soil water content,%,soil moisture,,01/01/2026 00:00,01/01/2027 00:00,11,3,1,FALSE,TRUE,FALSE,100,Campbell,CS-101
+SWC_11_4_1,SWC,Soil water content,%,soil moisture,,01/01/2026 00:00,01/01/2027 00:00,11,4,1,FALSE,TRUE,FALSE,100,Campbell,CS-101

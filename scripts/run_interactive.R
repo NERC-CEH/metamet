@@ -1,3 +1,4 @@
+library(here)
 library(sloop)
 library(devtools)
 library(usethis)
@@ -105,8 +106,41 @@ class(mm)
 str(mm)
 summary(mm$dt)
 
-# tested
+#  make formal tests for these:
 print(mm)
 summary(mm)
 mm <- restrict(mm)
 mm <- convert_time_char_to_posix(mm)
+
+# test existing Level 1 data
+fname_dt <- here("data-raw/UK-AMO/UK-AMO_BM_dt_2026.csv")
+fname_dt <- here("data-raw/UK-AMO/UK-AMo_BM_20260203_L03_F02.dat")
+fname_meta <- here("data-raw/UK-AMO/dt_meta.xlsx")
+fname_site <- here("data-raw/UK-AMO/dt_site.csv")
+rm(mm)
+  dt = fname_dt
+  dt_meta = fname_meta
+  dt_site = fname_site
+mm <- metamet(
+  dt = fname_dt,
+  dt_meta = fname_meta,
+  dt_site = fname_site
+)
+
+as.POSIXct(strptime(as.2024-01-01 00:00:00, "%Y-%m-%d %H:%M:%S"))
+as.POSIXct(strptime("2025-01-02 00:00:00 UTC", "%Y-%m-%d %H:%M:%S"))
+  mm$dt[1:5, get(time_name)]
+  mm$dt[46:50, strptime(get(time_name), time_format)]
+
+dt <- fread(fname_dt)
+dt[, which(is.na(DATECT))]
+summary(dt$DATECT)
+summary(mm$dt$DATECT)
+mm$dt[, which(is.na(DATECT))]
+mm$dt[46:50, 1:5]
+dt[46:50, 1:5]
+mm <- copy(mm_in) # we need this to avoid modifying the original object
+  
+time_average(mm, avg.time = "3 hour", report_end_interval = TRUE)
+
+  l_mm <- list(mm1, mm2)

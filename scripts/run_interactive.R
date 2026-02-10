@@ -13,12 +13,12 @@ usethis::use_build_ignore(c("data-raw"))
 use_tidy_eval()
 use_data_table()
 use_package("data.table", "Depends")
+# seems to produce an error with the coalesce_yx argument if we only Import
+use_package("powerjoin", "Depends")
 use_package("fs", "Imports", min_version = "1.5.0")
-use_package("here", "Imports")
 use_package("readxl", "Imports")
 use_package("openair", "Imports")
 use_package("lubridate", "Imports")
-use_package("powerjoin", "Depends")
 
 
 document()

@@ -21,7 +21,6 @@ Depends:
     powerjoin,
     R (>= 3.5)
 Imports:
-    here,
     fs (>= 1.5.0),
     openair,
     lubridate,

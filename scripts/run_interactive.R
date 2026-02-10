@@ -45,7 +45,8 @@ fname_site <- "data-raw/dt_site.csv"
 mm_from_files <- metamet(
   dt = fname_dt,
   dt_meta = fname_meta,
-  dt_site = fname_site, site_id = "UK-AMO"
+  dt_site = fname_site,
+  site_id = "UK-AMO"
 )
 s3_dispatch(metamet(fname_dt))
 
@@ -82,7 +83,12 @@ identical(mm_from_files$dt_meta, mm_from_dt$dt_meta)
 identical(mm_from_df$dt_meta, mm_from_dt$dt_meta)
 
 # test with a mix of arguments
-mm <- metamet(dt = fname_dt, dt_meta = fname_meta, dt_site = dt_site, site_id = "UK-AMO")
+mm <- metamet(
+  dt = fname_dt,
+  dt_meta = fname_meta,
+  dt_site = dt_site,
+  site_id = "UK-AMO"
+)
 class(mm)
 str(mm)
 summary(mm$dt)
@@ -96,7 +102,7 @@ fname_site <- "data-raw/dt_site.csv"
 mm <- metamet(
   dt = fname_dt,
   dt_meta = fname_meta,
-  dt_site = fname_site, 
+  dt_site = fname_site,
   site_id = "UK-AMO"
 )
 dim(mm$dt)
@@ -122,9 +128,9 @@ fname_dt <- here("data-raw/UK-AMO/UK-AMo_BM_20260203_L03_F02.dat")
 fname_meta <- here("data-raw/dt_meta.xlsx")
 fname_site <- here("data-raw/dt_site.csv")
 rm(mm)
-  dt = fname_dt
-  dt_meta = fname_meta
-  dt_site = fname_site
+dt = fname_dt
+dt_meta = fname_meta
+dt_site = fname_site
 mm <- metamet(
   dt = fname_dt,
   dt_meta = fname_meta,
@@ -132,10 +138,9 @@ mm <- metamet(
   site_id = "UK-AMO"
 )
 
-as.POSIXct(strptime(as.2024-01-01 00:00:00, "%Y-%m-%d %H:%M:%S"))
 as.POSIXct(strptime("2025-01-02 00:00:00 UTC", "%Y-%m-%d %H:%M:%S"))
-  mm$dt[1:5, get(time_name)]
-  mm$dt[46:50, strptime(get(time_name), time_format)]
+mm$dt[1:5, get(time_name)]
+mm$dt[46:50, strptime(get(time_name), time_format)]
 
 dt <- fread(fname_dt)
 dt[, which(is.na(DATECT))]
@@ -145,7 +150,7 @@ mm$dt[, which(is.na(DATECT))]
 mm$dt[46:50, 1:5]
 dt[46:50, 1:5]
 mm <- copy(mm_in) # we need this to avoid modifying the original object
-  
+
 time_average(mm, avg.time = "3 hour", report_end_interval = TRUE)
 
-  l_mm <- list(mm1, mm2)
+l_mm <- list(mm1, mm2)

@@ -8,6 +8,8 @@ new_metamet <- function(
   dt = data.table::data.table(),
   dt_meta = NULL,
   dt_site = NULL,
+  dt_qc = NULL,
+  dt_ref = NULL,
   site_id = NULL
 ) {
   # Make sure `dt` is a data table
@@ -22,12 +24,20 @@ new_metamet <- function(
   # add site_id to the data as site column
   # should this be ..site_id?
   dt[, site := as.character(site_id)]
+  if (!is.null(dt_qc)) {
+    dt_qc[, site := as.character(site_id)]
+  }
+  if (!is.null(dt_ref)) {
+    dt_ref[, site := as.character(site_id)]
+  }
 
   # Make the metamet object
   new_metamet <- list(
     dt = dt,
     dt_meta = dt_meta,
-    dt_site = dt_site
+    dt_site = dt_site,
+    dt_qc = dt_qc,
+    dt_ref = dt_ref
   )
 
   # Specify the class and return the metamet object
@@ -52,6 +62,8 @@ metamet.character <- function(
   dt,
   dt_meta = NULL,
   dt_site = NULL,
+  dt_qc = NULL,
+  dt_ref = NULL,
   site_id = NULL,
   ...
 ) {
@@ -71,20 +83,53 @@ metamet.character <- function(
   }
   data.table::setDT(dt_meta)
 
-  # and repeat for site, qc, faults, ref, ...
+  # and repeat for site
   if ("character" %in% class(dt_site)) {
     dt_site <- data.table::fread(dt_site)
   }
   data.table::setDT(dt_site)
 
+  # and repeat for qc
+  if ("character" %in% class(dt_qc)) {
+    dt_qc <- data.table::fread(dt_qc)
+  }
+  # allow dt_qc to not be required - can remain NULL
+  if (!is.null(dt_qc)) {
+    data.table::setDT(dt_qc)
+  }
+
+  # and repeat for ref
+  if ("character" %in% class(dt_ref)) {
+    dt_ref <- data.table::fread(dt_ref)
+  }
+  # allow dt_ref to not be required - can remain NULL
+  if (!is.null(dt_ref)) {
+    data.table::setDT(dt_ref)
+  }
+
   # l_dt <- lapply(v_fname, import_campbell_data)
   # and then call the data table method
-  metamet(dt = dt, dt_meta = dt_meta, dt_site = dt_site, site_id = site_id)
+  metamet(
+    dt = dt,
+    dt_meta = dt_meta,
+    dt_site = dt_site,
+    dt_qc = dt_qc,
+    dt_ref = dt_ref,
+    site_id = site_id
+  )
 }
 
 # 4. Method for data frames
 #' @export
-metamet.data.frame <- function(dt, dt_meta = NULL, dt_site = NULL, ...) {
+metamet.data.frame <- function(
+  dt,
+  dt_meta = NULL,
+  dt_site = NULL,
+  dt_qc = NULL,
+  dt_ref = NULL,
+  site_id = NULL,
+  ...
+) {
   message("Converting data frame to data table...")
   data.table::setDT(dt)
 
@@ -95,13 +140,38 @@ metamet.data.frame <- function(dt, dt_meta = NULL, dt_site = NULL, ...) {
   }
   data.table::setDT(dt_meta)
 
-  # and repeat for site, qc, faults, ref, ...
+  # and repeat for site
   if ("character" %in% class(dt_site)) {
     dt_site <- data.table::fread(dt_site)
   }
   data.table::setDT(dt_site)
 
-  metamet(dt = dt, dt_meta = dt_meta, dt_site = dt_site)
+  # and repeat for qc
+  if ("character" %in% class(dt_qc)) {
+    dt_qc <- data.table::fread(dt_qc)
+  }
+  # allow dt_qc to not be required - can remain NULL
+  if (!is.null(dt_qc)) {
+    data.table::setDT(dt_qc)
+  }
+
+  # and repeat for ref
+  if ("character" %in% class(dt_ref)) {
+    dt_ref <- data.table::fread(dt_ref)
+  }
+  # allow dt_ref to not be required - can remain NULL
+  if (!is.null(dt_ref)) {
+    data.table::setDT(dt_ref)
+  }
+
+  metamet(
+    dt = dt,
+    dt_meta = dt_meta,
+    dt_site = dt_site,
+    dt_qc = dt_qc,
+    dt_ref = dt_ref,
+    site_id = site_id
+  )
 }
 
 # 4. Method for data tables
@@ -110,6 +180,8 @@ metamet.data.table <- function(
   dt,
   dt_meta = NULL,
   dt_site = NULL,
+  dt_qc = NULL,
+  dt_ref = NULL,
   site_id = NULL,
   ...
 ) {
@@ -122,16 +194,36 @@ metamet.data.table <- function(
   }
   data.table::setDT(dt_meta)
 
-  # and repeat for site, qc, faults, ref, ...
+  # and repeat for site
   if ("character" %in% class(dt_site)) {
     dt_site <- data.table::fread(dt_site)
   }
   data.table::setDT(dt_site)
 
+  # and repeat for qc
+  if ("character" %in% class(dt_qc)) {
+    dt_qc <- data.table::fread(dt_qc)
+  }
+  # allow dt_qc to not be required - can remain NULL
+  if (!is.null(dt_qc)) {
+    data.table::setDT(dt_qc)
+  }
+
+  # and repeat for ref
+  if ("character" %in% class(dt_ref)) {
+    dt_ref <- data.table::fread(dt_ref)
+  }
+  # allow dt_ref to not be required - can remain NULL
+  if (!is.null(dt_ref)) {
+    data.table::setDT(dt_ref)
+  }
+
   mm <- new_metamet(
     dt = dt,
     dt_meta = dt_meta,
     dt_site = dt_site,
+    dt_qc = dt_qc,
+    dt_ref = dt_ref,
     site_id = site_id
   )
   mm <- restrict(mm)
@@ -147,6 +239,14 @@ restrict <- function(mm) {
   # subset dt to only those that exist in metadata
   v_name_dt <- v_name_dt[v_name_dt %in% v_name_meta]
   mm$dt <- mm$dt[, ..v_name_dt]
+  # possibly subset these based on time in dt but time is just a character here
+  # qc table has an extra column for the name of the validator
+  if (!is.null(mm$dt_qc)) {
+    mm$dt_qc <- mm$dt_qc[, c(..v_name_dt, "validator")]
+  }
+  if (!is.null(mm$dt_ref)) {
+    mm$dt_ref <- mm$dt_ref[, ..v_name_dt]
+  }
 
   # subset metadata to only variables that exist in dt and correspond to that site
   mm$dt_meta <- mm$dt_meta[site %in% v_site_dt & name_dt %in% v_name_dt]
@@ -183,98 +283,22 @@ convert_time_char_to_posix <- function(mm) {
   return(mm)
 }
 
-# Note that timeAverage associates the mean with the start of the averaging period,
-# so for hourly data the mean value for 00:00:00 is the mean of values from 00:00:00 to 00:59:59.
-# ICOS reports values at the time of sampling, so any online averagin applies to the previous time interval.
-# We should decide on a consistent approach, or report interval start and end times in the output data table.
-# For now, we will just use the default behaviour of timeAverage, which is to associate the mean with the start of the averaging period.
-
-time_average <- function(
-  mm_in,
-  avg.time = "30 min",
-  report_end_interval = TRUE
-) {
-  mm <- copy(mm_in) # we need this to avoid modifying the original object
-  # get the name and format of the time, precip, ws & wd variables
-  time_name <- mm$dt_meta[type == "time", name_dt]
-  precip_name <- mm$dt_meta[type == "precipitation", name_dt]
-  wd_name <- mm$dt_meta[type == "wind direction", name_dt]
-  ws_name <- mm$dt_meta[type == "wind speed" | type == "windspeed", name_dt]
-
-  # rename time variable with openair convention
-  # mm$dt[, date := get(time_name)]
-  setnames(mm$dt, eval(time_name), "date")
-
-  # and ws & wd if present, for proper vector averaging
-  if (length(wd_name) > 0) {
-    mm$dt[, wd := get(wd_name)]
-  }
-  if (length(ws_name) > 0) {
-    mm$dt[, ws := get(ws_name)]
-  }
-
-  first_date <- min(mm$dt[, date])
-  last_date <- max(mm$dt[, date])
-  # start at the beginning of the first hour, xx:00:00
-  start.date <- lubridate::floor_date(first_date, unit = "hour")
-  # run up to 1 second before the next hour to avoid creating an extra interval with only 1 value
-  end.date <- lubridate::ceiling_date(last_date, unit = "hour") - 1
-
-  # a data.table time averaging function would presumably be quicker
-  # intervalaverage exists but only does IDate i.e. whole days
-  df_mean <- openair::timeAverage(
-    openair::selectByDate(mm$dt, start = start.date, end = end.date),
-    start.date = start.date,
-    avg.time = avg.time,
-    type = "site"
-  )
-  # if the data contains precipitation, we want to sum instead of average
-  if (length(precip_name) > 0) {
-    df_sum <- openair::timeAverage(
-      openair::selectByDate(mm$dt, start = start.date, end = end.date),
-      start.date = start.date,
-      avg.time = avg.time,
-      statistic = "sum", #
-      type = "site"
-    )
-    # extract the summed precip as a vector
-    v_ppt <- df_sum[, eval(precip_name)][[1]]
-    # and put it into the dt of mean values
-    df_mean[, eval(precip_name)] <- v_ppt
-  }
-  mm$dt <- data.table::as.data.table(df_mean) # openair returns a data frame - upgrade to dt
-  mm$dt[, site := as.character(site)]
-
-  if (report_end_interval) {
-    # report the end time of the interval instead of the start time
-    interval_length <- difftime(mm$dt[2, date], mm$dt[1, date])
-    mm$dt[, date := date + interval_length]
-  }
-
-  # restore original time name
-  setnames(mm$dt, "date", eval(time_name))
-  # and delete extra names
-  if (length(wd_name) > 0) {
-    mm$dt[, wd := NULL]
-  }
-  if (length(ws_name) > 0) {
-    mm$dt[, ws := NULL]
-  }
-  return(mm)
-}
-
 # define method for printing a metamet object
 #' @export
 #' @method print metamet
 print.metamet <- function(x, ...) {
   cat("metamet object\n")
   cat("-------------\n")
-  cat("Data table (dt):\n")
-  print(head(x$dt))
-  cat("\nMetadata (dt_meta):\n")
-  print(head(x$dt_meta))
+  cat("Data table (dt) - first 6 cols:\n")
+  print(x$dt[, 1:min(ncol(x$dt), 6)])
+  cat("\nMetadata (dt_meta) - first 6 cols:\n")
+  print(head(x$dt_meta[, 1:min(ncol(x$dt_meta), 6)]))
   cat("\nSite information (dt_site):\n")
-  print(head(x$dt_site))
+  print(x$dt_site)
+  cat("\nQC information (dt_qc) - first 6 cols:\n")
+  print(x$dt_qc[, 1:min(ncol(x$dt_qc), 6)])
+  cat("\nReference data (dt_ref) - first 6 cols:\n")
+  print(x$dt_ref[, 1:min(ncol(x$dt_ref), 6)])
 }
 
 # define summary method for a metamet object

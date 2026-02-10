@@ -243,6 +243,7 @@ time_average <- function(
     df_mean[, eval(precip_name)] <- v_ppt
   }
   mm$dt <- data.table::as.data.table(df_mean) # openair returns a data frame - upgrade to dt
+  mm$dt[, site := as.character(site)]
 
   if (report_end_interval) {
     # report the end time of the interval instead of the start time

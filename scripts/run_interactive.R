@@ -18,6 +18,7 @@ use_package("here", "Imports")
 use_package("readxl", "Imports")
 use_package("openair", "Imports")
 use_package("lubridate", "Imports")
+use_package("powerjoin", "Depends")
 
 
 document()

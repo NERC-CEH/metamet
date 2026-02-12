@@ -10,15 +10,11 @@ time_average_dt <- function(
   report_end_interval = TRUE,
   extra_rows = 2
 ) {
-  dt <- copy(dt_in) # do we need this to avoid modifying the original object?
+  # we need to make a copy to avoid modifying the original object by reference
+  # i.e. we (probably) want to retain the unaveraged mm object
+  dt <- copy(dt_in)
 
-  # extract numeric time from character - must be in seconds
-  if (stringr::str_detect(avg.time, "sec")) {
-    regexp <- "[[:digit:]]+"
-    interval_length_s <- as.numeric(stringr::str_extract(avg.time, regexp))
-  } else {
-    stop("Specify time interval for averaging in 'sec'")
-  }
+  interval_length_s <- as.numeric(lubridate::duration(avg.time))
 
   # rename time variable with openair convention
   setnames(dt, eval(time_name), "date")
@@ -50,16 +46,12 @@ time_average_dt <- function(
   df_mean <- openair::timeAverage(
     openair::selectByDate(dt, start = first_date, end = last_date),
     start.date = start_date,
-    # end_date = end_date,
     avg.time = avg.time,
     fill = TRUE,
     statistic = statistic,
     type = "site"
   )
-  dt <- data.table::as.data.table(df_mean) # openair returns df - upgrade to dt
-
-  # data.table::setnafill(dt[, c(-1, -2)], type = "locf")
-  # data.table::setnafill(dt[, -c("date", "site")], type = "nocb")
+  dt <- data.table::setDT(df_mean) # openair returns df - upgrade to dt
 
   # site becomes a factor but we want a character variable
   dt[, site := as.character(site)]
@@ -77,6 +69,7 @@ time_average_dt <- function(
   if (report_end_interval) {
     # report the end time of the interval instead of the start time
     interval_length <- difftime(dt[2, date], dt[1, date])
+    # should be the same as interval_length_s so this is overcautious
     dt[, date := date + interval_length]
   }
 
@@ -86,13 +79,10 @@ time_average_dt <- function(
   ]
 
   # first few rows may be missing data; fill in with nocb
-  v_coal <- data.table::fcoalesce(dt[, 4:8]) # does not matter which
-  first_nona <- min(which(!is.na(v_coal)))
-  if (first_nona > 1) {
-    dtt <- dt[, -c("date", "site")]
-    dtt[1:(first_nona - 1), ] <- dtt[first_nona, ]
-    dt <- cbind(dt[, c("date", "site")], dtt)
-  }
+  # this only works on character variables, so have to split and cbind
+  dt_num <- dt[, -c("date", "site")]
+  data.table::setnafill(dt_num, type = "nocb")
+  dt <- cbind(dt[, c("date", "site")], dt_num)
 
   # restore original time name
   setnames(dt, "date", eval(time_name))

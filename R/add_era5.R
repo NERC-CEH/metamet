@@ -73,11 +73,10 @@ add_era5 <- function(
   }
 
   # check that all are the same no. rows
-  if (!identical(dim(mm$dt)[1], dim(mm$dt_qc)[1], dim(mm$dt_ref)[1])) {
+  if (!identical(dim(mm$dt)[1], dim(mm$dt_ref)[1])) {
     print(paste(
       "Obs and ERA5 data tables do not have the same dimensions",
       dim(mm$dt),
-      dim(mm$dt_qc),
       dim(mm$dt_ref)
     ))
   }

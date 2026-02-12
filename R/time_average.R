@@ -60,7 +60,7 @@ time_average <- function(
 
   if (!is.null(mm$dt_ref)) {
     mm$dt_ref <- time_average_dt(
-      mm$dt_qc,
+      mm$dt_ref,
       avg.time = avg.time,
       statistic = "median", # use "median" for qc codes
       first_date = min(mm$dt[, get(time_name)]),

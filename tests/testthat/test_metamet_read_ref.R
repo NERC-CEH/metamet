@@ -34,9 +34,6 @@ test_that("reading metamet from files with QC works", {
   mm2$dt_ref[1:5, 1:5]
   mm$dt[(.N - 3):.N, 1:5]
   mm2$dt_ref[(.N - 3):.N, 1:5]
-  # does not seem to work
-  # data.table::setnafill(mm2$dt_ref[, -c("DATECT", "site")], type = "nocb")
-  # mm2$dt_ref[1, -c("DATECT", "site")]  <- mm2$dt_ref[first_nona, -c("DATECT", "site")]
 
   expect_s3_class(mm, "metamet")
   expect_s3_class(mm$dt_qc, "data.table")

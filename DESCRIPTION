@@ -24,5 +24,6 @@ Imports:
     fs (>= 1.5.0),
     openair,
     lubridate,
-    readxl
+    readxl,
+    stringr
 Config/testthat/edition: 3

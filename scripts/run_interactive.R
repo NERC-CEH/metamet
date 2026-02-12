@@ -128,9 +128,9 @@ fname_dt <- here("data-raw/UK-AMO/UK-AMo_BM_20260203_L03_F02.dat")
 fname_meta <- here("data-raw/dt_meta.xlsx")
 fname_site <- here("data-raw/dt_site.csv")
 rm(mm)
-dt = fname_dt
-dt_meta = fname_meta
-dt_site = fname_site
+dt <- fname_dt
+dt_meta <- fname_meta
+dt_site <- fname_site
 mm <- metamet(
   dt = fname_dt,
   dt_meta = fname_meta,

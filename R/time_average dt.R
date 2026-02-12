@@ -1,32 +1,5 @@
-##' Time-average a `metamet` object
-##'
-##' Aggregates meteorological data in a `metamet` object over specified time
-##' intervals. The function handles different variable types appropriately:
-##' precipitation is summed, and other variables (temperature, wind speed, etc.)
-##' are averaged. Wind direction is vector-averaged if present.
-##'
-##' The function uses `openair::timeAverage()` for the aggregation and preserves
-##' the structure of the input object, including quality control (`dt_qc`) and
-##' reference (`dt_ref`) tables if present.
-##'
-##' @param mm_in A `metamet` object containing at least `dt`, `dt_meta`, and
-##'   `dt_site`.
-##' @param avg.time Time interval for averaging; passed to
-##'   `openair::timeAverage()`. Default is `"30 min"`.
-##' @param report_end_interval Logical. If `TRUE` (default), the returned
-##'   timestamps represent the end of the averaging interval. If `FALSE`,
-##'   timestamps represent the start of the interval.
-##'
-##' @return A `metamet` object with time-averaged `dt`, `dt_qc`, and `dt_ref`
-##'   tables (where applicable). The object structure is preserved.
-##'
-##' @examples
-##' # mm_avg <- time_average(mm, avg.time = "1 hour")
-##'
-##' @export
-
 time_average_dt <- function(
-  dt,
+  dt_in,
   avg.time = "30 min",
   statistic = "mean", # use "median" for qc codes
   first_date = NULL,
@@ -37,12 +10,12 @@ time_average_dt <- function(
   report_end_interval = TRUE,
   extra_rows = 2
 ) {
-  dt <- copy(dt_era5) #****** we need this to avoid modifying the original object - do we need this?
+  dt <- copy(dt_in) # do we need this to avoid modifying the original object?
 
   # extract numeric time from character - must be in seconds
-  if (str_detect(avg.time, "sec")) {
+  if (stringr::str_detect(avg.time, "sec")) {
     regexp <- "[[:digit:]]+"
-    interval_length_s <- as.numeric(str_extract(avg.time, regexp))
+    interval_length_s <- as.numeric(stringr::str_extract(avg.time, regexp))
   } else {
     stop("Specify time interval for averaging in 'sec'")
   }

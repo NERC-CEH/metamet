@@ -22,21 +22,21 @@ test_that("reading metamet from files with QC works", {
   mm2 <- add_era5(
     mm,
     fname_era5 = fname_era5,
-    restrict_era5_to_obs = TRUE,
-    restrict_obs_to_era5 = FALSE,
+    restrict_ref_to_obs = TRUE,
+    restrict_obs_to_ref = FALSE,
     report_end_interval = TRUE,
     extra_rows = 3
   )
 
   dim(mm2$dt)
-  dim(mm2$dt_era5)
+  dim(mm2$dt_ref)
   mm$dt[1:5, 1:5]
-  mm2$dt_era5[1:5, 1:5]
+  mm2$dt_ref[1:5, 1:5]
   mm$dt[(.N - 3):.N, 1:5]
-  mm2$dt_era5[(.N - 3):.N, 1:5]
+  mm2$dt_ref[(.N - 3):.N, 1:5]
   # does not seem to work
-  # data.table::setnafill(mm2$dt_era5[, -c("DATECT", "site")], type = "nocb")
-  # mm2$dt_era5[1, -c("DATECT", "site")]  <- mm2$dt_era5[first_nona, -c("DATECT", "site")]
+  # data.table::setnafill(mm2$dt_ref[, -c("DATECT", "site")], type = "nocb")
+  # mm2$dt_ref[1, -c("DATECT", "site")]  <- mm2$dt_ref[first_nona, -c("DATECT", "site")]
 
   expect_s3_class(mm, "metamet")
   expect_s3_class(mm$dt_qc, "data.table")

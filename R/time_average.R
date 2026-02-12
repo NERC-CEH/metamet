@@ -29,7 +29,7 @@ time_average <- function(
   avg.time = "30 min",
   report_end_interval = TRUE
 ) {
-  mm <- copy(mm_in) # we need this to avoid modifying the original object
+  mm <- copy(mm_in) # do we need this to avoid modifying the original object?
 
   # get the name and format of the time, precip, ws & wd variables
   time_name <- mm$dt_meta[type == "time", name_dt]

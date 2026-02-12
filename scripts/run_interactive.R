@@ -2,6 +2,8 @@ library(here)
 library(sloop)
 library(devtools)
 library(usethis)
+library(pkgload)
+library(pkgbuild)
 # usethis::use_package_doc()
 
 # add to .RBuildIgnore

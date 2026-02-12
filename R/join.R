@@ -38,7 +38,7 @@ join <- function(mm1, mm2) {
     mm1$dt,
     mm2$dt,
     by = c("site", time_name),
-    conflict = coalesce_yx
+    conflict = powerjoin::coalesce_yx
   )
   # we may want to add start_date to 'by =' list to cope with same variable at
   # different times
@@ -46,14 +46,14 @@ join <- function(mm1, mm2) {
     mm1$dt_meta,
     mm2$dt_meta,
     by = "name_dt",
-    conflict = coalesce_yx
+    conflict = powerjoin::coalesce_yx
   )
 
   mm2$dt_site <- powerjoin::power_full_join(
     mm1$dt_site,
     mm2$dt_site,
     by = "site",
-    conflict = coalesce_yx
+    conflict = powerjoin::coalesce_yx
   )
 
   # repeat for qc same as dt
@@ -62,7 +62,7 @@ join <- function(mm1, mm2) {
       mm1$dt_qc,
       mm2$dt_qc,
       by = c("site", time_name),
-      conflict = coalesce_yx
+      conflict = powerjoin::coalesce_yx
     )
   }
 
@@ -72,7 +72,7 @@ join <- function(mm1, mm2) {
       mm1$dt_ref,
       mm2$dt_ref,
       by = c("site", time_name),
-      conflict = coalesce_yx
+      conflict = powerjoin::coalesce_yx
     )
   }
 

@@ -2,7 +2,7 @@ test_that("time_average works", {
   # convert precip "P_12_1_1" in mm to a rate mm/s
   mm3$dt <- convert_sum_to_rate(
     mm3$dt,
-    var_to_convert = "P_12_1_1",
+    v_var_to_convert = "P_12_1_1",
     time_name = "TIMESTAMP"
   )
 

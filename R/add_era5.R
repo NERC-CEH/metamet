@@ -51,7 +51,7 @@ add_era5 <- function(
   # convert precip "tp" in mm to a rate mm/s
   mm$dt_ref <- convert_sum_to_rate(
     mm$dt_ref,
-    var_to_convert = "tp",
+    v_var_to_convert = "tp",
     time_name = "time"
   )
   # rename variables with names in dt

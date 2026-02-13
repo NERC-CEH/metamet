@@ -17,7 +17,7 @@ test_that("metamet time averaging 1-min data to 5-mins works", {
   # convert precip "P_12_1_1" in mm to a rate mm/s
   mm$dt <- convert_sum_to_rate(
     mm$dt,
-    var_to_convert = "P_12_1_1",
+    v_var_to_convert = "P_12_1_1",
     time_name = time_name
   )
 

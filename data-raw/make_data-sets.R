@@ -1,3 +1,51 @@
+# This script is run to process raw data to create data objects
+# stored in \data, which are built into the package.
+# The contents of \data-raw are ignored when building.
+
+# Define lookup table for methods, qc (codes) and method long names.
+
+df_method <- data.frame(
+  method = c(
+    'raw',
+    "missing",
+    "time",
+    "regn",
+    "nightzero",
+    "noneg",
+    "zero",
+    "era5"
+  ),
+  method_longname = c(
+    'Original observation (raw data)',
+    "Missing",
+    "Time",
+    "Regression with covariate",
+    "Night-time zero",
+    "No negative values",
+    "All zeros",
+    "Regression with ERA5 covariate"
+  ),
+  qc = c(0, 1, 2, 3, 4, 5, 6, 7) # 0 = raw, 1 = missing, >1 = missing but imputed
+)
+
+df_method$method_longname <- factor(
+  df_method$method_longname,
+  levels = c(
+    'Original observation (raw data)',
+    "Missing",
+    "Time",
+    "Regression with covariate",
+    "Night-time zero",
+    "No negative values",
+    "All zeros",
+    "Regression with ERA5 covariate"
+  )
+)
+
+usethis::use_data(df_method, overwrite = TRUE)
+
+
+# make some metamet objects from files
 site_id <- "UK-AMO"
 fname_dt1 <- "data-raw/UK-AMO/UK-AMo_BM_20250822_L03_F02.dat"
 fname_dt2 <- "data-raw/UK-AMO/UK-AMo_BM_20250822_L04_F01.dat"

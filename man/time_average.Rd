@@ -4,7 +4,12 @@
 \alias{time_average}
 \title{Time-average a `metamet` object}
 \usage{
-time_average(mm_in, avg.time = "30 min", report_end_interval = TRUE)
+time_average(
+  mm_in,
+  avg.time = "30 min",
+  report_end_interval = TRUE,
+  extra_rows = 0
+)
 }
 \arguments{
 \item{mm_in}{A `metamet` object containing at least `dt`, `dt_meta`, and

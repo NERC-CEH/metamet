@@ -18,11 +18,12 @@ Suggests:
     covr
 Depends: 
     data.table,
-    powerjoin,
     R (>= 3.5)
 Imports:
     fs (>= 1.5.0),
     openair,
     lubridate,
-    readxl
+    readxl,
+    powerjoin,
+    stringr
 Config/testthat/edition: 3

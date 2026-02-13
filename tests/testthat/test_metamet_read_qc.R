@@ -24,10 +24,18 @@ test_that("reading metamet from files with QC works", {
     site_id = "UK-AMO"
   )
 
-  mm1 <- time_average(mm_hh_1, avg.time = "1 day")
-  mm2 <- time_average(mm_hh_2, avg.time = "1 day")
+  mm1 <- time_average(mm_hh_1, avg.time = "1 day", extra_rows = 1)
+  mm2 <- time_average(mm_hh_2, avg.time = "1 day", extra_rows = 1)
 
   mm_joined <- join(mm1, mm2)
+
+  # dim(mm1$dt)
+  # dim(mm2$dt)
+  # mm_hh_1$dt[1:5, 1:5]
+  # mm_hh_2$dt[1:5, 1:5]
+  # mm1$dt[1:5, 1:5]
+  # mm2$dt[1:5, 1:5]
+  # dim(mm_joined$dt)
 
   time_name <- mm_joined$dt_meta[type == "time", name_dt]
 

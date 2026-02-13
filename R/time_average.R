@@ -27,9 +27,12 @@
 time_average <- function(
   mm_in,
   avg.time = "30 min",
-  report_end_interval = TRUE
+  report_end_interval = TRUE,
+  extra_rows = 0
 ) {
-  mm <- copy(mm_in) # we need this to avoid modifying the original object
+  # we need to make a copy to avoid modifying the original object by reference
+  # i.e. we (probably) want to retain the unaveraged mm object
+  mm <- copy(mm_in)
 
   # get the name and format of the time, precip, ws & wd variables
   time_name <- mm$dt_meta[type == "time", name_dt]
@@ -37,88 +40,51 @@ time_average <- function(
   wd_name <- mm$dt_meta[type == "wind direction", name_dt]
   ws_name <- mm$dt_meta[type == "wind speed" | type == "windspeed", name_dt]
 
-  # define a sub-function that will do the averaging for dt, and for qc and ref if they exist
-
-  perform_averaging <- function(dt = mm$dt, stat = c("mean", "sum")) {
-    # rename time variable with openair convention
-    # assume these are the same in qc and ref tables
-    setnames(dt, eval(time_name), "date")
-
-    # and ws & wd if present, for proper vector averaging
-    if (length(wd_name) > 0) {
-      dt[, wd := get(wd_name)]
-    }
-    if (length(ws_name) > 0) {
-      dt[, ws := get(ws_name)]
-    }
-
-    first_date <- min(dt[, date])
-    last_date <- max(dt[, date])
-    # start at the beginning of the first hour, xx:00:00
-    start.date <- lubridate::floor_date(first_date, unit = "hour")
-    # run up to 1 second before the next hour to avoid creating an extra interval with only 1 value
-    end.date <- lubridate::ceiling_date(last_date, unit = "hour") - 1
-
-    # a data.table time averaging function would presumably be quicker
-    # intervalaverage exists but only does IDate i.e. whole days
-    df_mean <- openair::timeAverage(
-      openair::selectByDate(dt, start = start.date, end = end.date),
-      start.date = start.date,
-      avg.time = avg.time,
-      statistic = stat[1],
-      type = "site"
-    )
-    # if the data contains precipitation, we want to sum instead of average
-    if (length(precip_name) > 0) {
-      df_sum <- openair::timeAverage(
-        openair::selectByDate(dt, start = start.date, end = end.date),
-        start.date = start.date,
-        avg.time = avg.time,
-        statistic = stat[2],
-        type = "site"
-      )
-      # extract the summed precip as a vector
-      v_ppt <- df_sum[, eval(precip_name)][[1]]
-      # and put it into the dt of mean values
-      df_mean[, eval(precip_name)] <- v_ppt
-    }
-    dt <- data.table::as.data.table(df_mean) # openair returns a data frame - upgrade to dt
-    dt[, site := as.character(site)]
-
-    # Note that timeAverage associates the mean with the start of the averaging period,
-    # so for hourly data the mean value for 00:00:00 is the mean of values from 00:00:00 to 00:59:59.
-    # ICOS reports values at the time of sampling, so any logger averaging applies to the previous time interval.
-    # We should perhaps report both interval start and end times in the output data table.
-    # 'report_end_interval = FALSE' gives the default behaviour of timeAverage,
-    # which is to associate the mean with the start of the averaging period;
-    # 'report_end_interval = TRUE' associates the mean with the end of the averaging period.
-    if (report_end_interval) {
-      # report the end time of the interval instead of the start time
-      interval_length <- difftime(dt[2, date], dt[1, date])
-      dt[, date := date + interval_length]
-    }
-
-    # restore original time name
-    setnames(dt, "date", eval(time_name))
-    # and delete extra names
-    if (length(wd_name) > 0) {
-      dt[, wd := NULL]
-    }
-    if (length(ws_name) > 0) {
-      dt[, ws := NULL]
-    }
-    return(dt)
-  }
-
   # call the function to perform averaging as necessary
-  mm$dt <- perform_averaging(dt = mm$dt, stat = c("mean", "sum"))
   if (!is.null(mm$dt_qc)) {
-    mm$dt_qc <- perform_averaging(dt = mm$dt_qc, stat = c("median", "median"))
-    # character variables are lost on averaging, but we want to keep the structure the same
+    mm$dt_qc <- time_average_dt(
+      mm$dt_qc,
+      avg.time = avg.time,
+      statistic = "median", # use "median" for qc codes
+      first_date = min(mm$dt[, get(time_name)]),
+      last_date = max(mm$dt[, get(time_name)]),
+      time_name = time_name,
+      wd_name = wd_name,
+      ws_name = ws_name,
+      report_end_interval = report_end_interval,
+      extra_rows = extra_rows
+    )
+    # character variables are lost on averaging, but we want to keep them
     mm$dt_qc[, validator := NA]
   }
+
   if (!is.null(mm$dt_ref)) {
-    mm$dt_ref <- perform_averaging(dt = mm$dt_ref, stat = c("mean", "sum"))
+    mm$dt_ref <- time_average_dt(
+      mm$dt_ref,
+      avg.time = avg.time,
+      statistic = "median", # use "median" for qc codes
+      first_date = min(mm$dt[, get(time_name)]),
+      last_date = max(mm$dt[, get(time_name)]),
+      time_name = time_name,
+      wd_name = wd_name,
+      ws_name = ws_name,
+      report_end_interval = report_end_interval,
+      extra_rows = extra_rows
+    )
   }
+
+  # do dt last as first_date/last_date are based on this and we do not want to
+  # use the time-averaged start/end
+  mm$dt <- time_average_dt(
+    mm$dt,
+    avg.time = avg.time,
+    first_date = min(mm$dt[, get(time_name)]),
+    last_date = max(mm$dt[, get(time_name)]),
+    time_name = time_name,
+    wd_name = wd_name,
+    ws_name = ws_name,
+    report_end_interval = report_end_interval,
+    extra_rows = extra_rows
+  )
   return(mm)
 }

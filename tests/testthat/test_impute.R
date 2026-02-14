@@ -34,20 +34,38 @@ test_that("applying imputing works", {
     .SDcols = names(mm$dt_qc)
   ]
 
-  time_name <- mm$dt_meta[type == "time", name_dt]
-
-  n_na_before <- sum(is.na(mm$dt$PPFD_DIF))
-  n_qc_missing <- sum(mm$dt_qc$PPFD_DIF == 1)
+  n_na_before_ppfd <- sum(is.na(mm$dt$PPFD_DIF))
+  n_qc_missing_ppfd <- sum(mm$dt_qc$PPFD_DIF == 1)
+  n_na_before_rh <- sum(is.na(mm$dt$RH_4_1_1))
+  n_qc_missing_rh <- sum(mm$dt_qc$RH_4_1_1 == 1)
+  n_na_before_rg <- sum(is.na(mm$dt$RG_4_1_0))
+  n_qc_missing_rg <- sum(mm$dt_qc$RG_4_1_0 == 1)
 
   mm <- impute(
-    y = "PPFD_DIF",
+    # v_y = c("NDVI_649IN_5_1_1", "D_SNOW", "RG_4_1_0"),
+    v_y = c("PPFD_DIF", "RH_4_1_1", "RG_4_1_0"),
     mm = mm,
-    method = "era5",
-    date_field = time_name,
+    method = NULL,
     fit = TRUE,
-    plot_graph = FALSE
+    plot_graph = TRUE
   )
 
-  expect_identical(n_na_before, n_qc_missing)
-  expect_identical(n_na_before, sum(mm$dt_qc$PPFD_DIF == 7))
+  n_na_after_ppfd <- sum(is.na(mm$dt$PPFD_DIF))
+  n_qc_era5_ppfd <- sum(mm$dt_qc$PPFD_DIF == 7)
+  n_na_after_rh <- sum(is.na(mm$dt$RH_4_1_1))
+  n_qc_era5_rh <- sum(mm$dt_qc$RH_4_1_1 == 7)
+  n_na_after_rg <- sum(is.na(mm$dt$RG_4_1_0))
+  n_qc_era5_rg <- sum(mm$dt_qc$RG_4_1_0 == 7)
+
+  expect_identical(n_na_before_ppfd, n_qc_missing_ppfd)
+  expect_identical(n_na_before_ppfd, n_qc_era5_ppfd)
+  expect_identical(n_na_before_rh, n_qc_era5_rh)
+  expect_identical(n_na_before_rg, n_qc_era5_rg)
+  expect_identical(
+    n_na_after_ppfd,
+    n_na_after_rh,
+    n_na_after_rg,
+    n_qc_era5_ppfd,
+    0
+  )
 })

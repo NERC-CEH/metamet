@@ -16,10 +16,6 @@ test_that("applying QC works", {
     site_id = "UK-AMO"
   )
 
-  # mm <- mm0
-  names(mm$dt)
-  names(mm$dt_ref)
-
   mm0 <- add_era5(
     mm0,
     fname_era5 = fname_era5,
@@ -50,4 +46,9 @@ test_that("applying QC works", {
   expect_identical(sum(is.na(mm2_after$dt)), sum(is.na(mm2_after_two$dt)))
   # should not be any duplicate times
   expect_equal(nrow(mm2_after$dt[duplicated(mm2_after$dt[, ..time_name]), ]), 0)
+  # qc codes for "missing" should match the missing obs
+  expect_identical(sum(is.na(mm0$dt)), sum(mm0$dt_qc == 1))
+  expect_identical(sum(is.na(mm1$dt)), sum(mm1$dt_qc == 1))
+  expect_identical(sum(is.na(mm2$dt)), sum(mm2$dt_qc == 1))
+  expect_identical(sum(is.na(mm3$dt)), sum(mm3$dt_qc == 1))
 })

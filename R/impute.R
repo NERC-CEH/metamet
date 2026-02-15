@@ -1,25 +1,118 @@
-#' @title impute
-#' @description Impute missing values using various methods
-#' @param y Response variable with missing values to be replaced
-#'   (variable name as a "quoted string")
-#' @param x Covariate to be used (name of a variable in the same data frame as
-#'   a "quoted string")
-#' @param mm metamet object containing data and qc codes.
-#' @param qc qc code to denote values imputed by this function, Default: 3
-#' @param fit Whether to fit a linear model or directly replace missing y with
-#'   x values, Default: TRUE
-#' @return List of two data frames containing data and qc codes with imputed values.
-#' @details DETAILS
-#' @examples
-#' \dontrun{
-#' if(interactive()) {
-#'  #EXAMPLE1
-#' mm <- list(df = df, df_qc = df_qc)
-#' mm <- impute(y = "SW_IN", x = "PPFD_IN",  mm)
-#'  }
-#' }
-#' @rdname impute
-#' @export
+##' Impute missing values in meteorological data
+##'
+##' Imputes missing or flagged values in one or more variables of a \code{metamet} object
+##' using various methods. The function supports regression-based imputation, time-series
+##' smoothing (GAM), substitution from reference data (ERA5), and physical constraints.
+##' All imputed values are flagged in the quality control (QC) table.
+##'
+##' @param v_y Character vector of variable names (as quoted strings) to impute.
+##'   If \code{NULL} (default), all variables in the data table except site and time
+##'   are selected for imputation.
+##' @param mm A \code{metamet} object containing observation data (\code{dt}),
+##'   quality control codes (\code{dt_qc}), and optional reference data (\code{dt_ref}).
+##' @param method Character string specifying the imputation method to use.
+##'   If \code{NULL} (default), the method is read from the \code{imputation_method}
+##'   column in \code{dt_meta}. Supported methods:
+##'   \describe{
+##'     \item{\code{"time"}}{Generalized additive model (GAM) with smoothing splines
+##'       over time and hour of day. Suitable for variables with strong diurnal/seasonal patterns.}
+##'     \item{\code{"regn"}}{Linear regression against covariate \code{x}. Fits a model
+##'       excluding missing values, then predicts.}
+##'     \item{\code{"era5"}}{Substitute ERA5 reanalysis data from \code{dt_ref}.
+##'       If fewer than \code{n_min} observations, replaces directly without fitting.}
+##'     \item{\code{"noneg"}}{Replace negative values with zero (physical constraint).}
+##'     \item{\code{"nightzero"}}{Replace nighttime values with zero. Uses site coordinates
+##'       (\code{lat}, \code{lon}) to identify day/night via \code{openair::cutData()}.}
+##'     \item{\code{"zero"}}{Replace all missing/flagged values with zero.}
+##'   }
+##' @param qc_tokeep Integer QC code(s) indicating "good" or "raw" data to retain unchanged.
+##'   Default \code{0}. Data with QC codes not in \code{qc_tokeep} are candidates for imputation.
+##' @param selection Logical. If \code{TRUE} (default), applies selection filtering
+##'   from metadata. If \code{FALSE}, imputes all values matching \code{qc_tokeep} criteria.
+##' @param k Integer. Smoothing basis dimension for GAM in "time" method (default: 40).
+##'   Automatically reduced if data is sparse. Controls temporal smoothness.
+##' @param fit Logical. If \code{TRUE} (default), fits regression/GAM models for
+##'   imputation. If \code{FALSE}, uses direct substitution (useful with "era5" method
+##'   and minimal data).
+##' @param n_min Integer. Minimum number of non-missing observations required to fit
+##'   a model (default: 10). If fewer observations exist, "time" and "regn" methods skip
+##'   imputation; "era5" method switches to direct substitution.
+##' @param x Optional. Character string naming a covariate column in the data table
+##'   for use in "regn" method. For example, \code{x = "PPFD_IN"} to regress against
+##'   photosynthetic photon flux density.
+##' @param lat Numeric. Latitude of the site in degrees (default: \code{55.792}).
+##'   Used by "nightzero" method to calculate sunrise/sunset times.
+##' @param lon Numeric. Longitude of the site in degrees (default: \code{-3.243}).
+##'   Used by "nightzero" method to calculate sunrise/sunset times.
+##' @param plot_graph Logical. If \code{TRUE} (default), generates diagnostic plots
+##'   showing observations, reference data (if available), and QC flags. Saves PNG files
+##'   to the \code{output/} directory with naming convention \code{plot_<variable>_<method>.png}.
+##'
+##' @return The input \code{metamet} object \code{mm}, invisibly returned with updated
+##'   \code{dt} (imputed values) and \code{dt_qc} (new QC codes for imputed points).
+##'
+##' @details
+##' **Imputation Process:**
+##' The function iterates over each variable in \code{v_y}. For each variable:
+##' 1. Determines the imputation method (from parameter or metadata).
+##' 2. Identifies which rows to impute based on QC codes and \code{selection} flag.
+##' 3. Applies the selected imputation method.
+##' 4. Updates the QC table to flag imputed values.
+##' 5. Optionally generates a diagnostic plot.
+##'
+##' **Minimum Data Handling:**
+##' If fewer than \code{n_min} non-missing observations exist:
+##' - "time" and "regn" methods skip the variable (no imputation).
+##' - "era5" method switches to direct substitution (\code{fit = FALSE}).
+##' - Other methods ("zero", "noneg", "nightzero") are unaffected.
+##'
+##' **Data Reference:**
+##' The function requires a metadata table (\code{dt_meta}) describing variables,
+##' and optionally a reference table (\code{dt_ref}) for ERA5 or other reanalysis data.
+##' Ensure these are present in the \code{metamet} object.
+##'
+##' **Plotting:**
+##' Diagnostic plots overlay observations (colored by QC code), reference data (black line),
+##' and imputed points. Useful for validating imputation results and identifying issues.
+##'
+##' @seealso
+##'   \code{\link{metamet}} for object structure
+##'   \code{\link{add_era5}} for adding ERA5 reference data
+##'   \code{\link{time_average}} for temporal aggregation
+##'
+##' @examples
+##' \dontrun{
+##' # Example 1: Impute from metadata method specification
+##' mm <- impute(
+##'   v_y = "SW_IN",
+##'   mm = mm,
+##'   qc_tokeep = 0,
+##'   plot_graph = TRUE
+##' )
+##'
+##' # Example 2: Impute using ERA5 data, multiple variables
+##' mm <- impute(
+##'   v_y = c("TA", "RH"),
+##'   mm = mm,
+##'   method = "era5",
+##'   fit = FALSE,
+##'   plot_graph = TRUE
+##' )
+##'
+##' # Example 3: Regression imputation with covariate
+##' mm <- impute(
+##'   v_y = "SW_IN",
+##'   mm = mm,
+##'   method = "regn",
+##'   x = "PPFD_IN",
+##'   fit = TRUE,
+##'   n_min = 15
+##' )
+##' }
+##'
+##' @keywords univar na
+##' @rdname impute
+##' @export
 impute <- function(
   v_y = NULL,
   mm,
@@ -154,8 +247,9 @@ impute <- function(
         )
       # }
       p <- p + geom_point(aes(y = y, colour = factor(qc)), size = 1) + ylab(y)
+      fs::dir_create("output")
       fname <- paste0("plot_", y, "_", method, ".png")
-      ggsave(p, filename = here("output", fname))
+      ggsave(p, filename = fname)
     }
   }
   return(mm)

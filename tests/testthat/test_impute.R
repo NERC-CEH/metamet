@@ -61,11 +61,7 @@ test_that("applying imputing works", {
   expect_identical(n_na_before_ppfd, n_qc_era5_ppfd)
   expect_identical(n_na_before_rh, n_qc_era5_rh)
   expect_identical(n_na_before_rg, n_qc_era5_rg)
-  expect_identical(
-    n_na_after_ppfd,
-    n_na_after_rh,
-    n_na_after_rg,
-    n_qc_era5_ppfd,
-    0
-  )
+  expect_identical(n_na_after_ppfd, 0L)
+  expect_identical(n_na_after_rh, 0L)
+  expect_identical(n_na_after_rg, 0L)
 })

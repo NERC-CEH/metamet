@@ -1,5 +1,8 @@
 apply_qc <- function(mm0) {
   mm <- copy(mm0)
+  # setindex needed to fix odd bug in data.table described here:
+  # https://github.com/Rdatatable/data.table/issues/3745
+  data.table::setindex(mm$dt_meta, type)
 
   time_name <- mm$dt_meta[type == "time", name_dt]
   v_cols_to_exclude <- c("site", time_name)

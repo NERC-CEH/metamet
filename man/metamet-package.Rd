@@ -2,7 +2,6 @@
 % Please edit documentation in R/metamet-package.r
 \docType{package}
 \name{metamet-package}
-\alias{metamet}
 \alias{metamet-package}
 \title{metamet: Meta Data for Met Data}
 \description{

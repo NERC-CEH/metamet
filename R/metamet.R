@@ -1,9 +1,36 @@
-# This file defines the metamet class, its constructor, and some essential S3
-# methods. A metamet object is a list of data tables - one for the met data
-# itself, and additional ones for the meta-data needed to process and interpret
-# the met data.
-
-# Constructor
+##' Create a new `metamet` object
+##'
+##' Internal constructor function for creating `metamet` objects. This function
+##' initializes a list containing meteorological data and associated metadata.
+##' Generally, users should use the \code{\link{metamet}} function instead,
+##' which provides a more flexible interface for loading data from files or
+##' data tables.
+##'
+##' @param dt A `data.table` containing the main meteorological observations.
+##'   Must have a time column and a site identifier. Required.
+##' @param dt_meta A `data.table` describing the columns in `dt`, including
+##'   variable names, types (e.g., "time", "temperature"), and units.
+##'   Required.
+##' @param dt_site A `data.table` containing site-level metadata (e.g.,
+##'   latitude, longitude, elevation). Required.
+##' @param dt_qc Optional `data.table` of quality control flags or codes
+##'   corresponding to the observations in `dt`. Defaults to `NULL`.
+##' @param dt_ref Optional `data.table` of reference data (e.g., from ERA5
+##'   reanalysis) for comparison with observations. Defaults to `NULL`.
+##' @param site_id A character string specifying the site identifier.
+##'   Must be provided and non-empty.
+##'
+##' @return A `metamet` object (a list with class `"metamet"`) containing
+##'   the provided data tables. The object has a "site" column added to
+##'   `dt`, `dt_qc`, and `dt_ref`.
+##'
+##' @details
+##' The function adds a "site" column to `dt`, `dt_qc`, and `dt_ref` containing
+##' the provided `site_id`. This is an internal constructor; users should prefer
+##' the \code{\link{metamet}} generic function.
+##'
+##' @keywords internal
+##' @noRd
 new_metamet <- function(
   dt = data.table::data.table(),
   dt_meta = NULL,
@@ -45,19 +72,70 @@ new_metamet <- function(
   return(new_metamet)
 }
 
+##' Create a `metamet` object from various input types
+##'
+##' Constructor function for creating `metamet` objects from files or
+##' data tables. This is a generic function with methods for different
+##' input types, allowing flexible object creation from CSV/Excel files,
+##' data frames, or data tables.
+##'
+##' @param dt The main data input. For `metamet.character`, this is a file path
+##'   to a CSV or other format readable by `data.table::fread()`. For
+##'   `metamet.data.frame` or `metamet.data.table`, this is the actual data object.
+##' @param dt_meta A `data.table`, `data.frame`, or file path to metadata describing
+##'   the columns in `dt`. Excel files (.xlsx) are supported; otherwise CSV format
+##'   is assumed. Required.
+##' @param dt_site A `data.table`, `data.frame`, or file path to site metadata
+##'   containing site-level information. Required.
+##' @param dt_qc Optional quality control data; can be a `data.table`, `data.frame`,
+##'   or file path. Defaults to `NULL`.
+##' @param dt_ref Optional reference data (e.g., ERA5 reanalysis); can be a
+##'   `data.table`, `data.frame`, or file path. Defaults to `NULL`.
+##' @param site_id A character string specifying the site identifier.
+##'   Required for `metamet.character` method. Used to tag all observations.
+##' @param ... Additional arguments passed to methods.
+##'
+##' @return A `metamet` object containing the provided data and metadata,
+##'   with processed and validated structure.
+##'
+##' @seealso
+##'   \code{\link{new_metamet}} for the internal constructor
+##'
+##' @examples
+##' \dontrun{
+##' # Create from files
+##' mm <- metamet(
+##'   dt = "data.csv",
+##'   dt_meta = "metadata.xlsx",
+##'   dt_site = "site_info.csv",
+##'   site_id = "UK-AMO"
+##' )
+##'
+##' # Create from data tables (requires metadata and site data)
+##' mm <- metamet(
+##'   dt = my_data_table,
+##'   dt_meta = my_metadata_table,
+##'   dt_site = my_site_info_table,
+##'   site_id = "UK-AMO"
+##' )
+##' }
+##'
+##' @export
 # 1. Define the generic function
 metamet <- function(dt, ...) {
   UseMethod("metamet")
 }
 
+##' @rdname metamet
+##' @export
 # 2. Default method for unexpected types
-#' @export
 metamet.default <- function(dt, ...) {
   stop("Unsupported input type: ", class(dt))
 }
 
+##' @rdname metamet
+##' @export
 # 3. Method for character strings (files)
-#' @export
 metamet.character <- function(
   dt,
   dt_meta = NULL,
@@ -119,8 +197,9 @@ metamet.character <- function(
   )
 }
 
+##' @rdname metamet
+##' @export
 # 4. Method for data frames
-#' @export
 metamet.data.frame <- function(
   dt,
   dt_meta = NULL,
@@ -174,8 +253,9 @@ metamet.data.frame <- function(
   )
 }
 
+##' @rdname metamet
+##' @export
 # 4. Method for data tables
-#' @export
 metamet.data.table <- function(
   dt,
   dt_meta = NULL,

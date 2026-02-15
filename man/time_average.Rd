@@ -21,6 +21,9 @@ time_average(
 \item{report_end_interval}{Logical. If `TRUE` (default), the returned
 timestamps represent the end of the averaging interval. If `FALSE`,
 timestamps represent the start of the interval.}
+
+\item{extra_rows}{Integer A number of time intervals to add before and
+after the data; usually truncated after averaging.}
 }
 \value{
 A `metamet` object with time-averaged `dt`, `dt_qc`, and `dt_ref`

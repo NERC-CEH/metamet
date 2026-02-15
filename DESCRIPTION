@@ -25,6 +25,5 @@ Imports:
     openair,
     lubridate,
     readxl,
-    powerjoin,
-    stringr
+    powerjoin
 Config/testthat/edition: 3

@@ -1,0 +1,4 @@
+url: https://nerc-ceh.github.io/metamet/
+template:
+  bootstrap: 5
+  bootswatch: cerulean

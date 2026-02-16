@@ -1,11 +1,4 @@
-
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-
 # metamet
-
-<!-- badges: start -->
-
-<!-- badges: end -->
 
 The goal of metamet is to …
 
@@ -47,11 +40,13 @@ summary(cars)
 ```
 
 You’ll still need to render `README.Rmd` regularly, to keep `README.md`
-up-to-date. `devtools::build_readme()` is handy for this.
+up-to-date.
+[`devtools::build_readme()`](https://devtools.r-lib.org/reference/build_rmd.html)
+is handy for this.
 
 You can also embed plots, for example:
 
-<img src="man/figures/README-pressure-1.png" width="100%" />
+![](reference/figures/README-pressure-1.png)
 
 In that case, don’t forget to commit and push the resulting figure
 files, so they display on GitHub and CRAN.

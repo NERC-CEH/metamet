@@ -27,3 +27,4 @@ Imports:
     readxl,
     powerjoin
 Config/testthat/edition: 3
+URL: https://nerc-ceh.github.io/metamet/

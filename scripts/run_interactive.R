@@ -31,6 +31,8 @@ build(vignettes = FALSE)
 check(vignettes = FALSE)
 pkgload::load_all()
 
+usethis::use_pkgdown_github_pages()
+
 s3_methods_generic("metamet")
 s3_methods_class("metamet")
 

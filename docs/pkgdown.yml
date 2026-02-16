@@ -1,0 +1,11 @@
+pandoc: 3.6.3
+pkgdown: 2.2.0
+pkgdown_sha: ~
+articles:
+  intro: intro.html
+  manuscript: manuscript.html
+  metamet: metamet.html
+last_built: 2026-02-16T10:55Z
+urls:
+  reference: https://nerc-ceh.github.io/metamet/reference
+  article: https://nerc-ceh.github.io/metamet/articles

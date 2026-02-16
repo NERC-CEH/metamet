@@ -6,4 +6,3 @@ vignettes/*_cache/
 output
 data-raw/*
 !data-raw/make_data-sets.R
-docs

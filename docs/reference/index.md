@@ -16,5 +16,7 @@
   [`mm2`](https://nerc-ceh.github.io/metamet/reference/mm1.md)
   [`mm3`](https://nerc-ceh.github.io/metamet/reference/mm1.md) : Example
   \`metamet\` objects
+- [`subset_by_date()`](https://nerc-ceh.github.io/metamet/reference/subset_by_date.md)
+  : Subset a \`metamet\` object by date
 - [`time_average()`](https://nerc-ceh.github.io/metamet/reference/time_average.md)
   : Time-average a \`metamet\` object

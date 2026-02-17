@@ -8,12 +8,12 @@
 ## Citation
 
 Levy P (2026). *metamet: Meta Data for Met Data*. R package version
-0.0.0.9000, <https://nerc-ceh.github.io/metamet/>.
+0.0.1, <https://nerc-ceh.github.io/metamet/>.
 
     @Manual{,
       title = {metamet: Meta Data for Met Data},
       author = {Peter Levy},
       year = {2026},
-      note = {R package version 0.0.0.9000},
+      note = {R package version 0.0.1},
       url = {https://nerc-ceh.github.io/metamet/},
     }

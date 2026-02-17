@@ -3,6 +3,12 @@
 This package is defines a data structure for met data and its meta data,
 and functions for manipulation and quality control.
 
+## See also
+
+Useful links:
+
+- <https://nerc-ceh.github.io/metamet/>
+
 ## Author
 
 **Maintainer**: Peter Levy <plevy@ceh.ac.uk>

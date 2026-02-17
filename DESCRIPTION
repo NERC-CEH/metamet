@@ -1,6 +1,6 @@
 Package: metamet
 Title: Meta Data for Met Data
-Version: 0.0.0.9000
+Version: 0.0.1
 Authors@R: person("Peter", "Levy", 
                   email = "plevy@ceh.ac.uk", 
                   role = c("aut", "cre", "cph"),

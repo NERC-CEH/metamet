@@ -130,6 +130,8 @@ impute <- function(
   # if not given as an argument, use that specified in dt_meta
   if (is.null(method)) {
     use_method_from_meta <- TRUE
+  } else {
+    use_method_from_meta <- FALSE
   }
 
   time_name <- mm$dt_meta[type == "time", name_dt]

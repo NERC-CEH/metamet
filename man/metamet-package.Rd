@@ -7,6 +7,13 @@
 \description{
 This package is defines a data structure for met data and its meta data, and functions for manipulation and quality control.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://nerc-ceh.github.io/metamet/}
+}
+
+}
 \author{
 \strong{Maintainer}: Peter Levy \email{plevy@ceh.ac.uk} (\href{https://orcid.org/0000-0002-8505-1901}{ORCID}) [copyright holder]
 

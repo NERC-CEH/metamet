@@ -118,8 +118,8 @@ run_shiny()
 
 Clearly a two-dimensional data table is not sufficient to hold all the
 information. Instead we define a `metamet` data object as a set of
-related data tables. We implement this as a list in R, containing six
-data tables (`dt`) explained in the table below.
+related data tables. We implement this as a list in R, containing five
+data tables (prefix `dt_`) explained in the table below.
 
 | Name | Type | Contains | Rows correspond to | Columns correspond to |
 |----|----|----|----|----|

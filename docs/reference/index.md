@@ -16,6 +16,8 @@
   [`mm2`](https://nerc-ceh.github.io/metamet/reference/mm1.md)
   [`mm3`](https://nerc-ceh.github.io/metamet/reference/mm1.md) : Example
   \`metamet\` objects
+- [`run_shiny()`](https://nerc-ceh.github.io/metamet/reference/run_shiny.md)
+  : Launches the shiny app for the metamet package
 - [`subset_by_date()`](https://nerc-ceh.github.io/metamet/reference/subset_by_date.md)
   : Subset a \`metamet\` object by date
 - [`time_average()`](https://nerc-ceh.github.io/metamet/reference/time_average.md)

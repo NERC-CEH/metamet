@@ -58,40 +58,157 @@
 </h1></div>
 <!-- badges: start -->
 <!-- badges: end -->
-<p>The goal of metamet is to …</p>
+<p><code>metamet</code> is an R package which attempts to solve many of the problems encountered in working with meteorological observation data. It provide a system for:</p>
+<ul>
+<li>standardising metadata</li>
+<li>converting between file formats</li>
+<li>converting between variable naming conventions</li>
+<li>converting units</li>
+<li>automating QA/QC</li>
+<li>facilitating manual QA/QC via a shiny app</li>
+<li>imputing missing values or “gap-filling”</li>
+</ul>
+<p>It does this by defining:</p>
+<ol style="list-style-type: decimal">
+<li>a standardised generic data structure with enough complexity to hold both the observational data and the metadata, including site-specific, variable-specific and individual record-specific metadata; and</li>
+<li>methods/functions for converting data between formats, combining data from different sources, quality control and gap-filling.</li>
+</ol>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of metamet from <a href="https://github.com/" class="external-link">GitHub</a> with:</p>
+<p>You can install the development version of metamet from <a href="https://github.com/NERC-CEH/metamet" class="external-link">GitHub</a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
-<span><span class="co"># pak::pak("NERC-CEH/metamet")</span></span>
-<span><span class="fu">pkgload</span><span class="fu">::</span><span class="fu"><a href="https://pkgload.r-lib.org/reference/load_all.html" class="external-link">load_all</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"pak"</span><span class="op">)</span></span>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"NERC-CEH/metamet"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<p>This is a basic example which shows you how to solve a common problem:</p>
+<p>Basic usage is to first create <code>metamet</code> objects from files or pre-existing data frames or data tables. Because all the metadata describing the observations is available in the structure, objects can be processed relatively easily so as to:</p>
+<ul>
+<li>rename variables in standard naming conventions</li>
+<li>combine data from different sites</li>
+<li>apply quality control</li>
+<li>impute missing data.</li>
+</ul>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://nerc-ceh.github.io/metamet/">metamet</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; Loading required package: data.table</span></span>
-<span><span class="co">#&gt; Loading required package: ggplot2</span></span>
-<span><span class="co">#&gt; Warning: package 'ggplot2' was built under R version 4.5.2</span></span>
-<span><span class="co">## basic example code</span></span></code></pre></div>
-<p>What is special about using <code>README.Rmd</code> instead of just <code>README.md</code>? You can include R chunks like so:</p>
+<span><span class="va">fname_dt</span> <span class="op">&lt;-</span> <span class="fu">testthat</span><span class="fu">::</span><span class="fu"><a href="https://testthat.r-lib.org/reference/test_path.html" class="external-link">test_path</a></span><span class="op">(</span><span class="st">"data-raw/UK-AMO_BM_dt_2026.csv"</span><span class="op">)</span></span>
+<span><span class="va">fname_meta</span> <span class="op">&lt;-</span> <span class="fu">testthat</span><span class="fu">::</span><span class="fu"><a href="https://testthat.r-lib.org/reference/test_path.html" class="external-link">test_path</a></span><span class="op">(</span><span class="st">"data-raw/dt_meta.xlsx"</span><span class="op">)</span></span>
+<span><span class="va">fname_site</span> <span class="op">&lt;-</span> <span class="fu">testthat</span><span class="fu">::</span><span class="fu"><a href="https://testthat.r-lib.org/reference/test_path.html" class="external-link">test_path</a></span><span class="op">(</span><span class="st">"data-raw/dt_site.csv"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">mm</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/metamet.html">metamet</a></span><span class="op">(</span></span>
+<span>  dt <span class="op">=</span> <span class="va">fname_dt</span>,</span>
+<span>  dt_meta <span class="op">=</span> <span class="va">fname_meta</span>,</span>
+<span>  dt_site <span class="op">=</span> <span class="va">fname_site</span>,</span>
+<span>  site_id <span class="op">=</span> <span class="st">"UK-AMO"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; Loading file: tests/testthat/data-raw/UK-AMO_BM_dt_2026.csv</span></span>
+<span><span class="co">#&gt; Reading data table ...</span></span>
+<span></span>
+<span><span class="co"># print the outline strucutre:</span></span>
+<span><span class="va">mm</span></span>
+<span><span class="co">#&gt; metamet object</span></span>
+<span><span class="co">#&gt; -------------</span></span>
+<span><span class="co">#&gt; Data table (dt) - first 6 cols:</span></span>
+<span><span class="co">#&gt;                    DATECT       TS      SWC          G         WTD WTD_4_1_1</span></span>
+<span><span class="co">#&gt;                    &lt;POSc&gt;    &lt;num&gt;    &lt;num&gt;      &lt;num&gt;       &lt;num&gt;     &lt;num&gt;</span></span>
+<span><span class="co">#&gt;    1: 2026-01-01 00:30:00 4.704447 66.78342 -5.2438167  0.03166667        NA</span></span>
+<span><span class="co">#&gt;    2: 2026-01-01 01:00:00 4.710880 66.78225 -5.1350167  0.03091667        NA</span></span>
+<span><span class="co">#&gt;    3: 2026-01-01 01:30:00 4.716867 66.78408 -5.0469667  0.02978333        NA</span></span>
+<span><span class="co">#&gt;    4: 2026-01-01 02:00:00 4.722013 66.78121 -4.9933833  0.02945000        NA</span></span>
+<span><span class="co">#&gt;    5: 2026-01-01 02:30:00 4.726623 66.78179 -4.9702167  0.02666667        NA</span></span>
+<span><span class="co">#&gt;   ---                                                                       </span></span>
+<span><span class="co">#&gt; 1484: 2026-01-31 22:00:00 4.702524 53.85774 -0.9039389 -0.18318600  -0.60073</span></span>
+<span><span class="co">#&gt; 1485: 2026-01-31 22:30:00 4.743937 53.84866 -0.9908333 -0.18335267  -0.60073</span></span>
+<span><span class="co">#&gt; 1486: 2026-01-31 23:00:00 4.773235 53.84151 -1.0347333 -0.18363933  -0.60073</span></span>
+<span><span class="co">#&gt; 1487: 2026-01-31 23:30:00 4.783013 53.83243 -1.0497611 -0.18391933  -0.60073</span></span>
+<span><span class="co">#&gt; 1488: 2026-02-01 00:00:00 4.785532 53.82335 -1.0490556 -0.18402600  -0.60073</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Metadata (dt_meta) - first 6 cols:</span></span>
+<span><span class="co">#&gt;      site name_dt standard_name      long_name  units        type</span></span>
+<span><span class="co">#&gt;    &lt;char&gt;  &lt;char&gt;        &lt;char&gt;         &lt;char&gt; &lt;char&gt;      &lt;char&gt;</span></span>
+<span><span class="co">#&gt; 1: UK-AMO    site          site           site   &lt;NA&gt;        site</span></span>
+<span><span class="co">#&gt; 2: UK-AMO  D_SNOW        D_SNOW     Snow depth     cm      height</span></span>
+<span><span class="co">#&gt; 3: UK-AMO  DATECT        DATECT      timestamp   &lt;NA&gt;        time</span></span>
+<span><span class="co">#&gt; 4: UK-AMO       G             G Soil heat flux  W m-2 energy flux</span></span>
+<span><span class="co">#&gt; 5: UK-AMO G_4_1_1             G Soil heat flux  W m-2 energy flux</span></span>
+<span><span class="co">#&gt; 6: UK-AMO G_4_1_2             G Soil heat flux  W m-2 energy flux</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Site information (dt_site):</span></span>
+<span><span class="co">#&gt;      site        long_name   lon   lat  elev</span></span>
+<span><span class="co">#&gt;    &lt;char&gt;           &lt;char&gt; &lt;num&gt; &lt;num&gt; &lt;int&gt;</span></span>
+<span><span class="co">#&gt; 1: UK-AMO Auchencorth Moss -3.25 55.75   120</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; QC information (dt_qc) - first 6 cols:</span></span>
+<span><span class="co">#&gt; NULL</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Reference data (dt_ref) - first 6 cols:</span></span>
+<span><span class="co">#&gt; NULL</span></span></code></pre></div>
+<p>A typical workflow would go on to perform tasks such as adding reference data from ECMWF ERA5 reanalysis, join with other <code>metamet</code> objects, apply quality control algorithms, impute missing values by various algorithms, and check the data manually for additional QC. This is illustrated below.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">cars</span><span class="op">)</span></span>
-<span><span class="co">#&gt;      speed           dist       </span></span>
-<span><span class="co">#&gt;  Min.   : 4.0   Min.   :  2.00  </span></span>
-<span><span class="co">#&gt;  1st Qu.:12.0   1st Qu.: 26.00  </span></span>
-<span><span class="co">#&gt;  Median :15.0   Median : 36.00  </span></span>
-<span><span class="co">#&gt;  Mean   :15.4   Mean   : 42.98  </span></span>
-<span><span class="co">#&gt;  3rd Qu.:19.0   3rd Qu.: 56.00  </span></span>
-<span><span class="co">#&gt;  Max.   :25.0   Max.   :120.00</span></span></code></pre></div>
-<p>You’ll still need to render <code>README.Rmd</code> regularly, to keep <code>README.md</code> up-to-date. <code><a href="https://devtools.r-lib.org/reference/build_rmd.html" class="external-link">devtools::build_readme()</a></code> is handy for this.</p>
-<p>You can also embed plots, for example:</p>
-<p><img src="reference/figures/README-pressure-1.png" width="100%"></p>
-<p>In that case, don’t forget to commit and push the resulting figure files, so they display on GitHub and CRAN.</p>
+<code class="sourceCode R"><span><span class="va">mm</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/add_era5.html">add_era5</a></span><span class="op">(</span></span>
+<span>  <span class="va">mm</span>,</span>
+<span>  fname_era5 <span class="op">=</span> <span class="fu">testthat</span><span class="fu">::</span><span class="fu"><a href="https://testthat.r-lib.org/reference/test_path.html" class="external-link">test_path</a></span><span class="op">(</span><span class="st">"data-raw/dt_era5.csv"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">mm</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/join.html">join</a></span><span class="op">(</span><span class="va">mm</span>, <span class="va">mm_old</span><span class="op">)</span></span>
+<span><span class="va">mm</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/apply_qc.html">apply_qc</a></span><span class="op">(</span><span class="va">mm</span><span class="op">)</span></span>
+<span><span class="va">mm</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/impute.html">impute</a></span><span class="op">(</span>mm <span class="op">=</span> <span class="va">mm</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/run_shiny.html">run_shiny</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>Clearly a two-dimensional data table is not sufficient to hold all the information. Instead we define a <code>metamet</code> data object as a set of related data tables. We implement this as a list in R, containing six data tables (<code>dt</code>) explained in the table below.</p>
+<table class="table">
+<colgroup>
+<col width="20%">
+<col width="20%">
+<col width="20%">
+<col width="20%">
+<col width="20%">
+</colgroup>
+<thead><tr>
+<th>Name</th>
+<th>Type</th>
+<th>Contains</th>
+<th>Rows correspond to</th>
+<th>Columns correspond to</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>dt</td>
+<td>data.table</td>
+<td>sensor data</td>
+<td>time intervals</td>
+<td>variables</td>
+</tr>
+<tr>
+<td>dt_meta</td>
+<td>data.table</td>
+<td>variable- and time-specific meta data (like netCDF data attributes) e.g. coords for sensor locations</td>
+<td>variables x time period</td>
+<td>metadata variables</td>
+</tr>
+<tr>
+<td>dt_site</td>
+<td>data.table</td>
+<td>site-specific meta data (like netCDF global attributes)</td>
+<td>sites</td>
+<td>metadata variables</td>
+</tr>
+<tr>
+<td>dt_qc</td>
+<td>data.table</td>
+<td>QC codes</td>
+<td>time intervals</td>
+<td>variables</td>
+</tr>
+<tr>
+<td>dt_ref</td>
+<td>data.table</td>
+<td>ref data e.g. era5</td>
+<td>time intervals</td>
+<td>variables</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="license">

@@ -21,6 +21,7 @@ use_package("fs", "Imports", min_version = "1.5.0")
 use_package("readxl", "Imports")
 use_package("openair", "Imports")
 use_package("lubridate", "Imports")
+use_package("shiny", "Imports")
 use_package("ggplot2", "Depends")
 
 
@@ -30,6 +31,8 @@ devtools::test()
 build(vignettes = FALSE)
 check(vignettes = FALSE)
 pkgload::load_all()
+
+run_shiny()
 
 s3_methods_generic("metamet")
 s3_methods_class("metamet")
@@ -157,3 +160,10 @@ mm <- copy(mm_in) # we need this to avoid modifying the original object
 time_average(mm, avg.time = "3 hour", report_end_interval = TRUE)
 
 l_mm <- list(mm1, mm2)
+
+library(glue)
+library(magrittr)
+with(as.data.frame(dt_meta), {
+  '\n#{h1}\n##{h2}\n{x}\n' %>% glue
+}) %>%
+  writeLines(., con = 'out.md')

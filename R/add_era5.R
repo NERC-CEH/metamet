@@ -58,6 +58,8 @@ add_era5 <- function(
   mm <- rename_era5(mm)
 
   time_name <- mm$dt_meta[type == "time", name_dt]
+  # make sure time series is complete without gaps in time variable
+  mm$dt_ref <- pad_data(mm$dt_ref, time_name = time_name)
 
   # Do units work in timeAverage? Maybe set, drop and reset in time_average
 
@@ -77,9 +79,12 @@ add_era5 <- function(
     mm$dt <- mm$dt[
       get(time_name) >= start_date & get(time_name) <= end_date
     ]
-    mm$dt_qc <- mm$dt_qc[
-      get(time_name) >= start_date & get(time_name) <= end_date
-    ]
+    # and if it exists, restrict qc to date range of ref
+    if (!is.null(mm$dt_qc)) {
+      mm$dt_qc <- mm$dt_qc[
+        get(time_name) >= start_date & get(time_name) <= end_date
+      ]
+    }
   }
 
   # check the ref time resolution is the same as the mm$dt obs data
@@ -108,6 +113,23 @@ add_era5 <- function(
     )
   }
 
+  dt_gaps <- detect_gaps(
+    dt_in = mm$dt,
+    expected_interval_mins = interval_length_dt / 60,
+    time_name = time_name
+  )
+  dt_ref_gaps <- detect_gaps(
+    dt_in = mm$dt_ref,
+    expected_interval_mins = interval_length_dt / 60,
+    time_name = time_name
+  )
+  if (nrow(dt_gaps) > 0) {
+    stop("Gaps found in obs data, dt")
+  }
+  if (nrow(dt_ref_gaps) > 0) {
+    stop("Gaps found in ref data, dt_ref")
+  }
+
   # check that all are the same no. rows
   if (!identical(dim(mm$dt)[1], dim(mm$dt_ref)[1])) {
     print(paste(
@@ -116,6 +138,7 @@ add_era5 <- function(
       dim(mm$dt_ref)
     ))
   }
+
   return(mm)
 }
 

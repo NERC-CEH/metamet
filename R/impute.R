@@ -203,11 +203,12 @@ impute <- function(
       datect_num <- as.numeric(v_date) ## !dt_qry$
       hour <- as.POSIXlt(v_date)$hour
 
-      m <- gam(
+      # cannot include hour if daily avg, as no spread in hours
+      m <- mgcv::gam(
         dt[, get(y)] ~
-          s(datect_num, k = k, bs = "cr") +
-          # s(yday, k = k_yday, bs = "cr") +
-          s(hour, k = -1, bs = "cc"),
+          s(datect_num, k = k, bs = "cr"),
+        # s(yday, k = k_yday, bs = "cr") +
+        # s(hour, k = -1, bs = "cc"),
         na.action = na.exclude #, data = dt
       )
       v_pred <- predict(m, newdata = data.frame(datect_num, hour))

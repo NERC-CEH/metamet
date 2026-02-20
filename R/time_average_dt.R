@@ -125,9 +125,19 @@ time_average_dt <- function(
     date >= first_date & date <= last_date
   ]
 
-  # first few rows may be missing data; fill in with nocb
   # this only works on character variables, so have to split and cbind
   dt_num <- dt[, -c("date", "site")]
+
+  # force all to be numeric; if any col contains only NA, this is set as logical
+  dt_num[, names(dt_num) := lapply(.SD, as.numeric)]
+  # have another check:
+  if (any(sapply(dt_num, class) != "numeric")) {
+    stop(
+      "Trying to time-average some non-numeric columns; maybe missing values?"
+    )
+  }
+
+  # first few rows may be missing data; fill in with nocb
   data.table::setnafill(dt_num, type = "nocb")
   data.table::setnafill(dt_num, type = "locf")
   dt <- cbind(dt[, c("date", "site")], dt_num)

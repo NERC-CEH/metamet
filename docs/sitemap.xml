@@ -6,6 +6,7 @@
 <url><loc>https://nerc-ceh.github.io/metamet/articles/intro.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/articles/manuscript.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/articles/metamet.html</loc></url>
+<url><loc>https://nerc-ceh.github.io/metamet/articles/workflow_example.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/authors.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/CONTRIBUTING.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/index.html</loc></url>
@@ -13,12 +14,14 @@
 <url><loc>https://nerc-ceh.github.io/metamet/news/index.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/add_era5.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/apply_qc.html</loc></url>
+<url><loc>https://nerc-ceh.github.io/metamet/reference/detect_gaps.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/impute.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/index.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/join.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/metamet-package.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/metamet.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/mm1.html</loc></url>
+<url><loc>https://nerc-ceh.github.io/metamet/reference/pad_data.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/rename_era5.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/run_shiny.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/subset_by_date.html</loc></url>

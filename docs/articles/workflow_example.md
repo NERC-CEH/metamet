@@ -1,12 +1,12 @@
 # Workflow Example
 
 This vignette illustrates the typical workflow for processing met data
-with `metamet`. The basic steps are to
+with `metamet`. The basic steps are to:
 
-- create a metadata table `dt_site` for the site or sites involved
 - read the observation data
-- create a corresponding metadata table `dt_meta` for the observation
+- create a corresponding metadata table `dt_meta` for the observed
   variables
+- create a metadata table `dt_site` for each site with observations
 - combine these into a single `metamet` object
 
 ## Example data
@@ -19,13 +19,81 @@ machine-readable format, so we have to extract it manually the first
 time. Thereafter it is available within the `metamet` object for all
 future use.
 
-Firstly, we load the `metamet` library.
+Firstly, we load the `metamet` library, as well as the `here` library
+which simplifies specifying file paths.
 
 ``` r
 here::i_am("vignettes/workflow_example.Rmd")
 library(metamet)
 library(here)
 ```
+
+### Observation data `dt`
+
+Having downloaded the observation data, we can read it from a file and
+display a few rows.
+
+``` r
+fname <- here("data-raw/UK-WHM/whim_met_2002_2023.csv")
+dt <- fread(fname)
+dim(dt)
+#> [1] 736321     14
+dt
+#>                Timestamp  Rain     LWS  AirT    RH   PAR Total_solar Net_rad
+#>                   <char> <num>   <num> <num> <num> <num>       <num>   <num>
+#>      1: 01/01/2003 00:00     0 6999.00 1.534  93.9    NA           0 -23.820
+#>      2: 01/01/2003 00:15     0 6999.00 1.509  93.8    NA           0 -33.320
+#>      3: 01/01/2003 00:30     0 6999.00 1.354  94.3    NA           0 -37.650
+#>      4: 01/01/2003 00:45     0 6999.00 1.359  94.5    NA           0 -25.340
+#>      5: 01/01/2003 01:00     0 6999.00 1.350  94.5    NA           0 -26.670
+#>     ---                                                                     
+#> 736317: 31/12/2023 23:00     0   18.96 2.796    NA     0           0  -1.570
+#> 736318: 31/12/2023 23:15     0   18.66 2.848    NA     0           0  -3.031
+#> 736319: 31/12/2023 23:30     0   18.51 2.845    NA     0           0  -4.105
+#> 736320: 31/12/2023 23:45     0   18.32 2.902    NA     0           0  -5.239
+#> 736321: 01/01/2024 00:00     0   17.85 2.959    NA     0           0  -2.587
+#>            WS    WD Soil_VWC Soil_T1 Soil_T2   WTD
+#>         <num> <num>    <num>   <num>   <num> <num>
+#>      1: 5.605 153.8       NA   3.979   4.441    NA
+#>      2: 5.713 160.8       NA   3.984   4.438    NA
+#>      3: 5.388 157.7       NA   3.967   4.430    NA
+#>      4: 5.675 157.1       NA   3.960   4.426    NA
+#>      5: 5.320 155.8       NA   3.946   4.418    NA
+#>     ---                                           
+#> 736317: 1.237 218.6     91.2   5.090   4.911  4.48
+#> 736318: 0.726 226.5     91.2   5.084   4.909  4.49
+#> 736319: 0.738 212.5     91.2   5.085   4.907  4.50
+#> 736320: 1.286 239.3     91.2   5.086   4.906  4.50
+#> 736321: 0.859 253.6     91.2   5.086   4.912  4.53
+```
+
+The data consistent of a timestamp column, and 13 variables observed
+every 15 minutes from 2003 until 2023, giving 736321 rows and 14
+columns.
+
+### Observation metadata `dt_meta`
+
+``` r
+knitr::kable(dt_meta[site == "UK-WHM", ..v_col], format = "html")
+```
+
+| site | name_dt | standard_name | long_name | units | type | time_char_format | range_min | range_max | standard_name_era5 | era5_units | imputation_method |
+|:---|:---|:---|:---|:---|:---|:---|---:|---:|:---|:---|:---|
+| UK-WHM | site | site | site | NA | site | NA | NA | NA | site | NA | era5 |
+| UK-WHM | Timestamp | DATECT | timestamp | NA | time | %d/%m/%Y %H:%M | 0 | 0 | time | NA | era5 |
+| UK-WHM | Rain | P | Precipitation | mm | precipitation | NA | 0 | 50 | tp | mm | era5 |
+| UK-WHM | LWS | LWS | Leaf Wetness | dimensionless | arbitrary | NA | -99999 | 99999 | rh | 1 | era5 |
+| UK-WHM | AirT | TA | Air temperature | degree_C | temperature | NA | -40 | 50 | t2m | degree_C | era5 |
+| UK-WHM | RH | RH | Relative humidity | percent | humidity | NA | 30 | 120 | rh | percent | era5 |
+| UK-WHM | PAR | PPFD_IN | Photosynthetic photon flux density incoming | micromol / m^2 / s | energy flux | NA | 0 | 2200 | ssrd | micromol / m^2 / s | era5 |
+| UK-WHM | Total_solar | SW_IN | Shortwave incoming radiation | W / m^2 | energy flux | NA | 0 | 1200 | ssrd | W / m^2 | era5 |
+| UK-WHM | Net_rad | RN | Net radiation | W / m^2 | energy flux | NA | -500 | 1200 | rn | W / m^2 | era5 |
+| UK-WHM | WS | WS | Wind speed | m / s | wind speed | NA | 0 | 30 | ws | m / s | era5 |
+| UK-WHM | WD | WD | Wind direction | degree | wind direction | NA | 0 | 360 | wd | degree | era5 |
+| UK-WHM | Soil_VWC | SWC | Soil water content | percent | soil moisture | NA | 0 | 100 | swvl1 | percent | era5 |
+| UK-WHM | Soil_T1 | TS | Soil temperature | degree_C | temperature | NA | -20 | 50 | stl1 | degree_C | era5 |
+| UK-WHM | Soil_T2 | TS | Soil temperature | degree_C | temperature | NA | -20 | 50 | stl1 | degree_C | era5 |
+| UK-WHM | WTD | WTD | Water table depth | cm | height | NA | -10 | 10 | swvl1 | m | era5 |
 
 ### Site data `dt_site`
 
@@ -66,73 +134,6 @@ knitr::kable(dt_site, format = "html")
 | UK-EBU | Easter Bush      | -3.23000 | 55.74000 |  119 |
 | UK-WHM | Whim Moss        | -3.27155 | 55.76566 |  316 |
 
-### Observation data `dt`
-
-Having downloaded the observation data, we can read it from a file.
-
-``` r
-fname <- here("data-raw/UK-WHM/whim_met_2002_2023.csv")
-dt <- fread(fname)
-dt
-#>                Timestamp  Rain     LWS  AirT    RH   PAR Total_solar Net_rad
-#>                   <char> <num>   <num> <num> <num> <num>       <num>   <num>
-#>      1: 01/01/2003 00:00     0 6999.00 1.534  93.9    NA           0 -23.820
-#>      2: 01/01/2003 00:15     0 6999.00 1.509  93.8    NA           0 -33.320
-#>      3: 01/01/2003 00:30     0 6999.00 1.354  94.3    NA           0 -37.650
-#>      4: 01/01/2003 00:45     0 6999.00 1.359  94.5    NA           0 -25.340
-#>      5: 01/01/2003 01:00     0 6999.00 1.350  94.5    NA           0 -26.670
-#>     ---                                                                     
-#> 736317: 31/12/2023 23:00     0   18.96 2.796    NA     0           0  -1.570
-#> 736318: 31/12/2023 23:15     0   18.66 2.848    NA     0           0  -3.031
-#> 736319: 31/12/2023 23:30     0   18.51 2.845    NA     0           0  -4.105
-#> 736320: 31/12/2023 23:45     0   18.32 2.902    NA     0           0  -5.239
-#> 736321: 01/01/2024 00:00     0   17.85 2.959    NA     0           0  -2.587
-#>            WS    WD Soil_VWC Soil_T1 Soil_T2   WTD
-#>         <num> <num>    <num>   <num>   <num> <num>
-#>      1: 5.605 153.8       NA   3.979   4.441    NA
-#>      2: 5.713 160.8       NA   3.984   4.438    NA
-#>      3: 5.388 157.7       NA   3.967   4.430    NA
-#>      4: 5.675 157.1       NA   3.960   4.426    NA
-#>      5: 5.320 155.8       NA   3.946   4.418    NA
-#>     ---                                           
-#> 736317: 1.237 218.6     91.2   5.090   4.911  4.48
-#> 736318: 0.726 226.5     91.2   5.084   4.909  4.49
-#> 736319: 0.738 212.5     91.2   5.085   4.907  4.50
-#> 736320: 1.286 239.3     91.2   5.086   4.906  4.50
-#> 736321: 0.859 253.6     91.2   5.086   4.912  4.53
-```
-
-This requires only a single addition, a column identifying the site so
-that the variables can be related to the correct site.
-
-``` r
-dt[, site := "UK-AMO"]
-```
-
-### Observation metadata `dt_meta`
-
-``` r
-knitr::kable(dt_meta[site == "UK-WHM", ..v_col], format = "html")
-```
-
-| site | name_dt | standard_name | long_name | units | type | time_char_format | range_min | range_max | standard_name_era5 | era5_units | imputation_method |
-|:---|:---|:---|:---|:---|:---|:---|---:|---:|:---|:---|:---|
-| UK-WHM | site | site | site | NA | site | NA | NA | NA | site | NA | era5 |
-| UK-WHM | Timestamp | DATECT | timestamp | NA | time | %d/%m/%Y %H:%M | 0 | 0 | time | NA | era5 |
-| UK-WHM | Rain | P | Precipitation | mm | precipitation | NA | 0 | 50 | tp | mm | era5 |
-| UK-WHM | LWS | LWS | Leaf Wetness | dimensionless | arbitrary | NA | -99999 | 99999 | rh | 1 | era5 |
-| UK-WHM | AirT | TA | Air temperature | degree_C | temperature | NA | -40 | 50 | t2m | degree_C | era5 |
-| UK-WHM | RH | RH | Relative humidity | percent | humidity | NA | 30 | 120 | rh | percent | era5 |
-| UK-WHM | PAR | PPFD_IN | Photosynthetic photon flux density incoming | micromol / m^2 / s | energy flux | NA | 0 | 2200 | ssrd | micromol / m^2 / s | era5 |
-| UK-WHM | Total_solar | SW_IN | Shortwave incoming radiation | W / m^2 | energy flux | NA | 0 | 1200 | ssrd | W / m^2 | era5 |
-| UK-WHM | Net_rad | RN | Net radiation | W / m^2 | energy flux | NA | -500 | 1200 | rn | W / m^2 | era5 |
-| UK-WHM | WS | WS | Wind speed | m / s | wind speed | NA | 0 | 30 | ws | m / s | era5 |
-| UK-WHM | WD | WD | Wind direction | degree | wind direction | NA | 0 | 360 | wd | degree | era5 |
-| UK-WHM | Soil_VWC | SWC | Soil water content | percent | soil moisture | NA | 0 | 100 | swvl1 | percent | era5 |
-| UK-WHM | Soil_T1 | TS | Soil temperature | degree_C | temperature | NA | -20 | 50 | stl1 | degree_C | era5 |
-| UK-WHM | Soil_T2 | TS | Soil temperature | degree_C | temperature | NA | -20 | 50 | stl1 | degree_C | era5 |
-| UK-WHM | WTD | WTD | Water table depth | cm | height | NA | -10 | 10 | swvl1 | m | era5 |
-
 ### - Create `metamet` object
 
 The `html_vignette` template includes a basic CSS theme. To override
@@ -153,7 +154,7 @@ plot(1:10)
 plot(10:1)
 ```
 
-![](reference/figures/README-unnamed-chunk-10-1.png)![](reference/figures/README-unnamed-chunk-10-2.png)
+![](reference/figures/README-unnamed-chunk-9-1.png)![](reference/figures/README-unnamed-chunk-9-2.png)
 
 You can enable figure captions by `fig_caption: yes` in YAML:
 

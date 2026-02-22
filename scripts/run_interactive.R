@@ -161,9 +161,115 @@ time_average(mm, avg.time = "3 hour", report_end_interval = TRUE)
 
 l_mm <- list(mm1, mm2)
 
-library(glue)
-library(magrittr)
-with(as.data.frame(dt_meta), {
-  '\n#{h1}\n##{h2}\n{x}\n' %>% glue
-}) %>%
-  writeLines(., con = 'out.md')
+install.packages("openairmaps")
+library(openairmaps)
+
+mm_amo <- readRDS("data-raw/UK-AMO/mm.rds")
+mm_amo <- subset_by_date(
+  mm_amo,
+  start_date = "2022-01-01",
+  end_date = "2023-01-01"
+)
+mm_amo <- time_average(mm_amo, avg.time = "1 hour")
+mm_amo
+mm
+# rename with ICOS names
+setnames(
+  mm$dt,
+  mm$dt_meta[site == "UK-WHM", name_dt],
+  mm$dt_meta[site == "UK-WHM", standard_name]
+)
+setnames(
+  mm$dt_qc,
+  mm$dt_meta[site == "UK-WHM", name_dt],
+  mm$dt_meta[site == "UK-WHM", standard_name]
+)
+setnames(
+  mm$dt_ref,
+  mm$dt_meta[site == "UK-WHM", name_dt],
+  mm$dt_meta[site == "UK-WHM", standard_name]
+)
+mm$dt[, which(duplicated(names(mm$dt))) := NULL]
+mm$dt_qc[, which(duplicated(names(mm$dt_qc))) := NULL]
+mm$dt_ref[, which(duplicated(names(mm$dt_ref))) := NULL]
+
+names(mm$dt)
+names(mm$dt_qc)
+names(mm$dt_ref)
+
+names(mm_amo$dt)
+names(mm_amo$dt_qc)
+names(mm_amo$dt_ref)
+
+setnames(
+  mm_amo$dt,
+  mm_amo$dt_meta[site == "UK-AMO", name_dt],
+  mm_amo$dt_meta[site == "UK-AMO", standard_name]
+)
+setnames(
+  mm_amo$dt_qc,
+  mm_amo$dt_meta[site == "UK-AMO", name_dt],
+  mm_amo$dt_meta[site == "UK-AMO", standard_name]
+)
+setnames(
+  mm_amo$dt_ref,
+  mm_amo$dt_meta[site == "UK-AMO", name_dt],
+  mm_amo$dt_meta[site == "UK-AMO", standard_name]
+)
+mm_amo$dt[, which(duplicated(names(mm_amo$dt))) := NULL]
+mm_amo$dt_qc[, which(duplicated(names(mm_amo$dt_qc))) := NULL]
+mm_amo$dt_ref[, which(duplicated(names(mm_amo$dt_ref))) := NULL]
+
+# does not work - this uses names_dt, not standard_name
+mmj <- join(mm_amo, mm)
+names(mm)
+names(mm_amo)
+
+polar_map <- function(mm) {
+  dt <- copy(mm$dt)
+  # get the name and format of the time, precip, ws & wd variables
+  time_name <- mm$dt_meta[type == "time", name_dt]
+  precip_name <- mm$dt_meta[type == "precipitation", name_dt]
+  wd_name <- mm$dt_meta[type == "wind direction", name_dt]
+  ws_name <- mm$dt_meta[type == "wind speed" | type == "windspeed", name_dt]
+
+  dt[, date := get(time_name)]
+  dt[, wd := get(wd_name)]
+  dt[, ws := get(ws_name)]
+
+  dt <- dt[mm$dt_site, on = .(site = site)]
+
+  polarMap(
+    dt,
+    pollutant = "PAR",
+    latitude = "lat",
+    longitude = "lon",
+    popup = "site"
+  )
+}
+
+library(leaflet)
+
+network_map <- function(dt_site = mm$dt_site) {
+  library(leaflet)
+  map_data <-
+    dt_site |>
+    # build a popup
+    buildPopup(
+      latitude = "lat",
+      longitude = "lon",
+      columns = c(
+        "AURN Code" = "long_name",
+        "Name" = "site",
+        "Site Type" = "elev"
+      )
+    ) |>
+    # get unique sites
+    dplyr::distinct(site, .keep_all = TRUE)
+
+  # create a basic leaflet map
+  leaflet(map_data) |>
+    addTiles() |>
+    addMarkers(popup = ~popup)
+}
+network_map(dt_site)

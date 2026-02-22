@@ -15,8 +15,8 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.path = "man/figures/README-",
   out.width = "100%",
-  warning = FALSE, 
-  message = FALSE, 
+  warning = FALSE,
+  message = FALSE,
   fig.show='hold'
 )
 ```
@@ -25,11 +25,11 @@ rmarkdown::render("vignettes/workflow_example.Rmd")
 ```
 
 This vignette illustrates the typical workflow for processing met data with 
-`metamet`. The basic steps are to
+`metamet`. The basic steps are to:
 
-- create a metadata table `dt_site` for the site or sites involved
 - read the observation data
-- create a corresponding metadata table `dt_meta` for the observation variables 
+- create a corresponding metadata table `dt_meta` for the observed variables 
+- create a metadata table `dt_site` for each site with observations
 - combine these into a single `metamet` object
 
 ## Example data
@@ -40,55 +40,29 @@ Metadata are available in the supporting documentation, but not in a
 machine-readable format, so we have to extract it manually the first time. 
 Thereafter it is available within the `metamet` object for all future use.
 
-Firstly, we load the `metamet` library.
+Firstly, we load the `metamet` library, as well as the `here` library which 
+simplifies specifying file paths.
+
 ```{r}
 here::i_am("vignettes/workflow_example.Rmd")
 library(metamet)
 library(here)
 ```
 
-### Site data `dt_site`
-
-The site metadata required is minimal. Any additional variables can be added, 
-but at a minimum we require the site name, a uniquely identifying code `site`,
-longitude, latitude (in degrees with a decimal fraction) and elevation (in m).
-These are easily gleaned from the supporting documentation and could be entered
-in excel, read in as a .csv text file, or entered directly in R as below.
-
-```{r, fig.show='hold'}
-dt_site <- data.table(
-  site = "UK-WHM",
-  long_name = "Whim Moss",
-  lon = -3.27155,
-  lat = -55.76566,
-  elev = 316
-)
-dt_site
-```
-
-In practice, we are likely to have multiple sites as in the table below, and it
-is easiest to append rows to a .csv or excel file as new sites are added.
-
-```{r, fig.show='hold'}
-fname <- here("data-raw/dt_site.csv")
-dt_site <- fread(fname)
-knitr::kable(dt_site, format = "html")
-```
-
 ### Observation data `dt`
 
-Having downloaded the observation data, we can read it from a file.
+Having downloaded the observation data, we can read it from a file and display 
+a few rows.
+
 ```{r}
 fname <- here("data-raw/UK-WHM/whim_met_2002_2023.csv")
 dt <- fread(fname)
+dim(dt)
 dt
 ```
-This requires only a single addition, a column identifying the site so that the
-variables can be related to the correct site.
 
-```{r}
-dt[, site := "UK-AMO"]
-```
+The data consistent of a timestamp column, and 13 variables observed every 15 
+minutes from 2003 until 2023, giving `r nrow(dt)` rows and `r ncol(dt)` columns.
 
 ### Observation metadata `dt_meta`
 
@@ -125,6 +99,34 @@ v_col <- c(
 
 ```{r}
 knitr::kable(dt_meta[site == "UK-WHM", ..v_col], format = "html")
+```
+
+### Site data `dt_site`
+
+The site metadata required is minimal. Any additional variables can be added, 
+but at a minimum we require the site name, a uniquely identifying code `site`,
+longitude, latitude (in degrees with a decimal fraction) and elevation (in m).
+These are easily gleaned from the supporting documentation and could be entered
+in excel, read in as a .csv text file, or entered directly in R as below.
+
+```{r, fig.show='hold'}
+dt_site <- data.table(
+  site = "UK-WHM",
+  long_name = "Whim Moss",
+  lon = -3.27155,
+  lat = -55.76566,
+  elev = 316
+)
+dt_site
+```
+
+In practice, we are likely to have multiple sites as in the table below, and it
+is easiest to append rows to a .csv or excel file as new sites are added.
+
+```{r, fig.show='hold'}
+fname <- here("data-raw/dt_site.csv")
+dt_site <- fread(fname)
+knitr::kable(dt_site, format = "html")
 ```
 
 ### - Create `metamet` object

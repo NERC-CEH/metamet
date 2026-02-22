@@ -5,6 +5,8 @@
 \alias{metamet-package}
 \title{metamet: Meta Data for Met Data}
 \description{
+\if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
+
 This package is defines a data structure for met data and its meta data, and functions for manipulation and quality control.
 }
 \seealso{

@@ -1,4 +1,6 @@
 
+# metamet <a href="https://nerc-ceh.github.io/metamet/"><img src="man/figures/logo.png" align="right" height="139" alt="metamet website" /></a>
+
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 # metamet

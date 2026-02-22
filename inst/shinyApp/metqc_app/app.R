@@ -1,8 +1,3 @@
-# install.packages("pak")
-# library(pak)
-# pak::pak("NERC-CEH/metamet")
-
-# here::i_am("R/metqc_app.R")
 library(metamet)
 library(here)
 library(shiny)
@@ -28,23 +23,8 @@ library(stringr)
 library(forcats)
 library(shinyvalidate)
 library(markdown)
-# source(here("R", "imputation.R"))
-# source(here("R", "plotting.R"))
-# source(here("R", "metqc_app.R"))
 
-# # to run
-# rm(list=ls(all=TRUE))
-# devtools::load_all()
-# metqcApp()
-Sys.setenv(DBNAME = "budbase.nerc-bush.ac.uk/BUA")
-Sys.setenv(DBUID = "BU_FIELD_SITES")
-Sys.setenv(DBPWD = "0ig2mtYUL9")
-Sys.getenv("DBUID")
-
-# metqcApp <- function(...) {
-# Reading in the gap-filling methods and codes----
-v_names <- readRDS(file = here("data", "v_mainmet_name.rds"))
-
+# Set the gap-filling methods and codes----
 gf_choices <- setNames(df_method$method, df_method$method_longname)
 
 # Define UI for the app
@@ -187,7 +167,7 @@ ui <- dashboardPage(
               uiOutput("impute_extra_info"),
               actionButton("reset", label = "Restart app"),
               #actionButton("submitchanges", "Submit changes to file"),
-              actionButton("submitchanges_cloud", "Submit changes")
+              actionButton("submitchanges", "Submit changes")
             ),
           )
         ),
@@ -316,28 +296,18 @@ server <- function(input, output, session) {
 
   disable('compare_vars')
 
-  # Reading in Level 1 data from pin on Connect server
-  system.time(mm1 <- readRDS(file = here("data-raw/UK-AMO", "mm1.rds")))
-  # Read in the previously validated data from pin on Connect server
-  system.time(mm2 <- readRDS(file = here("data-raw/UK-AMO", "mm2.rds")))
-  dim(mm2$dt)
-  dim(mm1$dt)
-
-  # Here we join the existing Level 2 data with new Level 1 data.
-  # Where records already exist in the Level 2 data, these are preserved
-  # and only new Level 1 data is added to the resulting data frame.
-
-  mm2 <- join(mm1, mm2)
-  dim(mm2$dt)
+  # Read in the previously validated data
+  ##* WIP: to be replaced by shiny fileInput dialogue
+  system.time(
+    mm <- readRDS(
+      file = "P:/NECXXXX_Auchencorth/thoth_PL/UK-AMO/lev2/mm_amo_since_2025_06.rds"
+    )
+  )
+  time_name <- mm$dt_meta[type == "time", name_dt]
+  v_names <- mm$dt_meta[type != "time" & type != "site", name_dt]
 
   date_of_first_new_record <- as.POSIXct(Sys.Date() - 225, tz = "UTC")
-  date_of_last_new_record <- max(mm1$dt$DATECT, na.rm = TRUE)
-
-  # v_names <<- dbListFields(con, table_name)
-  v_names_for_box <- v_names[
-    !v_names %in%
-      c("DATECT", "TIMESTAMP", "datect_num", "checked", "pred")
-  ]
+  date_of_last_new_record <- mm$dt[, max(get(time_name), na.rm = TRUE)]
 
   v_names_checklist <- reactiveValues()
 
@@ -449,7 +419,7 @@ server <- function(input, output, session) {
       selectInput(
         "select_covariate",
         label = h5("Covariate"),
-        choices = v_names_for_box
+        choices = v_names
       )
     }
   })
@@ -464,20 +434,19 @@ server <- function(input, output, session) {
     shinyjs::show("extracted_data")
     shinyjs::show("validation_calendar_outer")
 
-    ##* WIP: create a subsetting function in metamet. mm_qry here will be the
-    ## return value  of this function
     mm_qry <<- metamet::subset_by_date(
-      mm2,
+      mm,
       start_date = df_daterange()$start_date,
       end_date = df_daterange()$end_date
     )
 
     mm_qry$dt$checked <<- as.factor(rownames(mm_qry$dt))
-    mm_qry$dt$datect_num <<- as.numeric(mm_qry$dt$DATECT)
+    ##* WIP: the line below appears to be redundant
+    mm_qry$dt$datect_num <<- as.numeric(mm_qry$dt[, get(time_name)])
 
     # Add a tab to the plotting panel for each variable that has been selected by the user.
     output$mytabs <- renderUI({
-      my_tabs <- lapply(paste(v_names_for_box), function(i) {
+      my_tabs <- lapply(paste(v_names), function(i) {
         tabPanel(
           i,
           value = i,
@@ -495,7 +464,7 @@ server <- function(input, output, session) {
     })
 
     observe(
-      lapply(paste(v_names_for_box), function(i) {
+      lapply(paste(v_names), function(i) {
         output[[paste0(i, "_interactive_plot")]] <-
           renderGirafe(plotting_function(i))
       })
@@ -531,15 +500,15 @@ server <- function(input, output, session) {
           fluidRow(
             column(
               6,
-              selectInput('x_var', 'X variable:', choices = v_names_for_box)
+              selectInput('x_var', 'X variable:', choices = v_names)
             ),
             column(
               6,
               selectInput(
                 'y_var',
                 'Y variable:',
-                choices = v_names_for_box,
-                selected = v_names_for_box[2]
+                choices = v_names,
+                selected = v_names[2]
               )
             )
           ),
@@ -627,22 +596,7 @@ server <- function(input, output, session) {
       }
     },
     content = function(file) {
-      if (input$download_file == 'lev1') {
-        runjs(
-          'document.getElementById("download_data").textContent="Preparing download...";'
-        )
-        shinyjs::disable("download_data")
-        tmpdir <- tempdir()
-        setwd(tempdir())
-        fs <- c('level_1-data.csv', 'level_1-qc.csv')
-        data.table::fwrite(mm1$dt, 'level_1-data.csv')
-        data.table::fwrite(mm1$dt_qc, 'level_1-qc.csv')
-        zip(zipfile = file, files = fs)
-        runjs(
-          'document.getElementById("download_data").textContent="Download";'
-        )
-        shinyjs::enable("download_data")
-      } else if (input$download_file == 'lev2') {
+      if (input$download_file == 'lev2') {
         runjs(
           'document.getElementById("download_data").textContent="Preparing download...";'
         )
@@ -650,8 +604,8 @@ server <- function(input, output, session) {
         tmpdir <- tempdir()
         setwd(tempdir())
         fs <- c('level_2-data.csv', 'level_2-qc.csv')
-        data.table::fwrite(mm2$dt, 'level_2-data.csv')
-        data.table::fwrite(mm2$dt_qc, 'level_2-qc.csv')
+        data.table::fwrite(mm$dt, 'level_2-data.csv')
+        data.table::fwrite(mm$dt_qc, 'level_2-qc.csv')
         zip(zipfile = file, files = fs)
         runjs(
           'document.getElementById("download_data").textContent="Download";'
@@ -665,7 +619,7 @@ server <- function(input, output, session) {
         tmpdir <- tempdir()
         setwd(tempdir())
         fs <- c('ceda-data.csv')
-        df_ceda <- format_for_ceda(mm2)
+        df_ceda <- format_for_ceda(mm)
         data.table::fwrite(df_ceda, 'ceda-data.csv')
         zip(zipfile = file, files = fs)
         runjs(
@@ -676,78 +630,43 @@ server <- function(input, output, session) {
     }
   )
 
-  # Writing validated data to pin---- From main Dashboard
-  observeEvent(input$submitchanges_cloud, {
+  # Writing validated data to file---- From main Dashboard
+  observeEvent(input$submitchanges, {
     # Update button text
     runjs(
-      'document.getElementById("submitchanges_cloud").textContent="Submitting changes...";'
+      'document.getElementById("submitchanges").textContent="Submitting changes...";'
     )
 
     # disable button while working
-    shinyjs::disable("submitchanges_cloud")
+    shinyjs::disable("submitchanges")
     shinyjs::disable("edit_table_cols")
 
     # update lev2 with mm_qry
+    ##* WIP: this labels every row with current user whenever file is saved
+    ##* Should only do this if finished checking all variables.
     mm_qry$dt_qc$validator <- username
 
     # overwrite existing data with changes in query
-    mm2 <<- join(mm2, mm_qry)
+    mm <<- join(mm, mm_qry)
 
-    ##* WIP: temp stop writing to pins
-    # write to pin on Connect server
-    # pin_write(board, mm2, name = "plevy/level2_data", type = "rds")
-
-    # write CEDA formatted data to pin
-    df_ceda <- format_for_ceda(mm2)
-    # pin_write(board, df_ceda, name = "plevy/ceda_data", type = "rds")
-
-    # time_diff <- difftime(
-    #   as.POSIXct(Sys.time()),
-    #   as.POSIXct(pins::pin_meta(board, 'plevy/level2_data')$created),
-    #   units = 'mins'
-    # )
-
-    # if (time_diff < 2) {
-    #   shinyalert(
-    #     title = "Data successfully saved to cloud",
-    #     size = "m",
-    #     closeOnEsc = TRUE,
-    #     closeOnClickOutside = TRUE,
-    #     html = FALSE,
-    #     type = "success",
-    #     showConfirmButton = TRUE,
-    #     showCancelButton = FALSE,
-    #     confirmButtonText = "OK",
-    #     confirmButtonCol = "#AEDEF4",
-    #     timer = 10000,
-    #     imageUrl = "",
-    #     animation = TRUE
-    #   )
-    # } else {
-    #   shinyalert(
-    #     title = "Error saving data",
-    #     text = "Data took over 2 minutes to write. Data may not have saved correctly to the cloud.",
-    #     size = "m",
-    #     closeOnEsc = FALSE,
-    #     closeOnClickOutside = FALSE,
-    #     html = FALSE,
-    #     type = "error",
-    #     showConfirmButton = FALSE,
-    #     showCancelButton = TRUE,
-    #     cancelButtonText = "Cancel",
-    #     timer = 10000,
-    #     imageUrl = "",
-    #     animation = TRUE
-    #   )
-    # }
-
+    # write output to same file as input
+    ##* WIP: save backup copy of input and choose overwrite/restore?
+    saveRDS(
+      mm,
+      file = "P:/NECXXXX_Auchencorth/thoth_PL/UK-AMO/lev2/mm_amo_since_2025_06.rds"
+    )
+    # write CEDA formatted data to file
+    df_ceda <- format_for_ceda(mm)
+    saveRDS(
+      df_ceda,
+      file = "P:/NECXXXX_Auchencorth/thoth_PL/UK-AMO/lev2/df_ceda.rds"
+    )
     # remove button activation and reactivate button
     runjs(
-      'document.getElementById("submitchanges_cloud").textContent="Submit";'
+      'document.getElementById("submitchanges").textContent="Submit";'
     )
-    shinyjs::enable("submitchanges_cloud")
+    shinyjs::enable("submitchanges")
   })
 }
 
 shinyApp(ui, server)
-# }

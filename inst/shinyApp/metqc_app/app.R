@@ -44,6 +44,7 @@ ui <- dashboardPage(
   dashboardSidebar(
     sidebarMenu(
       id = 'tabs',
+      menuItem("Upload", tabName = "upload", icon = icon("upload")),
       menuItem("Dashboard", tabName = "dashboard", icon = icon('database')),
       menuItem("Download", tabName = "download", icon = icon('download')),
       menuItem(
@@ -172,6 +173,16 @@ ui <- dashboardPage(
           )
         ),
       ),
+
+      # upload file tab
+      tabItem(
+        tabName = "upload",
+        fluidPage(
+          mod_upload_ui("upload_module")
+        )
+      ),
+      ###################
+
       tabItem(
         tabName = 'download',
         fluidRow(
@@ -215,6 +226,9 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output, session) {
+  # load mapping for upload module
+  uploaded <- mod_upload_server("upload_module")
+
   ##########################
   #shinyvalidate statements#
   #########################
@@ -275,16 +289,6 @@ server <- function(input, output, session) {
     }
   })
 
-  # output$date_warning <- renderText({
-  #   browser()
-  #   req(input$start_date, input$end_date, input$retrieve_data)
-  #   if (input$end_date < input$start_date) {
-  #     "Warning: End date must not be earlier than start date."
-  #   } else {
-  #     "" # No warning
-  #   }
-  # })
-
   observeEvent(input$ok, {
     removeModal()
     # save the username
@@ -303,10 +307,13 @@ server <- function(input, output, session) {
       file = "P:/NECXXXX_Auchencorth/thoth_PL/UK-AMO/lev2/mm_amo_since_2025_06.rds"
     )
   )
+
+  # mm <- uploaded$mm
   time_name <- mm$dt_meta[type == "time", name_dt]
   v_names <- mm$dt_meta[type != "time" & type != "site", name_dt]
 
-  date_of_first_new_record <- as.POSIXct(Sys.Date() - 225, tz = "UTC")
+  # date_of_first_new_record <- as.POSIXct(Sys.Date() - 225, tz = "UTC")
+  date_of_first_new_record <- mm$dt[, min(get(time_name), na.rm = TRUE)]
   date_of_last_new_record <- mm$dt[, max(get(time_name), na.rm = TRUE)]
 
   v_names_checklist <- reactiveValues()

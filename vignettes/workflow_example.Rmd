@@ -55,7 +55,7 @@ Having downloaded the observation data, we can read it from a file and display
 a few rows.
 
 ```{r}
-fname <- here("data-raw/UK-WHM/whim_met_2002_2023.csv")
+fname <- here("tests/testthat/data-raw/UK-WHM/whim_met_2002_2023.csv")
 dt <- fread(fname)
 dim(dt)
 dt

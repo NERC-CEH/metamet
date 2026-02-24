@@ -7,7 +7,6 @@ library(shinydashboard)
 library(dplyr)
 library(ggplot2)
 library(ggiraph)
-# library(ROracle)
 library(mgcv)
 library(DT)
 library(data.table)
@@ -44,7 +43,18 @@ ui <- dashboardPage(
   dashboardSidebar(
     sidebarMenu(
       id = 'tabs',
-      menuItem("Dashboard", tabName = "dashboard", icon = icon('database')),
+      menuItem("Choose file", tabName = "upload", icon = icon("upload")),
+
+      fileInput(
+        inputId = "file",
+        label = "Open a metamet .rds file",
+        accept = ".rds"
+      ),
+      menuItem(
+        "Choose date range",
+        tabName = "dashboard",
+        icon = icon('database')
+      ),
       menuItem("Download", tabName = "download", icon = icon('download')),
       menuItem(
         "Information",
@@ -71,8 +81,7 @@ ui <- dashboardPage(
             ),
             column(
               width = 6,
-              uiOutput("start_date") #,
-              #textOutput("date_warning")
+              uiOutput("start_date")
             ),
             column(
               width = 3,
@@ -166,11 +175,16 @@ ui <- dashboardPage(
               ),
               uiOutput("impute_extra_info"),
               actionButton("reset", label = "Restart app"),
-              #actionButton("submitchanges", "Submit changes to file"),
               actionButton("submitchanges", "Submit changes")
             ),
           )
         ),
+      ),
+
+      # upload file tab
+      tabItem(
+        tabName = "upload",
+        verbatimTextOutput("status")
       ),
       tabItem(
         tabName = 'download',
@@ -215,6 +229,47 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output, session) {
+  # Non-reactive code
+  # Format the start and end dates----
+  df_proc <- data.frame(
+    start_date = "1995/01/01 00:00",
+    end_date = "2026/12/31 00:00"
+  )
+  df_proc$start_date <- as.POSIXct(
+    df_proc$start_date,
+    format = "%Y/%m/%d %H:%M",
+    tz = "UTC"
+  )
+  df_proc$end_date <- as.POSIXct(Sys.Date() - 2, tz = "UTC")
+
+  # Reactive expression to load the RDS file
+  uploaded <- reactive({
+    req(input$file)
+    mm <- readRDS(input$file$datapath)
+    print(input$file$datapath)
+    time_name <- mm$dt_meta[type == "time", name_dt]
+    v_names <- mm$dt_meta[type != "time" & type != "site", name_dt]
+    date_of_first_new_record <- mm$dt[, min(get(time_name), na.rm = TRUE)]
+    date_of_last_new_record <- mm$dt[, max(get(time_name), na.rm = TRUE)]
+    list(
+      mm = mm,
+      time_name = time_name,
+      v_names = v_names,
+      date_of_first_new_record = date_of_first_new_record,
+      date_of_last_new_record = date_of_last_new_record,
+      fname = input$file$datapath
+    )
+  })
+
+  # Simple status message instead of displaying the object
+  output$status <- renderText({
+    if (is.null(input$file)) {
+      "No file uploaded yet."
+    } else {
+      "RDS file successfully loaded."
+    }
+  })
+
   ##########################
   #shinyvalidate statements#
   #########################
@@ -275,16 +330,6 @@ server <- function(input, output, session) {
     }
   })
 
-  # output$date_warning <- renderText({
-  #   browser()
-  #   req(input$start_date, input$end_date, input$retrieve_data)
-  #   if (input$end_date < input$start_date) {
-  #     "Warning: End date must not be earlier than start date."
-  #   } else {
-  #     "" # No warning
-  #   }
-  # })
-
   observeEvent(input$ok, {
     removeModal()
     # save the username
@@ -296,35 +341,7 @@ server <- function(input, output, session) {
 
   disable('compare_vars')
 
-  # Read in the previously validated data
-  ##* WIP: to be replaced by shiny fileInput dialogue
-  system.time(
-    mm <- readRDS(
-      file = "P:/NECXXXX_Auchencorth/thoth_PL/UK-AMO/lev2/mm_amo_since_2025_06.rds"
-    )
-  )
-  time_name <- mm$dt_meta[type == "time", name_dt]
-  v_names <- mm$dt_meta[type != "time" & type != "site", name_dt]
-
-  date_of_first_new_record <- as.POSIXct(Sys.Date() - 225, tz = "UTC")
-  date_of_last_new_record <- mm$dt[, max(get(time_name), na.rm = TRUE)]
-
   v_names_checklist <- reactiveValues()
-
-  # Format the dates for R----
-  df_proc <- data.frame(
-    start_date = "1995/01/01 00:00",
-    end_date = "2026/12/31 00:00"
-  )
-  df_proc$start_date <- as.POSIXct(
-    df_proc$start_date,
-    format = "%Y/%m/%d %H:%M",
-    tz = "UTC"
-  )
-  df_proc$end_date <- as.POSIXct(Sys.Date() - 2, tz = "UTC")
-  #   df_proc$end_date,
-  #   format = "%Y/%m/%d %H:%M", tz = "UTC"
-  # )
 
   # Create a reactive element with the earliest start date
   first_start_date <- reactive({
@@ -340,8 +357,7 @@ server <- function(input, output, session) {
   output$start_date <- renderUI({
     dateInput(
       "sdate",
-      value = as.Date(date_of_first_new_record, tz = "UTC"),
-      #value = as.Date(date_of_first_new_record, tz = "UTC"),
+      value = as.Date(uploaded()$date_of_first_new_record, tz = "UTC"),
       min = first_start_date(),
       max = last_end_date(),
       label = "Start date"
@@ -352,8 +368,7 @@ server <- function(input, output, session) {
   output$end_date <- renderUI({
     dateInput(
       "edate",
-      value = as.Date(date_of_last_new_record, tz = "UTC"),
-      # value = as.Date(strptime("01/03/2022", "%d/%m/%Y"), tz = "UTC"),
+      value = as.Date(uploaded()$date_of_last_new_record, tz = "UTC"),
       min = first_start_date(),
       max = last_end_date(),
       label = "End date"
@@ -419,15 +434,15 @@ server <- function(input, output, session) {
       selectInput(
         "select_covariate",
         label = h5("Covariate"),
-        choices = v_names
+        choices = uploaded()$v_names
       )
     }
   })
 
   # Data retrieval functionality-----
   observeEvent(input$retrieve_data, {
-    for (i in 1:length(v_names)) {
-      v_names_checklist[[v_names[i]]] <- FALSE
+    for (i in 1:length(uploaded()$v_names)) {
+      v_names_checklist[[uploaded()$v_names[i]]] <- FALSE
     }
 
     # enabling previously disabled buttons
@@ -435,18 +450,17 @@ server <- function(input, output, session) {
     shinyjs::show("validation_calendar_outer")
 
     mm_qry <<- metamet::subset_by_date(
-      mm,
+      uploaded()$mm,
       start_date = df_daterange()$start_date,
       end_date = df_daterange()$end_date
     )
 
     mm_qry$dt$checked <<- as.factor(rownames(mm_qry$dt))
-    ##* WIP: the line below appears to be redundant
-    mm_qry$dt$datect_num <<- as.numeric(mm_qry$dt[, get(time_name)])
+    mm_qry$dt$datect_num <<- as.numeric(mm_qry$dt[, get(uploaded()$time_name)])
 
     # Add a tab to the plotting panel for each variable that has been selected by the user.
     output$mytabs <- renderUI({
-      my_tabs <- lapply(paste(v_names), function(i) {
+      my_tabs <- lapply(paste(uploaded()$v_names), function(i) {
         tabPanel(
           i,
           value = i,
@@ -464,7 +478,7 @@ server <- function(input, output, session) {
     })
 
     observe(
-      lapply(paste(v_names), function(i) {
+      lapply(paste(uploaded()$v_names), function(i) {
         output[[paste0(i, "_interactive_plot")]] <-
           renderGirafe(plotting_function(i))
       })
@@ -500,15 +514,15 @@ server <- function(input, output, session) {
           fluidRow(
             column(
               6,
-              selectInput('x_var', 'X variable:', choices = v_names)
+              selectInput('x_var', 'X variable:', choices = uploaded()$v_names)
             ),
             column(
               6,
               selectInput(
                 'y_var',
                 'Y variable:',
-                choices = v_names,
-                selected = v_names[2]
+                choices = uploaded()$v_names,
+                selected = uploaded()$v_names[1]
               )
             )
           ),
@@ -649,17 +663,36 @@ server <- function(input, output, session) {
     # overwrite existing data with changes in query
     mm <<- join(mm, mm_qry)
 
-    # write output to same file as input
-    ##* WIP: save backup copy of input and choose overwrite/restore?
+    # write output to new file in same location as input
+    ##* WIP: this does not work - input$file$datapath does not return the
+    ##* original path but a temp copy. Needs shinyFiles to do this.
+    fname <- uploaded()$fname
+    print(uploaded()$fname)
     saveRDS(
       mm,
-      file = "P:/NECXXXX_Auchencorth/thoth_PL/UK-AMO/lev2/mm_amo_since_2025_06.rds"
+      file = paste0(
+        fs::path_ext_remove(fname),
+        "_qc_by_",
+        username,
+        "_on_",
+        Sys.Date(),
+        ".",
+        fs::path_ext(fname)
+      )
     )
     # write CEDA formatted data to file
     df_ceda <- format_for_ceda(mm)
     saveRDS(
       df_ceda,
-      file = "P:/NECXXXX_Auchencorth/thoth_PL/UK-AMO/lev2/df_ceda.rds"
+      file = paste0(
+        fs::path_ext_remove(fname),
+        "_qc_by_",
+        username,
+        "_on_",
+        Sys.Date(),
+        "_ceda.",
+        fs::path_ext(fname)
+      )
     )
     # remove button activation and reactivate button
     runjs(

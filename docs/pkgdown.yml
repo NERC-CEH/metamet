@@ -4,11 +4,10 @@ pkgdown_sha: ~
 articles:
   app_user_guide: app_user_guide.html
   gap_fill_methods: gap_fill_methods.html
-  intro: intro.html
-  manuscript: manuscript.html
   metamet: metamet.html
+  openairmaps: openairmaps.html
   workflow_example: workflow_example.html
-last_built: 2026-02-22T09:33Z
+last_built: 2026-02-25T17:09Z
 urls:
   reference: https://nerc-ceh.github.io/metamet/reference
   article: https://nerc-ceh.github.io/metamet/articles

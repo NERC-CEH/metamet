@@ -10,6 +10,10 @@ output: pdf_document
 %\VignetteIndexEntry{manuscript}
 -->
 
+```{r, eval = FALSE, include = FALSE}
+rmarkdown::render("vignettes/gap_fill_methods.Rmd")
+```
+
 The MetQC app uses multiple gap-fill methods to impute data when the recorded data maybe incorrect or unreliable. This document will outline the methods undertaken, by the app, for each gap-fill method.
 
 | QC code value | QC Code | Meaning |

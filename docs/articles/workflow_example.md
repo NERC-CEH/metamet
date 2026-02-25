@@ -34,7 +34,7 @@ Having downloaded the observation data, we can read it from a file and
 display a few rows.
 
 ``` r
-fname <- here("data-raw/UK-WHM/whim_met_2002_2023.csv")
+fname <- here("tests/testthat/data-raw/UK-WHM/whim_met_2002_2023.csv")
 dt <- fread(fname)
 dim(dt)
 #> [1] 736321     14
@@ -130,8 +130,8 @@ knitr::kable(dt_site, format = "html")
 
 | site   | long_name        |      lon |      lat | elev |
 |:-------|:-----------------|---------:|---------:|-----:|
-| UK-AMO | Auchencorth Moss | -3.25000 | 55.75000 |  120 |
-| UK-EBU | Easter Bush      | -3.23000 | 55.74000 |  119 |
+| UK-AMO | Auchencorth Moss | -3.24300 | 55.79230 |  120 |
+| UK-EBU | Easter Bush      | -3.20710 | 55.86740 |  119 |
 | UK-WHM | Whim Moss        | -3.27155 | 55.76566 |  316 |
 
 ### - Create `metamet` object

@@ -18,8 +18,12 @@
   [`mm2`](https://nerc-ceh.github.io/metamet/reference/mm1.md)
   [`mm3`](https://nerc-ceh.github.io/metamet/reference/mm1.md) : Example
   \`metamet\` objects
+- [`network_map()`](https://nerc-ceh.github.io/metamet/reference/network_map.md)
+  : Create a Leaflet Map of Monitoring Network Sites
 - [`pad_data()`](https://nerc-ceh.github.io/metamet/reference/pad_data.md)
   : pad_data
+- [`polar_map()`](https://nerc-ceh.github.io/metamet/reference/polar_map.md)
+  : Create a Polar Plot Map for a Selected Variable
 - [`run_shiny()`](https://nerc-ceh.github.io/metamet/reference/run_shiny.md)
   : Launches the shiny app for the metamet package
 - [`subset_by_date()`](https://nerc-ceh.github.io/metamet/reference/subset_by_date.md)

@@ -14,6 +14,16 @@ knitr::opts_chunk$set(
 )
 ```
 
+You can install the development version of metamet from 
+[GitHub](https://github.com/NERC-CEH/metamet) with:
+
+``` {r, eval = FALSE}
+install.packages("pak")
+pak::pak("NERC-CEH/metamet")
+```
+
+And thereafter:
+
 ```{r setup}
 library(metamet)
 ```

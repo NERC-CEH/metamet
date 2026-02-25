@@ -1,5 +1,7 @@
 # metamet
 
+# metamet
+
 `metamet` is an R package which attempts to solve many of the problems
 encountered in working with meteorological observation data. It provide
 a system for:
@@ -149,8 +151,12 @@ data tables (prefix `dt_`) explained in the table below.
   [`mm2`](https://nerc-ceh.github.io/metamet/reference/mm1.md)
   [`mm3`](https://nerc-ceh.github.io/metamet/reference/mm1.md) : Example
   \`metamet\` objects
+- [`network_map()`](https://nerc-ceh.github.io/metamet/reference/network_map.md)
+  : Create a Leaflet Map of Monitoring Network Sites
 - [`pad_data()`](https://nerc-ceh.github.io/metamet/reference/pad_data.md)
   : pad_data
+- [`polar_map()`](https://nerc-ceh.github.io/metamet/reference/polar_map.md)
+  : Create a Polar Plot Map for a Selected Variable
 - [`run_shiny()`](https://nerc-ceh.github.io/metamet/reference/run_shiny.md)
   : Launches the shiny app for the metamet package
 - [`subset_by_date()`](https://nerc-ceh.github.io/metamet/reference/subset_by_date.md)
@@ -166,9 +172,8 @@ data tables (prefix `dt_`) explained in the table below.
   Guide](https://nerc-ceh.github.io/metamet/articles/app_user_guide.md):
 - [Imputing missing
   data](https://nerc-ceh.github.io/metamet/articles/gap_fill_methods.md):
-- [Vignette
-  Title](https://nerc-ceh.github.io/metamet/articles/intro.md):
-- [manuscript](https://nerc-ceh.github.io/metamet/articles/manuscript.md):
 - [metamet](https://nerc-ceh.github.io/metamet/articles/metamet.md):
+- [Using Openair Mapping
+  Functions](https://nerc-ceh.github.io/metamet/articles/openairmaps.md):
 - [Workflow
   Example](https://nerc-ceh.github.io/metamet/articles/workflow_example.md):

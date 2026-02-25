@@ -1,0 +1,64 @@
+---
+title: "Using Openair Mapping Functions"
+author: "Peter Levy"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using Openair Mapping Functions}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%",
+  warning = FALSE,
+  message = FALSE,
+  fig.show='hold'
+)
+```
+```{r, eval = FALSE, include = FALSE}
+rmarkdown::render("vignettes/openairmaps.Rmd")
+```
+
+This vignette illustrates the use of `openairmaps` to produce a simple 
+interactive leaflet maps showing weather station sites.
+
+
+## Network map
+
+The simplest function is simply to create a network map with the `network_map` 
+function shown below
+
+```{r}
+here::i_am("vignettes/openairmaps.Rmd")
+library(metamet)
+
+fname_site <- here::here("data-raw/dt_site.csv")
+dt_site <- fread(fname_site)
+network_map(dt_site)
+```
+
+## Polar plot maps
+
+We can also create interactive polar plot maps using `polar_map()`.
+The function extracts the appropriate time, wind speed, and wind direction 
+fields from a metamet object, and produces a leaflet-based polar map.
+for a varible `var_name` chosen to be mapped.
+
+```{r}
+fname_dt <- here::here("data-raw/UK-AMO/UK-AMO_BM_dt_2026.csv")
+  fname_meta <- here::here("data-raw/dt_meta.xlsx")
+  fname_site <- here::here("data-raw/dt_site.csv")
+  # half-hourly data
+  mm <- metamet(
+    dt = fname_dt,
+    dt_meta = fname_meta,
+    dt_site = fname_site,
+    site_id = "UK-AMO"
+  )
+  polar_map(mm, var_name = "PA_4_1_1")
+```

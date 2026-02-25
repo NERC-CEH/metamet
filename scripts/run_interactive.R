@@ -15,14 +15,15 @@ usethis::use_build_ignore(c("data-raw"))
 use_tidy_eval()
 use_data_table()
 use_package("data.table", "Depends")
+use_package("ggplot2", "Depends")
 # seems to produce an error with the coalesce_yx argument if we only Import
 use_package("powerjoin", "Imports")
 use_package("fs", "Imports", min_version = "1.5.0")
 use_package("readxl", "Imports")
-use_package("openair", "Imports")
 use_package("lubridate", "Imports")
 use_package("shiny", "Imports")
-use_package("ggplot2", "Depends")
+use_package("openair", "Imports")
+use_package("openairmaps", "Imports")
 
 
 document()
@@ -224,52 +225,3 @@ mm_amo$dt_ref[, which(duplicated(names(mm_amo$dt_ref))) := NULL]
 mmj <- join(mm_amo, mm)
 names(mm)
 names(mm_amo)
-
-polar_map <- function(mm) {
-  dt <- copy(mm$dt)
-  # get the name and format of the time, precip, ws & wd variables
-  time_name <- mm$dt_meta[type == "time", name_dt]
-  precip_name <- mm$dt_meta[type == "precipitation", name_dt]
-  wd_name <- mm$dt_meta[type == "wind direction", name_dt]
-  ws_name <- mm$dt_meta[type == "wind speed" | type == "windspeed", name_dt]
-
-  dt[, date := get(time_name)]
-  dt[, wd := get(wd_name)]
-  dt[, ws := get(ws_name)]
-
-  dt <- dt[mm$dt_site, on = .(site = site)]
-
-  polarMap(
-    dt,
-    pollutant = "PAR",
-    latitude = "lat",
-    longitude = "lon",
-    popup = "site"
-  )
-}
-
-library(leaflet)
-
-network_map <- function(dt_site = mm$dt_site) {
-  library(leaflet)
-  map_data <-
-    dt_site |>
-    # build a popup
-    buildPopup(
-      latitude = "lat",
-      longitude = "lon",
-      columns = c(
-        "AURN Code" = "long_name",
-        "Name" = "site",
-        "Site Type" = "elev"
-      )
-    ) |>
-    # get unique sites
-    dplyr::distinct(site, .keep_all = TRUE)
-
-  # create a basic leaflet map
-  leaflet(map_data) |>
-    addTiles() |>
-    addMarkers(popup = ~popup)
-}
-network_map(dt_site)

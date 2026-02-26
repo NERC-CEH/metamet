@@ -77,23 +77,23 @@ columns.
 knitr::kable(dt_meta[site == "UK-WHM", ..v_col], format = "html")
 ```
 
-| site | name_dt | standard_name | long_name | units | type | time_char_format | range_min | range_max | standard_name_era5 | era5_units | imputation_method |
-|:---|:---|:---|:---|:---|:---|:---|---:|---:|:---|:---|:---|
-| UK-WHM | site | site | site | NA | site | NA | NA | NA | site | NA | era5 |
-| UK-WHM | Timestamp | DATECT | timestamp | NA | time | %d/%m/%Y %H:%M | 0 | 0 | time | NA | era5 |
-| UK-WHM | Rain | P | Precipitation | mm | precipitation | NA | 0 | 50 | tp | mm | era5 |
-| UK-WHM | LWS | LWS | Leaf Wetness | dimensionless | arbitrary | NA | -99999 | 99999 | rh | 1 | era5 |
-| UK-WHM | AirT | TA | Air temperature | degree_C | temperature | NA | -40 | 50 | t2m | degree_C | era5 |
-| UK-WHM | RH | RH | Relative humidity | percent | humidity | NA | 30 | 120 | rh | percent | era5 |
-| UK-WHM | PAR | PPFD_IN | Photosynthetic photon flux density incoming | micromol / m^2 / s | energy flux | NA | 0 | 2200 | ssrd | micromol / m^2 / s | era5 |
-| UK-WHM | Total_solar | SW_IN | Shortwave incoming radiation | W / m^2 | energy flux | NA | 0 | 1200 | ssrd | W / m^2 | era5 |
-| UK-WHM | Net_rad | RN | Net radiation | W / m^2 | energy flux | NA | -500 | 1200 | rn | W / m^2 | era5 |
-| UK-WHM | WS | WS | Wind speed | m / s | wind speed | NA | 0 | 30 | ws | m / s | era5 |
-| UK-WHM | WD | WD | Wind direction | degree | wind direction | NA | 0 | 360 | wd | degree | era5 |
-| UK-WHM | Soil_VWC | SWC | Soil water content | percent | soil moisture | NA | 0 | 100 | swvl1 | percent | era5 |
-| UK-WHM | Soil_T1 | TS | Soil temperature | degree_C | temperature | NA | -20 | 50 | stl1 | degree_C | era5 |
-| UK-WHM | Soil_T2 | TS | Soil temperature | degree_C | temperature | NA | -20 | 50 | stl1 | degree_C | era5 |
-| UK-WHM | WTD | WTD | Water table depth | cm | height | NA | -10 | 10 | swvl1 | m | era5 |
+| site | name_dt | name_local | units_local | type | time_char_format | range_min | range_max | name_era5 | units_era5 | imputation_method |
+|:---|:---|:---|:---|:---|:---|---:|---:|:---|:---|:---|
+| UK-WHM | site | site | NA | site | NA | NA | NA | site | NA | era5 |
+| UK-WHM | Timestamp | Timestamp | NA | time | %d/%m/%Y %H:%M | NA | NA | time | NA | NA |
+| UK-WHM | Rain | Rain | mm | precipitation | NA | 0 | 50 | tp | mm | era5 |
+| UK-WHM | LWS | LWS | dimensionless | arbitrary | NA | -99999 | 99999 | rh | 1 | era5 |
+| UK-WHM | AirT | AirT | degree_C | temperature | NA | -40 | 50 | t2m | degree_C | era5 |
+| UK-WHM | RH | RH | percent | humidity | NA | 30 | 120 | rh | percent | era5 |
+| UK-WHM | PAR | PAR | micromol / m^2 / s | energy flux | NA | 0 | 2200 | ssrd | micromol / m^2 / s | era5 |
+| UK-WHM | Total_solar | Total_solar | W / m^2 | energy flux | NA | 0 | 1200 | ssrd | W / m^2 | era5 |
+| UK-WHM | Net_rad | Net_rad | W / m^2 | energy flux | NA | -500 | 1200 | rn | W / m^2 | era5 |
+| UK-WHM | WS | WS | m / s | wind speed | NA | 0 | 30 | ws | m / s | era5 |
+| UK-WHM | WD | WD | degree | wind direction | NA | 0 | 360 | wd | degree | era5 |
+| UK-WHM | Soil_VWC | Soil_VWC | percent | soil moisture | NA | 0 | 100 | swvl1 | percent | era5 |
+| UK-WHM | Soil_T1 | Soil_T1 | degree_C | temperature | NA | -20 | 50 | stl1 | degree_C | era5 |
+| UK-WHM | Soil_T2 | Soil_T2 | degree_C | temperature | NA | -20 | 50 | stl1 | degree_C | era5 |
+| UK-WHM | WTD | WTD | cm | height | NA | -10 | 10 | swvl1 | m | era5 |
 
 ### Site data `dt_site`
 

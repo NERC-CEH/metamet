@@ -1,6 +1,7 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://nerc-ceh.github.io/metamet/404.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/articles/app_user_guide.html</loc></url>
+<url><loc>https://nerc-ceh.github.io/metamet/articles/changing_names.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/articles/gap_fill_methods.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/articles/index.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/articles/intro.html</loc></url>
@@ -15,6 +16,7 @@
 <url><loc>https://nerc-ceh.github.io/metamet/news/index.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/add_era5.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/apply_qc.html</loc></url>
+<url><loc>https://nerc-ceh.github.io/metamet/reference/change_naming_convention.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/detect_gaps.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/impute.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/index.html</loc></url>

@@ -6,6 +6,8 @@
   : Add ERA5 reference data to a \`metamet\` object
 - [`apply_qc()`](https://nerc-ceh.github.io/metamet/reference/apply_qc.md)
   : Apply Quality Control Checks to Meteorological Data
+- [`change_naming_convention()`](https://nerc-ceh.github.io/metamet/reference/change_naming_convention.md)
+  : Change the naming convention of measurement variables
 - [`detect_gaps()`](https://nerc-ceh.github.io/metamet/reference/detect_gaps.md)
   : detect_gaps
 - [`impute()`](https://nerc-ceh.github.io/metamet/reference/impute.md) :

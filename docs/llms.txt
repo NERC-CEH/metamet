@@ -139,6 +139,8 @@ data tables (prefix `dt_`) explained in the table below.
   : Add ERA5 reference data to a \`metamet\` object
 - [`apply_qc()`](https://nerc-ceh.github.io/metamet/reference/apply_qc.md)
   : Apply Quality Control Checks to Meteorological Data
+- [`change_naming_convention()`](https://nerc-ceh.github.io/metamet/reference/change_naming_convention.md)
+  : Change the naming convention of measurement variables
 - [`detect_gaps()`](https://nerc-ceh.github.io/metamet/reference/detect_gaps.md)
   : detect_gaps
 - [`impute()`](https://nerc-ceh.github.io/metamet/reference/impute.md) :
@@ -171,6 +173,8 @@ data tables (prefix `dt_`) explained in the table below.
 - [metamet](https://nerc-ceh.github.io/metamet/articles/metamet.md):
 - [Workflow
   Example](https://nerc-ceh.github.io/metamet/articles/workflow_example.md):
+- [Change the naming convention of measurement
+  variables](https://nerc-ceh.github.io/metamet/articles/changing_names.md):
 - [Imputing missing
   data](https://nerc-ceh.github.io/metamet/articles/gap_fill_methods.md):
 - [Using Openair Mapping

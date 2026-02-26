@@ -1,4 +1,4 @@
-test_that("subsetting by date works", {
+test_that("changing naming convention works", {
   # mm without qc or ref
   dim(mm1$dt)
   dim(mm1$dt_qc)

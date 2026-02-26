@@ -40,6 +40,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/workflow_example.html">Workflow Example</a></li>
+    <li><a class="dropdown-item" href="../articles/changing_names.html">Change the naming convention of measurement variables</a></li>
     <li><a class="dropdown-item" href="../articles/gap_fill_methods.html">Imputing missing data</a></li>
     <li><a class="dropdown-item" href="../articles/openairmaps.html">Using Openair Mapping Functions</a></li>
     <li><a class="dropdown-item" href="../articles/app_user_guide.html">metqc app User Guide</a></li>
@@ -66,7 +67,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Workflow Example</h1>
                         <h4 data-toc-skip class="author">Peter Levy</h4>
             
-            <h4 data-toc-skip class="date">2026-02-25</h4>
+            <h4 data-toc-skip class="date">2026-02-26</h4>
       
 
       <div class="d-none name"><code>workflow_example.Rmd</code></div>
@@ -154,13 +155,10 @@ site
 name_dt
 </th>
 <th style="text-align:left;">
-standard_name
+name_local
 </th>
 <th style="text-align:left;">
-long_name
-</th>
-<th style="text-align:left;">
-units
+units_local
 </th>
 <th style="text-align:left;">
 type
@@ -175,10 +173,10 @@ range_min
 range_max
 </th>
 <th style="text-align:left;">
-standard_name_era5
+name_era5
 </th>
 <th style="text-align:left;">
-era5_units
+units_era5
 </th>
 <th style="text-align:left;">
 imputation_method
@@ -188,9 +186,6 @@ imputation_method
 <tr>
 <td style="text-align:left;">
 UK-WHM
-</td>
-<td style="text-align:left;">
-site
 </td>
 <td style="text-align:left;">
 site
@@ -231,10 +226,7 @@ UK-WHM
 Timestamp
 </td>
 <td style="text-align:left;">
-DATECT
-</td>
-<td style="text-align:left;">
-timestamp
+Timestamp
 </td>
 <td style="text-align:left;">
 NA
@@ -246,10 +238,10 @@ time
 %d/%m/%Y %H:%M
 </td>
 <td style="text-align:right;">
-0
+NA
 </td>
 <td style="text-align:right;">
-0
+NA
 </td>
 <td style="text-align:left;">
 time
@@ -258,7 +250,7 @@ time
 NA
 </td>
 <td style="text-align:left;">
-era5
+NA
 </td>
 </tr>
 <tr>
@@ -269,10 +261,7 @@ UK-WHM
 Rain
 </td>
 <td style="text-align:left;">
-P
-</td>
-<td style="text-align:left;">
-Precipitation
+Rain
 </td>
 <td style="text-align:left;">
 mm
@@ -310,9 +299,6 @@ LWS
 LWS
 </td>
 <td style="text-align:left;">
-Leaf Wetness
-</td>
-<td style="text-align:left;">
 dimensionless
 </td>
 <td style="text-align:left;">
@@ -345,10 +331,7 @@ UK-WHM
 AirT
 </td>
 <td style="text-align:left;">
-TA
-</td>
-<td style="text-align:left;">
-Air temperature
+AirT
 </td>
 <td style="text-align:left;">
 degree_C
@@ -386,9 +369,6 @@ RH
 RH
 </td>
 <td style="text-align:left;">
-Relative humidity
-</td>
-<td style="text-align:left;">
 percent
 </td>
 <td style="text-align:left;">
@@ -421,10 +401,7 @@ UK-WHM
 PAR
 </td>
 <td style="text-align:left;">
-PPFD_IN
-</td>
-<td style="text-align:left;">
-Photosynthetic photon flux density incoming
+PAR
 </td>
 <td style="text-align:left;">
 micromol / m^2 / s
@@ -459,10 +436,7 @@ UK-WHM
 Total_solar
 </td>
 <td style="text-align:left;">
-SW_IN
-</td>
-<td style="text-align:left;">
-Shortwave incoming radiation
+Total_solar
 </td>
 <td style="text-align:left;">
 W / m^2
@@ -497,10 +471,7 @@ UK-WHM
 Net_rad
 </td>
 <td style="text-align:left;">
-RN
-</td>
-<td style="text-align:left;">
-Net radiation
+Net_rad
 </td>
 <td style="text-align:left;">
 W / m^2
@@ -538,9 +509,6 @@ WS
 WS
 </td>
 <td style="text-align:left;">
-Wind speed
-</td>
-<td style="text-align:left;">
 m / s
 </td>
 <td style="text-align:left;">
@@ -576,9 +544,6 @@ WD
 WD
 </td>
 <td style="text-align:left;">
-Wind direction
-</td>
-<td style="text-align:left;">
 degree
 </td>
 <td style="text-align:left;">
@@ -611,10 +576,7 @@ UK-WHM
 Soil_VWC
 </td>
 <td style="text-align:left;">
-SWC
-</td>
-<td style="text-align:left;">
-Soil water content
+Soil_VWC
 </td>
 <td style="text-align:left;">
 percent
@@ -649,10 +611,7 @@ UK-WHM
 Soil_T1
 </td>
 <td style="text-align:left;">
-TS
-</td>
-<td style="text-align:left;">
-Soil temperature
+Soil_T1
 </td>
 <td style="text-align:left;">
 degree_C
@@ -687,10 +646,7 @@ UK-WHM
 Soil_T2
 </td>
 <td style="text-align:left;">
-TS
-</td>
-<td style="text-align:left;">
-Soil temperature
+Soil_T2
 </td>
 <td style="text-align:left;">
 degree_C
@@ -726,9 +682,6 @@ WTD
 </td>
 <td style="text-align:left;">
 WTD
-</td>
-<td style="text-align:left;">
-Water table depth
 </td>
 <td style="text-align:left;">
 cm

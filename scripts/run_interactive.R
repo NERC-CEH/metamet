@@ -31,7 +31,10 @@ pkgload::load_all()
 devtools::test()
 build(vignettes = FALSE)
 check(vignettes = FALSE)
+install(".")
 pkgload::load_all()
+detach("package:metamet", unload = TRUE)
+build_site()
 
 run_shiny()
 

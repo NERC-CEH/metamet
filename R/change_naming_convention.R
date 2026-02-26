@@ -39,11 +39,16 @@
 #' @export
 change_naming_convention <- function(mm_in, name_convention = "name_era5") {
   mm <- copy(mm_in)
-
-  v_cols_id <- c("horizontal_id", "vertical_id", "replicate_id")
+  names(mm$dt_meta)
+  # v_cols_id <- c("horizontal_id", "vertical_id", "replicate_id")
   v_cols <- c(name_convention, "horizontal_id", "vertical_id", "replicate_id")
 
-  mm$dt_meta[, eval(v_cols_id) := lapply(.SD, as.integer), .SDcols = v_cols_id]
+  # replace non-numeric values with 0
+
+  # mm$dt_meta[, eval(v_cols_id) := lapply(.SD, as.integer), .SDcols = v_cols_id]
+  mm$dt_meta[horizontal_id == "NA", horizontal_id := NA]
+  mm$dt_meta[vertical_id == "NA", vertical_id := NA]
+  mm$dt_meta[replicate_id == "NA", replicate_id := NA]
 
   mm$dt_meta[, new_names := get(name_convention)]
 

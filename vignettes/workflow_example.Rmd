@@ -73,9 +73,8 @@ dt_meta <- setDT(readxl::read_excel(fname))
 v_col <- c(
   "site",
   "name_dt",
-  "standard_name",
-  "long_name",
-  "units",
+  "name_local",
+  "units_local",
   "type",
   "time_char_format",
   # "start_date",
@@ -91,8 +90,8 @@ v_col <- c(
   # "sensor_model",
   "range_min",
   "range_max",
-  "standard_name_era5",
-  "era5_units",
+  "name_era5",
+  "units_era5",
   "imputation_method"
 )
 ```

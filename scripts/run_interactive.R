@@ -178,17 +178,17 @@ mm
 setnames(
   mm$dt,
   mm$dt_meta[site == "UK-WHM", name_dt],
-  mm$dt_meta[site == "UK-WHM", standard_name]
+  mm$dt_meta[site == "UK-WHM", name_icos]
 )
 setnames(
   mm$dt_qc,
   mm$dt_meta[site == "UK-WHM", name_dt],
-  mm$dt_meta[site == "UK-WHM", standard_name]
+  mm$dt_meta[site == "UK-WHM", name_icos]
 )
 setnames(
   mm$dt_ref,
   mm$dt_meta[site == "UK-WHM", name_dt],
-  mm$dt_meta[site == "UK-WHM", standard_name]
+  mm$dt_meta[site == "UK-WHM", name_icos]
 )
 mm$dt[, which(duplicated(names(mm$dt))) := NULL]
 mm$dt_qc[, which(duplicated(names(mm$dt_qc))) := NULL]
@@ -205,17 +205,17 @@ names(mm_amo$dt_ref)
 setnames(
   mm_amo$dt,
   mm_amo$dt_meta[site == "UK-AMO", name_dt],
-  mm_amo$dt_meta[site == "UK-AMO", standard_name]
+  mm_amo$dt_meta[site == "UK-AMO", name_icos]
 )
 setnames(
   mm_amo$dt_qc,
   mm_amo$dt_meta[site == "UK-AMO", name_dt],
-  mm_amo$dt_meta[site == "UK-AMO", standard_name]
+  mm_amo$dt_meta[site == "UK-AMO", name_icos]
 )
 setnames(
   mm_amo$dt_ref,
   mm_amo$dt_meta[site == "UK-AMO", name_dt],
-  mm_amo$dt_meta[site == "UK-AMO", standard_name]
+  mm_amo$dt_meta[site == "UK-AMO", name_icos]
 )
 mm_amo$dt[, which(duplicated(names(mm_amo$dt))) := NULL]
 mm_amo$dt_qc[, which(duplicated(names(mm_amo$dt_qc))) := NULL]

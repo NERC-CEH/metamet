@@ -3,6 +3,7 @@ library(shinydashboard)
 library(shinyjs)
 library(shinyvalidate)
 library(ggiraph)
+getwd()
 
 # Set the gap-filling methods and codes----
 gf_choices <- setNames(df_method$method, df_method$method_longname)
@@ -461,7 +462,7 @@ server <- function(input, output, session) {
     observe(
       lapply(paste(uploaded()$v_names), function(i) {
         output[[paste0(i, "_interactive_plot")]] <-
-          renderGirafe(ggiraph_plot(i))
+          renderGirafe(metamet::ggiraph_plot(i))
       })
     )
 
@@ -548,7 +549,7 @@ server <- function(input, output, session) {
       # Creating a reactive plot that will be plotted depending on the tab selected in plotTabs
       plot_selected <- reactive({
         req(input$plotTabs)
-        ggiraph_plot(input$plotTabs)
+        metamet::ggiraph_plot(input$plotTabs)
       })
       # Re-render
       output[[paste0(

@@ -1,27 +1,7 @@
-library(metamet)
-library(here)
-library(shiny)
-library(shinyWidgets)
-library(shinyjs)
 library(shinydashboard)
-library(dplyr)
-library(ggplot2)
-library(ggiraph)
-library(mgcv)
-library(DT)
-library(data.table)
-library(lubridate)
-library(ggExtra)
-library(openair)
-library(powerjoin)
-library(pins)
-library(glue)
-library(shinycssloaders)
-library(shinyalert)
-library(stringr)
-library(forcats)
+library(shinyjs)
 library(shinyvalidate)
-library(markdown)
+library(ggiraph)
 
 # Set the gap-filling methods and codes----
 gf_choices <- setNames(df_method$method, df_method$method_longname)
@@ -211,12 +191,12 @@ ui <- dashboardPage(
         tabName = "information",
       ),
       tabItem(
-        tabName = "gapfill_guide",
-        includeMarkdown(here::here("vignettes/gap_fill_methods.md"))
+        tabName = "gapfill_guide"
+        # includeMarkdown(here::here("vignettes/gap_fill_methods.md"))
       ),
       tabItem(
-        tabName = "app_guide",
-        includeMarkdown(here::here("vignettes/app_user_guide.md"))
+        tabName = "app_guide"
+        # includeMarkdown(here::here("vignettes/app_user_guide.md"))
       ) # ,
       # tabItem(
       #   tabName = "data_guide",
@@ -378,11 +358,11 @@ server <- function(input, output, session) {
   # Create a dataframe with the start and end dates,
   df_daterange <- eventReactive(input$retrieve_data, {
     start_date_ch <- paste(
-      sprintf("%02d", day(input$sdate)),
+      sprintf("%02d", lubridate::day(input$sdate)),
       "/",
-      sprintf("%02d", month(input$sdate)),
+      sprintf("%02d", lubridate::month(input$sdate)),
       "/",
-      year(input$sdate),
+      lubridate::year(input$sdate),
       " ",
       sprintf("%02d", input$shour),
       ":",
@@ -394,11 +374,11 @@ server <- function(input, output, session) {
       tz = "UTC"
     )
     end_date_ch <- paste(
-      sprintf("%02d", day(input$edate)),
+      sprintf("%02d", lubridate::day(input$edate)),
       "/",
-      sprintf("%02d", month(input$edate)),
+      sprintf("%02d", lubridate::month(input$edate)),
       "/",
-      year(input$edate),
+      lubridate::year(input$edate),
       " ",
       sprintf("%02d", input$ehour),
       ":",

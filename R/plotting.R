@@ -36,7 +36,7 @@ plotting_function <- function(input_variable) {
     geom_point_interactive(
       aes(
         data_id = checked,
-        tooltip = glue("Timestamp: {DATECT}\nMeasure: {y}"),
+        tooltip = glue::glue("Timestamp: {DATECT}\nMeasure: {y}"),
         colour = factor(method_longname)
       ),
       size = 3

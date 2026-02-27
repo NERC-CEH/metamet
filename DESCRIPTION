@@ -28,6 +28,18 @@ Imports:
     readxl,
     powerjoin,
     shiny,
-    openairmaps
+    openairmaps,
+    mgcv,
+    dplyr,
+    leaflet,
+    forcats,
+    ggExtra,
+    utils,
+    here,
+    shinycssloaders,
+    shinyjs,
+    glue,
+    shinydashboard,
+    shinyvalidate
 Config/testthat/edition: 3
 URL: https://nerc-ceh.github.io/metamet/

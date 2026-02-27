@@ -461,14 +461,14 @@ server <- function(input, output, session) {
     observe(
       lapply(paste(uploaded()$v_names), function(i) {
         output[[paste0(i, "_interactive_plot")]] <-
-          renderGirafe(metamet::plotting_function(i))
+          renderGirafe(plotting_function(i))
       })
     )
 
     # Creating a calendar heatmap plot that will be plotted depending on the tab selected in plotTabs
     heatmap_plot_selected <- reactive({
       req(input$plotTabs)
-      metamet::plot_heatmap_calendar(mm_qry$dt_qc)
+      plot_heatmap_calendar(mm_qry$dt_qc)
     })
 
     output$heatmap_plot <- renderPlot(heatmap_plot_selected())
@@ -548,7 +548,7 @@ server <- function(input, output, session) {
       # Creating a reactive plot that will be plotted depending on the tab selected in plotTabs
       plot_selected <- reactive({
         req(input$plotTabs)
-        metamet::plotting_function(input$plotTabs)
+        plotting_function(input$plotTabs)
       })
       # Re-render
       output[[paste0(

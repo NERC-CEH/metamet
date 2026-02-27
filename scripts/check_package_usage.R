@@ -38,6 +38,7 @@ use_package('shinyjs', 'Imports')
 # manually added
 use_package('shinydashboard', 'Imports')
 use_package('shinyvalidate', 'Imports')
+use_package('ggiraph', 'Imports')
 use_package('glue', 'Imports') # used in one line only - should perhaps replace
 
 pkg_remove(pkg)

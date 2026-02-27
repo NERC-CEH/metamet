@@ -1,4 +1,5 @@
 library(metamet)
+library(dplyr)
 library(shinydashboard)
 library(shinyjs)
 library(shinyvalidate)

@@ -461,7 +461,7 @@ server <- function(input, output, session) {
     observe(
       lapply(paste(uploaded()$v_names), function(i) {
         output[[paste0(i, "_interactive_plot")]] <-
-          renderGirafe(plotting_function(i))
+          renderGirafe(ggiraph_plot(i))
       })
     )
 
@@ -548,7 +548,7 @@ server <- function(input, output, session) {
       # Creating a reactive plot that will be plotted depending on the tab selected in plotTabs
       plot_selected <- reactive({
         req(input$plotTabs)
-        plotting_function(input$plotTabs)
+        ggiraph_plot(input$plotTabs)
       })
       # Re-render
       output[[paste0(

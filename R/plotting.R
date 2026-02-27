@@ -1,15 +1,14 @@
 #' Custom plotting function for each variable
 #'
 
-#' @title plotting_function
+#' @title ggiraph_plot
 #' @description Creates an interactive girafe plot, whereby the user can select
 #'   points with dubious quality and impute new values.
 #' @param input_variable The name of the variable within the query data frame to plot.
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
-#' @keywords internal
-#' @noRd
-plotting_function <- function(input_variable) {
+#' @export
+ggiraph_plot <- function(input_variable) {
   df <- data.frame(
     DATECT = mm_qry$dt$DATECT,
     y = mm_qry$dt[, ..input_variable][[1]],
@@ -70,8 +69,7 @@ plotting_function <- function(input_variable) {
 #' @param df A data frame of met data
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
-#' @keywords internal
-#' @noRd
+#' @export
 plot_heatmap_calendar <- function(df) {
   # Transforming query dataframe with lubridate to fit the format needed for a heatmap calendar
   df <- df %>%

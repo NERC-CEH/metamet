@@ -26,8 +26,7 @@
 ##' @seealso
 ##'   \code{\link{add_era5}} for an application converting ERA5 precipitation
 ##'
-##' @keywords internal
-##' @noRd
+#' @export
 convert_sum_to_rate <- function(
   dt,
   v_var_to_convert = NA, # c("P_12_1_1", "LWS_4_1_2"),

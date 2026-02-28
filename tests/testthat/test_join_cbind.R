@@ -2,8 +2,12 @@
 # adding columns as a full join; we might want to add an option to restrict to left join
 
 test_that("joining metamet objects works", {
-  fname_dt1 <- testthat::test_path("data-raw/UK-AMo_BM_20260126_L04_F01.dat")
-  fname_dt2 <- testthat::test_path("data-raw/UK-AMo_BM_20260126_L04_F02.dat")
+  fname_dt1 <- testthat::test_path(
+    "data-raw/UK-AMO/UK-AMO_BM_20260126_L04_F01.dat"
+  )
+  fname_dt2 <- testthat::test_path(
+    "data-raw/UK-AMO/UK-AMO_BM_20260126_L04_F02.dat"
+  )
   fname_meta <- testthat::test_path("data-raw/dt_meta.xlsx")
   fname_site <- testthat::test_path("data-raw/dt_site.csv")
   mm1 <- metamet(

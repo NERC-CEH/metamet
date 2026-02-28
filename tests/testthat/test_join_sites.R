@@ -1,7 +1,7 @@
 # test the helper constructor function with file paths as argument
 # also testing handling time variables with different names in different files
 
-test_that("reading metamet from files from Whim works", {
+test_that("joining metamet from different sites works", {
   fname_dt <- testthat::test_path("data-raw/UK-WHM/whim_met_2002_2023.csv")
   fname_meta <- testthat::test_path("data-raw/dt_meta.xlsx")
   fname_site <- testthat::test_path("data-raw/dt_site.csv")

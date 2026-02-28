@@ -2,8 +2,8 @@
 # in the case of two consectutive time periods, we are just adding rows
 
 test_that("joining metamet objects works", {
-  fname_dt1 <- testthat::test_path("data-raw/UK-AMO_BM_dt_2025.csv")
-  fname_dt2 <- testthat::test_path("data-raw/UK-AMO_BM_dt_2026.csv")
+  fname_dt1 <- testthat::test_path("data-raw/UK-AMO/UK-AMO_BM_dt_2025.csv")
+  fname_dt2 <- testthat::test_path("data-raw/UK-AMO/UK-AMO_BM_dt_2026.csv")
   fname_meta <- testthat::test_path("data-raw/dt_meta.xlsx")
   fname_site <- testthat::test_path("data-raw/dt_site.csv")
   mm1 <- metamet(

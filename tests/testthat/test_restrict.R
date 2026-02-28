@@ -3,7 +3,7 @@
 # 2. dt_site only has sites that exist in dt and v.v.
 
 test_that("restrict function works", {
-  fname_dt <- testthat::test_path("data-raw/UK-AMO_BM_dt_2026.csv")
+  fname_dt <- testthat::test_path("data-raw/UK-AMO/UK-AMO_BM_dt_2026.csv")
   fname_meta <- testthat::test_path("data-raw/dt_meta.xlsx")
   fname_site <- testthat::test_path("data-raw/dt_site.csv")
   mm <- metamet(

@@ -15,8 +15,8 @@ test_that("subsetting by date works", {
   dim(mm_s1$dt_ref)
 
   # read a year's data with qc and ref data
-  fname_dt <- testthat::test_path("data-raw/UK-AMO_BM_dt_2025.csv")
-  fname_qc <- testthat::test_path("data-raw/UK-AMO_BM_qc_2025.csv")
+  fname_dt <- testthat::test_path("data-raw/UK-AMO/UK-AMO_BM_dt_2025.csv")
+  fname_qc <- testthat::test_path("data-raw/UK-AMO/UK-AMO_BM_qc_2025.csv")
   fname_meta <- testthat::test_path("data-raw/dt_meta.xlsx")
   fname_site <- testthat::test_path("data-raw/dt_site.csv")
   fname_era5 <- testthat::test_path("data-raw/dt_era5.csv")

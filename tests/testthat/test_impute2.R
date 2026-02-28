@@ -2,9 +2,15 @@
 # also testing handling time variables with different names in different files
 
 test_that("applying imputing works for more files", {
-  fname_dt_32 <- testthat::test_path("data-raw/UK-AMo_BM_20250822_L03_F02.dat")
-  fname_dt_41 <- testthat::test_path("data-raw/UK-AMo_BM_20250822_L04_F01.dat")
-  fname_dt_42 <- testthat::test_path("data-raw/UK-AMo_BM_20250822_L04_F02.dat")
+  fname_dt_32 <- testthat::test_path(
+    "data-raw/UK-AMO/UK-AMO_BM_20250822_L03_F02.dat"
+  )
+  fname_dt_41 <- testthat::test_path(
+    "data-raw/UK-AMO/UK-AMO_BM_20250822_L04_F01.dat"
+  )
+  fname_dt_42 <- testthat::test_path(
+    "data-raw/UK-AMO/UK-AMO_BM_20250822_L04_F02.dat"
+  )
   fname_meta <- testthat::test_path("data-raw/dt_meta.xlsx")
   fname_site <- testthat::test_path("data-raw/dt_site.csv")
   fname_era5 <- testthat::test_path("data-raw/dt_era5.csv")

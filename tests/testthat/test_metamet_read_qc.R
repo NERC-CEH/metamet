@@ -2,10 +2,10 @@
 # also testing handling time variables with different names in different files
 
 test_that("reading metamet from files with QC works", {
-  fname_dt1 <- testthat::test_path("data-raw/UK-AMO_BM_dt_2025.csv")
-  fname_qc1 <- testthat::test_path("data-raw/UK-AMO_BM_qc_2025.csv")
-  fname_dt2 <- testthat::test_path("data-raw/UK-AMO_BM_dt_2026.csv")
-  fname_qc2 <- testthat::test_path("data-raw/UK-AMO_BM_qc_2026.csv")
+  fname_dt1 <- testthat::test_path("data-raw/UK-AMO/UK-AMO_BM_dt_2025.csv")
+  fname_qc1 <- testthat::test_path("data-raw/UK-AMO/UK-AMO_BM_qc_2025.csv")
+  fname_dt2 <- testthat::test_path("data-raw/UK-AMO/UK-AMO_BM_dt_2026.csv")
+  fname_qc2 <- testthat::test_path("data-raw/UK-AMO/UK-AMO_BM_qc_2026.csv")
   fname_meta <- testthat::test_path("data-raw/dt_meta.xlsx")
   fname_site <- testthat::test_path("data-raw/dt_site.csv")
   # half-hourly data

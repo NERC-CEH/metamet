@@ -2,68 +2,65 @@
 # also testing handling time variables with different names in different files
 
 test_that("joining metamet from different sites works", {
-  fname_dt <- testthat::test_path("data-raw/UK-WHM/whim_met_2002_2023.csv")
-  fname_meta <- testthat::test_path("data-raw/dt_meta.xlsx")
-  fname_site <- testthat::test_path("data-raw/dt_site.csv")
-  fname_era5 <- testthat::test_path("data-raw/UK-WHM/dt_era5.csv")
+  mm_amo <- readRDS(
+    file = testthat::test_path("data-raw/UK-AMO/UK-AMO_BM_mm_2023.rds")
+  )
+  mm_ebu <- readRDS(
+    file = testthat::test_path("data-raw/UK-EBU/UK-EBU_BM_mm_2023.rds")
+  )
+  mm_whm <- readRDS(
+    file = testthat::test_path("data-raw/UK-WHM/UK-WHM_BM_mm_2023.rds")
+  )
 
-  dt <- fread(fname_dt)
-  dt_site <- fread(fname_site)
-  dt_meta <- setDT(readxl::read_excel(fname_meta))
+  mm_amo <- subset_by_date(mm_amo, "2023-09-01", "2023-09-02")
+  mm_ebu <- subset_by_date(mm_ebu, "2023-09-01", "2023-09-02")
+  mm_whm <- subset_by_date(mm_whm, "2023-09-01", "2023-09-02")
 
-  mm <- metamet(
-    dt = dt,
-    dt_meta = dt_meta,
-    dt_site = dt_site,
-    site_id = "UK-WHM"
+  mm_whm <- change_naming_convention(mm_whm, name_convention = "name_icos")
+
+  mm_amo <- reshape_wide_to_long(mm_amo)
+  mm_ebu <- reshape_wide_to_long(mm_ebu)
+  mm_whm <- reshape_wide_to_long(mm_whm)
+
+  dim(mm_amo$dt)
+  dim(mm_ebu$dt)
+  dim(mm_whm$dt)
+
+  mm <- rbind_metamet(
+    mm_amo,
+    l_dt = list(mm_amo$dt, mm_ebu$dt, mm_whm$dt),
+    l_dt_meta = list(mm_amo$dt_meta, mm_ebu$dt_meta, mm_whm$dt_meta),
+    l_dt_site = list(mm_amo$dt_site, mm_ebu$dt_site, mm_whm$dt_site)
   )
   dim(mm$dt)
+  names(mm$dt)
 
-  mm <- subset_by_date(
-    mm,
-    start_date = "2022-01-01 00:30:00",
-    end_date = "2022-12-31 00:00:00"
+  p <- ggplot(
+    mm$dt[name_icos == "TS", ],
+    aes(TIMESTAMP, value, colour = var_name)
   )
+  p <- p + geom_point()
+  p <- p + geom_line(aes(y = ref), colour = "black")
+  p <- p + facet_wrap(~site)
 
-  mm <- time_average(mm, avg.time = "1 hour", extra_rows = 3)
-
-  dim(mm$dt)
-
-  mm <- add_era5(
-    mm,
-    fname_era5 = fname_era5,
-    restrict_ref_to_obs = TRUE,
-    restrict_obs_to_ref = TRUE,
-    report_end_interval = TRUE,
-    extra_rows = 3
+  p <- ggplot(
+    mm$dt[name_icos == "PPFD_IN", ],
+    aes(TIMESTAMP, value, colour = var_name)
   )
+  p <- p + geom_line(aes(y = ref), colour = "black")
+  p <- p + geom_line()
+  p <- p + facet_wrap(~site)
 
-  dim(mm$dt)
-  dim(mm$dt_ref)
-
-  sum(is.na(mm$dt))
-  mm <- apply_qc(mm)
-  sum(is.na(mm$dt))
-
-  summary(mm$dt)
-  mm$dt[, sapply(.SD, function(x) sum(is.na(x))), .SDcols = names(mm$dt)]
-
-  mm <- impute(
-    v_y = c("WTD"),
-    mm = mm,
-    method = "time",
-    fit = TRUE,
-    plot_graph = TRUE
+  p <- ggplot(
+    mm$dt[name_icos == "TA", ],
+    aes(ref, value, colour = var_name)
   )
-
-  time_name <- mm$dt_meta[type == "time", name_dt]
+  p <- p + geom_abline()
+  p <- p + geom_point()
+  p <- p + facet_wrap(~site)
 
   expect_s3_class(mm, "metamet")
-  expect_s3_class(mm$dt_qc, "data.table")
-  expect_equal(sum(is.na(mm$dt_qc[, ..time_name])), 0)
-  expect_equal(nrow(mm$dt_ref), nrow(mm$dt_qc))
-  # qc loses the extra validator column when averaged, so should be same
-  expect_equal(ncol(mm$dt), ncol(mm$dt_qc) - 1)
-  # should not be any duplicate times
-  expect_equal(nrow(mm$dt[duplicated(mm$dt[, ..time_name]), ]), 0)
+  expect_s3_class(mm$dt, "data.table")
+  expect_equal(nrow(mm$dt), nrow(mm_amo$dt) + nrow(mm_ebu$dt) + nrow(mm_whm$dt))
+  expect_equal(nrow(mm$dt_site), 3)
 })

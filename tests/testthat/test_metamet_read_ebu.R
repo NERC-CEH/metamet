@@ -59,7 +59,7 @@ test_that("reading metamet from files from EBU works", {
     plot_graph = FALSE
   )
 
-  # saveRDS(mm, file = here::here("data-raw/UK-EBU/UK-EBU_BM_mm_2023.rds"))
+  saveRDS(mm, file = here::here("data-raw/UK-EBU/UK-EBU_BM_mm_2023.rds"))
 
   time_name <- mm$dt_meta[type == "time", name_dt]
 

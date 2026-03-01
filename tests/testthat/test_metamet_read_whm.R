@@ -21,11 +21,11 @@ test_that("reading metamet from files from Whim works", {
 
   mm <- subset_by_date(
     mm,
-    start_date = "2022-01-01 00:30:00",
-    end_date = "2022-12-31 00:00:00"
+    start_date = "2023-01-01 00:30:00",
+    end_date = "2024-01-01 00:00:00"
   )
 
-  mm <- time_average(mm, avg.time = "1 hour", extra_rows = 3)
+  mm <- time_average(mm, avg.time = "30 min", extra_rows = 3)
 
   dim(mm$dt)
 
@@ -57,6 +57,7 @@ test_that("reading metamet from files from Whim works", {
     fit = TRUE,
     plot_graph = TRUE
   )
+  saveRDS(mm, file = here::here("data-raw/UK-WHM/UK-WHM_BM_mm_2023.rds"))
 
   time_name <- mm$dt_meta[type == "time", name_dt]
 

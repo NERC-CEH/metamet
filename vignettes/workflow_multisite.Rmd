@@ -1,0 +1,121 @@
+---
+title: "Workflow Example 2 - Mutiple Sites"
+author: "Peter Levy"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Workflow Example 2 - Mutiple Sites}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%",
+  warning = FALSE,
+  message = FALSE,
+  fig.show='hold'
+)
+```
+
+```{r, eval = FALSE, include = FALSE}
+rmarkdown::render("vignettes/workflow_multisite.Rmd")
+```
+
+This vignette illustrates the typical workflow for quality control of met data 
+from multiple sites simultaneously with `metamet`. We assume that the basic 
+steps of reading the observation data, creating systematic metadata for the
+variables and each site (described in [Workflow Example 1](workflow_example.html)).
+This produces a single `metamet` object for each site.
+
+
+## Example data
+
+Here, we load data from three sites.
+
+```{r}
+here::i_am("vignettes/workflow_example.Rmd")
+library(here)
+library(testthat)
+library(metamet)
+```
+
+### Observation data `dt`
+
+Having downloaded the observation data, we can read it from a file and display 
+a few rows.
+
+```{r}
+  mm_amo <- readRDS(
+    file = here::here("data-raw/UK-AMO/UK-AMO_BM_mm_2023.rds")
+  )
+  mm_ebu <- readRDS(
+    file = here::here("data-raw/UK-EBU/UK-EBU_BM_mm_2023.rds")
+  )
+  mm_whm <- readRDS(
+    file = here::here("data-raw/UK-WHM/UK-WHM_BM_mm_2023.rds")
+  )
+
+  mm_amo <- subset_by_date(mm_amo, "2023-09-01", "2023-09-02")
+  mm_ebu <- subset_by_date(mm_ebu, "2023-09-01", "2023-09-02")
+  mm_whm <- subset_by_date(mm_whm, "2023-09-01", "2023-09-02")
+
+  dim(mm_amo$dt)
+  dim(mm_whm$dt)
+  dim(mm_ebu$dt)
+
+  mm_whm <- change_naming_convention(mm_whm, name_convention = "name_icos")
+
+  mm_amo <- reshape_wide_to_long(mm_amo)
+  mm_ebu <- reshape_wide_to_long(mm_ebu)
+  mm_whm <- reshape_wide_to_long(mm_whm)
+
+  dim(mm_amo$dt)
+  dim(mm_ebu$dt)
+  dim(mm_whm$dt)
+
+  mm <- rbind_metamet(
+    mm_amo,
+    l_dt = list(mm_amo$dt, mm_ebu$dt, mm_whm$dt),
+    l_dt_meta = list(mm_amo$dt_meta, mm_ebu$dt_meta, mm_whm$dt_meta),
+    l_dt_site = list(mm_amo$dt_site, mm_ebu$dt_site, mm_whm$dt_site)
+  )
+  dim(mm$dt)
+  names(mm$dt)
+```
+
+```{r}
+  p <- ggplot(
+    mm$dt[name_icos == "TS", ],
+    aes(TIMESTAMP, value, colour = var_name)
+  )
+  p <- p + geom_line(aes(y = ref), colour = "black")
+  p <- p + geom_point()
+  p <- p + facet_wrap(~site)
+  print(p)
+```
+
+```{r}
+  p <- ggplot(
+    mm$dt[name_icos == "PPFD_IN", ],
+    aes(TIMESTAMP, value, colour = var_name)
+  )
+  p <- p + geom_line(aes(y = ref), colour = "black")
+  p <- p + geom_line(alpha = 0.5)
+  p <- p + facet_wrap(~site)
+  print(p)
+```
+
+```{r}
+  p <- ggplot(
+    mm$dt[name_icos == "TA", ],
+    aes(ref, value, colour = var_name)
+  )
+  p <- p + geom_abline()
+  p <- p + geom_point()
+  p <- p + facet_wrap(~site)
+  print(p)
+```

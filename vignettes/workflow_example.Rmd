@@ -1,10 +1,10 @@
 ---
-title: "Workflow Example"
+title: "Workflow Example 1"
 author: "Peter Levy"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Workflow Example}
+  %\VignetteIndexEntry{Workflow Example 1}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
@@ -61,7 +61,7 @@ dim(dt)
 dt
 ```
 
-The data consistent of a timestamp column, and 13 variables observed every 15 
+The data consist of a timestamp column, and 13 variables observed every 15 
 minutes from 2003 until 2023, giving `r nrow(dt)` rows and `r ncol(dt)` columns.
 
 ### Observation metadata `dt_meta`

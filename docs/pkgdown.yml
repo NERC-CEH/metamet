@@ -5,10 +5,12 @@ articles:
   app_user_guide: app_user_guide.html
   changing_names: changing_names.html
   gap_fill_methods: gap_fill_methods.html
+  met_data_standards: met_data_standards.html
   metamet: metamet.html
   openairmaps: openairmaps.html
   workflow_example: workflow_example.html
-last_built: 2026-03-03T12:24Z
+  workflow_multisite: workflow_multisite.html
+last_built: 2026-03-03T17:46Z
 urls:
   reference: https://nerc-ceh.github.io/metamet/reference
   article: https://nerc-ceh.github.io/metamet/articles

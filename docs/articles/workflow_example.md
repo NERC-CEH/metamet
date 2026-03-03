@@ -1,4 +1,4 @@
-# Workflow Example
+# Workflow Example 1
 
 This vignette illustrates the typical workflow for processing met data
 with `metamet`. The basic steps are to:
@@ -67,9 +67,8 @@ dt
 #> 736321: 0.859 253.6     91.2   5.086   4.912  4.53
 ```
 
-The data consistent of a timestamp column, and 13 variables observed
-every 15 minutes from 2003 until 2023, giving 736321 rows and 14
-columns.
+The data consist of a timestamp column, and 13 variables observed every
+15 minutes from 2003 until 2023, giving 736321 rows and 14 columns.
 
 ### Observation metadata `dt_meta`
 

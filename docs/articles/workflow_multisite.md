@@ -1,15 +1,38 @@
-# test the helper constructor function with file paths as argument
-# also testing handling time variables with different names in different files
+# Workflow Example 2 - Mutiple Sites
 
-test_that("joining metamet from different sites works", {
+This vignette illustrates the typical workflow for quality control of
+met data from multiple sites simultaneously with `metamet`. We assume
+that the basic steps of reading the observation data, creating
+systematic metadata for the variables and each site (described in
+[Workflow Example
+1](https://nerc-ceh.github.io/metamet/articles/workflow_example.md)).
+This produces a single `metamet` object for each site.
+
+## Example data
+
+Here, we load data from three sites.
+
+``` r
+here::i_am("vignettes/workflow_example.Rmd")
+library(here)
+library(testthat)
+library(metamet)
+```
+
+### Observation data `dt`
+
+Having downloaded the observation data, we can read it from a file and
+display a few rows.
+
+``` r
   mm_amo <- readRDS(
-    file = testthat::test_path("data-raw/UK-AMO/UK-AMO_BM_mm_2023.rds")
+    file = here::here("data-raw/UK-AMO/UK-AMO_BM_mm_2023.rds")
   )
   mm_ebu <- readRDS(
-    file = testthat::test_path("data-raw/UK-EBU/UK-EBU_BM_mm_2023.rds")
+    file = here::here("data-raw/UK-EBU/UK-EBU_BM_mm_2023.rds")
   )
   mm_whm <- readRDS(
-    file = testthat::test_path("data-raw/UK-WHM/UK-WHM_BM_mm_2023.rds")
+    file = here::here("data-raw/UK-WHM/UK-WHM_BM_mm_2023.rds")
   )
 
   mm_amo <- subset_by_date(mm_amo, "2023-09-01", "2023-09-02")
@@ -17,8 +40,11 @@ test_that("joining metamet from different sites works", {
   mm_whm <- subset_by_date(mm_whm, "2023-09-01", "2023-09-02")
 
   dim(mm_amo$dt)
+#> [1] 49 39
   dim(mm_whm$dt)
+#> [1] 49 15
   dim(mm_ebu$dt)
+#> [1] 49 21
 
   mm_whm <- change_naming_convention(mm_whm, name_convention = "name_icos")
 
@@ -27,8 +53,11 @@ test_that("joining metamet from different sites works", {
   mm_whm <- reshape_wide_to_long(mm_whm)
 
   dim(mm_amo$dt)
+#> [1] 1813    9
   dim(mm_ebu$dt)
+#> [1] 931   9
   dim(mm_whm$dt)
+#> [1] 637   9
 
   mm <- rbind_metamet(
     mm_amo,
@@ -37,8 +66,13 @@ test_that("joining metamet from different sites works", {
     l_dt_site = list(mm_amo$dt_site, mm_ebu$dt_site, mm_whm$dt_site)
   )
   dim(mm$dt)
+#> [1] 3381    9
   names(mm$dt)
+#> [1] "site"      "TIMESTAMP" "var_name"  "value"     "type"      "name_icos"
+#> [7] "qc"        "validator" "ref"
+```
 
+``` r
   p <- ggplot(
     mm$dt[name_icos == "TS", ],
     aes(TIMESTAMP, value, colour = var_name)
@@ -46,7 +80,12 @@ test_that("joining metamet from different sites works", {
   p <- p + geom_line(aes(y = ref), colour = "black")
   p <- p + geom_point()
   p <- p + facet_wrap(~site)
+  print(p)
+```
 
+![](reference/figures/README-unnamed-chunk-5-1.png)
+
+``` r
   p <- ggplot(
     mm$dt[name_icos == "PPFD_IN", ],
     aes(TIMESTAMP, value, colour = var_name)
@@ -54,7 +93,12 @@ test_that("joining metamet from different sites works", {
   p <- p + geom_line(aes(y = ref), colour = "black")
   p <- p + geom_line(alpha = 0.5)
   p <- p + facet_wrap(~site)
-  p
+  print(p)
+```
+
+![](reference/figures/README-unnamed-chunk-6-1.png)
+
+``` r
   p <- ggplot(
     mm$dt[name_icos == "TA", ],
     aes(ref, value, colour = var_name)
@@ -62,9 +106,7 @@ test_that("joining metamet from different sites works", {
   p <- p + geom_abline()
   p <- p + geom_point()
   p <- p + facet_wrap(~site)
+  print(p)
+```
 
-  expect_s3_class(mm, "metamet")
-  expect_s3_class(mm$dt, "data.table")
-  expect_equal(nrow(mm$dt), nrow(mm_amo$dt) + nrow(mm_ebu$dt) + nrow(mm_whm$dt))
-  expect_equal(nrow(mm$dt_site), 3)
-})
+![](reference/figures/README-unnamed-chunk-7-1.png)

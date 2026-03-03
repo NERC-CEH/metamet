@@ -17,7 +17,9 @@
 <url><loc>https://nerc-ceh.github.io/metamet/reference/add_era5.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/apply_qc.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/change_naming_convention.html</loc></url>
+<url><loc>https://nerc-ceh.github.io/metamet/reference/convert_sum_to_rate.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/detect_gaps.html</loc></url>
+<url><loc>https://nerc-ceh.github.io/metamet/reference/ggiraph_plot.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/impute.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/index.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/join.html</loc></url>
@@ -26,8 +28,11 @@
 <url><loc>https://nerc-ceh.github.io/metamet/reference/mm1.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/network_map.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/pad_data.html</loc></url>
+<url><loc>https://nerc-ceh.github.io/metamet/reference/plot_heatmap_calendar.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/polar_map.html</loc></url>
+<url><loc>https://nerc-ceh.github.io/metamet/reference/rbind_metamet.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/rename_era5.html</loc></url>
+<url><loc>https://nerc-ceh.github.io/metamet/reference/reshape_wide_to_long.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/run_shiny.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/subset_by_date.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/time_average.html</loc></url>

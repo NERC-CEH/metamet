@@ -2,7 +2,9 @@
 # also testing handling time variables with different names in different files
 
 test_that("metamet time averaging 1-min data to 5-mins works", {
-  fname_dt <- testthat::test_path("data-raw/UK-AMo_BM_20250822_L03_F02.dat")
+  fname_dt <- testthat::test_path(
+    "data-raw/UK-AMO/UK-AMO_BM_20250822_L03_F02.dat"
+  )
   fname_meta <- testthat::test_path("data-raw/dt_meta.xlsx")
   fname_site <- testthat::test_path("data-raw/dt_site.csv")
   fname_era5 <- testthat::test_path("data-raw/dt_era5.csv")

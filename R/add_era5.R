@@ -112,6 +112,7 @@ add_era5 <- function(
       extra_rows = extra_rows
     )
   }
+  setcolorder(mm$dt_ref, neworder = names(mm$dt))
 
   dt_gaps <- detect_gaps(
     dt_in = mm$dt,
@@ -173,5 +174,6 @@ rename_era5 <- function(mm) {
   v_names_era5 <- mm$dt_meta$name_era5[ind]
   mm$dt_ref <- mm$dt_ref[, ..v_names_era5]
   names(mm$dt_ref) <- names(mm$dt)
+  setcolorder(mm$dt_ref, neworder = names(mm$dt))
   return(mm)
 }

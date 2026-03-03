@@ -212,6 +212,8 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output, session) {
+  # increase input file size limit to 200 MB
+  options(shiny.maxRequestSize = 200 * 1024^2)
   # Non-reactive code
   # Format the start and end dates----
   df_proc <- data.frame(
@@ -262,38 +264,9 @@ server <- function(input, output, session) {
   iv$add_rule("edate", sv_required())
   iv$enable()
 
-  # list of possible users - hard-coded for now
-  v_usernames <- c(
-    "plevy",
-    "dunhar",
-    "karung",
-    "leav",
-    "matj",
-    "MauGre",
-    "mcoy",
-    "neimul",
-    "sarle",
-    "wilfinc",
-    "jamcas"
-  )
-
-  # a modal dialog where the user can enter their user name.
-  username_modal <- modalDialog(
-    title = "Enter user name",
-    selectInput('input_username', 'Select from:', v_usernames),
-    easyClose = F,
-    footer = tagList(
-      actionButton("ok", "OK")
-    )
-  )
-
-  # Show the model on start up ...
-  showModal(username_modal)
-
-  # allow user to trigger modal with button press
-  observeEvent(input$change_user, {
-    showModal(username_modal)
-  })
+  # save the username
+  username <<- Sys.info()[["user"]]
+  print(paste("Proceeding with", username, "as data validator"))
 
   ###
   ##Observe event for shinyvalidate dates
@@ -311,15 +284,6 @@ server <- function(input, output, session) {
         easyClose = TRUE
       ))
     }
-  })
-
-  observeEvent(input$ok, {
-    removeModal()
-    # save the username
-    username <<- input$input_username
-    output$user_name_text <- renderText({
-      paste0('Current user:  ', input$input_username)
-    })
   })
 
   disable('compare_vars')

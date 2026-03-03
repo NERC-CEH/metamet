@@ -5,7 +5,7 @@
 - [metamet](https://nerc-ceh.github.io/metamet/articles/metamet.md):
 - [Workflow Example
   1](https://nerc-ceh.github.io/metamet/articles/workflow_example.md):
-- [Workflow Example 2 - Mutiple
+- [Workflow Example 2 - Multiple
   Sites](https://nerc-ceh.github.io/metamet/articles/workflow_multisite.md):
 - [Met data
   standards](https://nerc-ceh.github.io/metamet/articles/met_data_standards.md):

@@ -10,9 +10,11 @@
 #' @export
 ggiraph_plot <- function(input_variable) {
   df <- data.frame(
-    DATECT = mm_qry$dt$DATECT,
-    y = mm_qry$dt[, ..input_variable][[1]],
-    qc = mm_qry$dt_qc[, ..input_variable][[1]],
+    site = mm_qry$dt[, site],
+    DATECT = mm_qry$dt[, get(time_name)],
+    ##* WIP: how to extract correct variables when in long format?
+    y = mm_qry$dt[var_name == input_variable, value],
+    qc = mm_qry$dt[var_name == input_variable, qc],
     checked = mm_qry$dt$checked
   )
 

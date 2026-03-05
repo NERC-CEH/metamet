@@ -240,7 +240,7 @@ server <- function(input, output, session) {
       time_name <<- unique(time_name)
     }
     time_name <- "TIMESTAMP" ##* WIP: temp test
-    v_names <- mm$dt_meta[type != "time" & type != "site", name_dt]
+    v_names <- unique(mm$dt_meta[type != "time" & type != "site", name_icos])
     date_of_first_new_record <- mm$dt[, min(get(time_name), na.rm = TRUE)]
     date_of_last_new_record <- mm$dt[, max(get(time_name), na.rm = TRUE)]
     list(

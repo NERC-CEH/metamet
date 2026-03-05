@@ -9,13 +9,15 @@
 #' @details DETAILS
 #' @export
 ggiraph_plot <- function(input_variable) {
-  df <- data.frame(
-    site = mm_qry$dt[, site],
-    DATECT = mm_qry$dt[, get(time_name)],
+  df <- data.table(
+    site = mm_qry$dt[name_icos == input_variable, site],
+    DATECT = mm_qry$dt[name_icos == input_variable, get(time_name)],
     ##* WIP: how to extract correct variables when in long format?
-    y = mm_qry$dt[var_name == input_variable, value],
-    qc = mm_qry$dt[var_name == input_variable, qc],
-    checked = mm_qry$dt$checked
+    var_name = mm_qry$dt[name_icos == input_variable, var_name],
+    y = mm_qry$dt[name_icos == input_variable, value],
+    qc = mm_qry$dt[name_icos == input_variable, qc],
+    ref = mm_qry$dt[name_icos == input_variable, ref],
+    checked = mm_qry$dt[name_icos == input_variable, checked]
   )
 
   df <- left_join(df, df_method, by = "qc")
@@ -38,11 +40,24 @@ ggiraph_plot <- function(input_variable) {
       aes(
         data_id = checked,
         tooltip = glue::glue("Timestamp: {DATECT}\nMeasure: {y}"),
-        colour = factor(method_longname)
+        shape = factor(method_longname),
+        colour = factor(var_name)
       ),
       size = 3
     ) +
-    scale_color_manual(values = col_pal, limits = force) +
+
+    facet_wrap_interactive(
+      ncol = 2,
+      interactive_on = "text",
+      vars(site),
+      labeller = labeller_interactive(aes(
+        tooltip = paste("The site is", site),
+        data_id = site
+      ))
+    ) +
+
+    geom_line(aes(y = ref), colour = "black") +
+    # scale_color_manual(values = col_pal, limits = force) +
     xlab("Date") +
     ylab(paste("Your variable:", input_variable)) +
     ggtitle(paste(input_variable, "time series")) +
@@ -67,7 +82,7 @@ ggiraph_plot <- function(input_variable) {
 #'
 
 #' @title plot_heatmap_calendar
-#' @description Plots a calendar showing who has checked the data by date
+#' @description Plots a calendar showing who has validated the data by date
 #' @param df A data frame of met data
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS

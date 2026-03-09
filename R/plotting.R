@@ -9,8 +9,10 @@
 #' @details DETAILS
 #' @export
 ggiraph_plot <- function(input_variable) {
+  time_name <- mm_qry$dt_meta[type == "time", name_dt]
   df <- data.frame(
-    DATECT = mm_qry$dt$DATECT,
+    # DATECT = mm_qry$dt$DATECT,
+    DATECT = mm_qry$dt[, get(time_name)],
     y = mm_qry$dt[, ..input_variable][[1]],
     qc = mm_qry$dt_qc[, ..input_variable][[1]],
     checked = mm_qry$dt$checked
@@ -70,15 +72,19 @@ ggiraph_plot <- function(input_variable) {
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
 #' @export
-plot_heatmap_calendar <- function(df) {
+plot_heatmap_calendar <- function(df, time_name) {
   # Transforming query dataframe with lubridate to fit the format needed for a heatmap calendar
   df <- df %>%
     mutate(
-      year = lubridate::year(DATECT),
-      day_of_the_week = lubridate::wday(DATECT, label = TRUE, week_start = 1),
-      month = lubridate::month(DATECT, label = TRUE, abbr = FALSE),
-      week = as.double(lubridate::isoweek(DATECT)),
-      day = lubridate::day(DATECT)
+      year = lubridate::year(get(time_name)),
+      day_of_the_week = lubridate::wday(
+        get(time_name),
+        label = TRUE,
+        week_start = 1
+      ),
+      month = lubridate::month(get(time_name), label = TRUE, abbr = FALSE),
+      week = as.double(lubridate::isoweek(get(time_name))),
+      day = lubridate::day(get(time_name))
     ) %>%
     dplyr::select(year, month, day, week, day_of_the_week, validator) %>%
     mutate(

@@ -434,7 +434,10 @@ server <- function(input, output, session) {
     # Creating a calendar heatmap plot that will be plotted depending on the tab selected in plotTabs
     heatmap_plot_selected <- reactive({
       req(input$plotTabs)
-      plot_heatmap_calendar(mm_qry$dt_qc)
+      plot_heatmap_calendar(
+        mm_qry$dt_qc,
+        time_name = mm_qry$dt_meta[type == "time", name_dt]
+      )
     })
 
     output$heatmap_plot <- renderPlot(heatmap_plot_selected())

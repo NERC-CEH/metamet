@@ -1,27 +1,11 @@
 library(metamet)
-library(here)
-library(shiny)
-library(shinyWidgets)
-library(shinyjs)
-library(shinydashboard)
 library(dplyr)
-library(ggplot2)
-library(ggiraph)
-library(mgcv)
-library(DT)
-library(data.table)
-library(lubridate)
-library(ggExtra)
-library(openair)
-library(powerjoin)
-library(pins)
-library(glue)
-library(shinycssloaders)
-library(shinyalert)
-library(stringr)
-library(forcats)
+library(shinydashboard)
+library(shinyjs)
 library(shinyvalidate)
-library(markdown)
+library(shinyFiles)
+library(ggiraph)
+getwd()
 
 # Set the gap-filling methods and codes----
 gf_choices <- setNames(df_method$method, df_method$method_longname)
@@ -44,11 +28,12 @@ ui <- dashboardPage(
     sidebarMenu(
       id = 'tabs',
       menuItem("Choose file", tabName = "upload", icon = icon("upload")),
-
-      fileInput(
-        inputId = "file",
-        label = "Open a metamet .rds file",
-        accept = ".rds"
+      # with shinyfiles lib
+      shinyFilesButton(
+        id = "file",
+        label = "Open metamet .rds file",
+        title = "Select a file",
+        multiple = FALSE
       ),
       menuItem(
         "Choose date range",
@@ -211,12 +196,12 @@ ui <- dashboardPage(
         tabName = "information",
       ),
       tabItem(
-        tabName = "gapfill_guide",
-        includeMarkdown(here::here("vignettes/gap_fill_methods.md"))
+        tabName = "gapfill_guide"
+        # includeMarkdown(here::here("vignettes/gap_fill_methods.md"))
       ),
       tabItem(
-        tabName = "app_guide",
-        includeMarkdown(here::here("vignettes/app_user_guide.md"))
+        tabName = "app_guide"
+        # includeMarkdown(here::here("vignettes/app_user_guide.md"))
       ) # ,
       # tabItem(
       #   tabName = "data_guide",
@@ -229,6 +214,20 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output, session) {
+  # increase input file size limit to 200 MB
+  options(shiny.maxRequestSize = 200 * 1024^2)
+
+  # define root path with shinyFiles
+  roots <- c(home = fs::path_home(), wd = getwd())
+
+  shinyFileChoose(
+    input,
+    "file",
+    roots = roots,
+    session = session,
+    filetypes = c("rds")
+  )
+
   # Non-reactive code
   # Format the start and end dates----
   df_proc <- data.frame(
@@ -245,8 +244,10 @@ server <- function(input, output, session) {
   # Reactive expression to load the RDS file
   uploaded <- reactive({
     req(input$file)
-    mm <- readRDS(input$file$datapath)
-    print(input$file$datapath)
+    fileinfo <- parseFilePaths(roots, input$file)
+    req(nrow(fileinfo) > 0)
+    fname <- as.character(fileinfo$datapath)
+    mm <- readRDS(fname)
     time_name <- mm$dt_meta[type == "time", name_dt]
     v_names <- mm$dt_meta[type != "time" & type != "site", name_dt]
     date_of_first_new_record <- mm$dt[, min(get(time_name), na.rm = TRUE)]
@@ -257,17 +258,20 @@ server <- function(input, output, session) {
       v_names = v_names,
       date_of_first_new_record = date_of_first_new_record,
       date_of_last_new_record = date_of_last_new_record,
-      fname = input$file$datapath
+      fname = fname
     )
   })
 
   # Simple status message instead of displaying the object
   output$status <- renderText({
     if (is.null(input$file)) {
-      "No file uploaded yet."
-    } else {
-      "RDS file successfully loaded."
+      return("No file selected yet.")
     }
+    req(uploaded())
+    paste(
+      "RDS file successfully loaded:",
+      basename(uploaded()$fname)
+    )
   })
 
   ##########################
@@ -279,38 +283,9 @@ server <- function(input, output, session) {
   iv$add_rule("edate", sv_required())
   iv$enable()
 
-  # list of possible users - hard-coded for now
-  v_usernames <- c(
-    "plevy",
-    "dunhar",
-    "karung",
-    "leav",
-    "matj",
-    "MauGre",
-    "mcoy",
-    "neimul",
-    "sarle",
-    "wilfinc",
-    "jamcas"
-  )
-
-  # a modal dialog where the user can enter their user name.
-  username_modal <- modalDialog(
-    title = "Enter user name",
-    selectInput('input_username', 'Select from:', v_usernames),
-    easyClose = F,
-    footer = tagList(
-      actionButton("ok", "OK")
-    )
-  )
-
-  # Show the model on start up ...
-  showModal(username_modal)
-
-  # allow user to trigger modal with button press
-  observeEvent(input$change_user, {
-    showModal(username_modal)
-  })
+  # save the username
+  username <<- Sys.info()[["user"]]
+  print(paste("Proceeding with", username, "as data validator"))
 
   ###
   ##Observe event for shinyvalidate dates
@@ -328,15 +303,6 @@ server <- function(input, output, session) {
         easyClose = TRUE
       ))
     }
-  })
-
-  observeEvent(input$ok, {
-    removeModal()
-    # save the username
-    username <<- input$input_username
-    output$user_name_text <- renderText({
-      paste0('Current user:  ', input$input_username)
-    })
   })
 
   disable('compare_vars')
@@ -378,11 +344,11 @@ server <- function(input, output, session) {
   # Create a dataframe with the start and end dates,
   df_daterange <- eventReactive(input$retrieve_data, {
     start_date_ch <- paste(
-      sprintf("%02d", day(input$sdate)),
+      sprintf("%02d", lubridate::day(input$sdate)),
       "/",
-      sprintf("%02d", month(input$sdate)),
+      sprintf("%02d", lubridate::month(input$sdate)),
       "/",
-      year(input$sdate),
+      lubridate::year(input$sdate),
       " ",
       sprintf("%02d", input$shour),
       ":",
@@ -394,11 +360,11 @@ server <- function(input, output, session) {
       tz = "UTC"
     )
     end_date_ch <- paste(
-      sprintf("%02d", day(input$edate)),
+      sprintf("%02d", lubridate::day(input$edate)),
       "/",
-      sprintf("%02d", month(input$edate)),
+      sprintf("%02d", lubridate::month(input$edate)),
       "/",
-      year(input$edate),
+      lubridate::year(input$edate),
       " ",
       sprintf("%02d", input$ehour),
       ":",
@@ -480,14 +446,17 @@ server <- function(input, output, session) {
     observe(
       lapply(paste(uploaded()$v_names), function(i) {
         output[[paste0(i, "_interactive_plot")]] <-
-          renderGirafe(plotting_function(i))
+          renderGirafe(metamet:::ggiraph_plot(i))
       })
     )
 
     # Creating a calendar heatmap plot that will be plotted depending on the tab selected in plotTabs
     heatmap_plot_selected <- reactive({
       req(input$plotTabs)
-      plot_heatmap_calendar(mm_qry$dt_qc)
+      plot_heatmap_calendar(
+        mm_qry$dt_qc,
+        time_name = mm_qry$dt_meta[type == "time", name_dt]
+      )
     })
 
     output$heatmap_plot <- renderPlot(heatmap_plot_selected())
@@ -567,7 +536,7 @@ server <- function(input, output, session) {
       # Creating a reactive plot that will be plotted depending on the tab selected in plotTabs
       plot_selected <- reactive({
         req(input$plotTabs)
-        plotting_function(input$plotTabs)
+        metamet:::ggiraph_plot(input$plotTabs)
       })
       # Re-render
       output[[paste0(
@@ -661,7 +630,7 @@ server <- function(input, output, session) {
     mm_qry$dt_qc$validator <- username
 
     # overwrite existing data with changes in query
-    mm <<- join(mm, mm_qry)
+    mm <- join(uploaded()$mm, mm_qry)
 
     # write output to new file in same location as input
     ##* WIP: this does not work - input$file$datapath does not return the
@@ -694,6 +663,14 @@ server <- function(input, output, session) {
         fs::path_ext(fname)
       )
     )
+
+    # notify user that file was created
+    showNotification(
+      "Your file was successfully created.",
+      type = "message",
+      duration = 5
+    )
+
     # remove button activation and reactivate button
     runjs(
       'document.getElementById("submitchanges").textContent="Submit";'

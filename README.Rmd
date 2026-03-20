@@ -67,7 +67,7 @@ available in the structure, objects can be processed relatively easily so as to:
 
 ```{r example}
 library(metamet)
-fname_dt <- testthat::test_path("data-raw/UK-AMO_BM_dt_2026.csv")
+fname_dt <- testthat::test_path("data-raw/UK-AMO/UK-AMO_BM_dt_2026.csv")
 fname_meta <- testthat::test_path("data-raw/dt_meta.xlsx")
 fname_site <- testthat::test_path("data-raw/dt_site.csv")
 

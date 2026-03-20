@@ -1,0 +1,54 @@
+---
+title: "Change the naming convention of measurement variables"
+author: "Peter Levy"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Change the naming convention of measurement variables}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%",
+  warning = FALSE,
+  message = FALSE,
+  fig.show='hold'
+)
+```
+```{r, eval = FALSE, include = FALSE}
+rmarkdown::render("vignettes/changing_names.Rmd")
+```
+
+This vignette illustrates how to change the naming convention of measurement variables.
+
+
+## Local names in original data file
+
+We start with the ad hoc names given locally to variables in the raw data file we have read in.
+
+```{r}
+library(metamet)
+
+names(mm1$dt)
+```
+
+## Convert to ICOS naming convention
+
+
+```{r}
+mm1_icos <- change_naming_convention(mm1, name_convention = "name_icos")
+names(mm1_icos$dt)
+```
+
+## Convert to ERA5 naming convention
+
+```{r}
+names(mm1_icos$dt)
+mm1_era5 <- change_naming_convention(mm1, name_convention = "name_era5")
+names(mm1_era5$dt)
+```

@@ -3,7 +3,10 @@ library(dplyr)
 library(shinydashboard)
 library(shinyjs)
 library(shinyvalidate)
+<<<<<<< issues/32-fix-writing-output-files
 library(shinyFiles)
+=======
+>>>>>>> main
 library(ggiraph)
 getwd()
 
@@ -216,6 +219,7 @@ ui <- dashboardPage(
 server <- function(input, output, session) {
   # increase input file size limit to 200 MB
   options(shiny.maxRequestSize = 200 * 1024^2)
+<<<<<<< issues/32-fix-writing-output-files
 
   # define root path with shinyFiles
   roots <- c(home = fs::path_home(), wd = getwd())
@@ -228,6 +232,8 @@ server <- function(input, output, session) {
     filetypes = c("rds")
   )
 
+=======
+>>>>>>> main
   # Non-reactive code
   # Format the start and end dates----
   df_proc <- data.frame(
@@ -446,7 +452,11 @@ server <- function(input, output, session) {
     observe(
       lapply(paste(uploaded()$v_names), function(i) {
         output[[paste0(i, "_interactive_plot")]] <-
+<<<<<<< issues/32-fix-writing-output-files
           renderGirafe(metamet:::ggiraph_plot(i))
+=======
+          renderGirafe(metamet::ggiraph_plot(i))
+>>>>>>> main
       })
     )
 
@@ -536,7 +546,11 @@ server <- function(input, output, session) {
       # Creating a reactive plot that will be plotted depending on the tab selected in plotTabs
       plot_selected <- reactive({
         req(input$plotTabs)
+<<<<<<< issues/32-fix-writing-output-files
         metamet:::ggiraph_plot(input$plotTabs)
+=======
+        metamet::ggiraph_plot(input$plotTabs)
+>>>>>>> main
       })
       # Re-render
       output[[paste0(

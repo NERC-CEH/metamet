@@ -112,6 +112,7 @@ add_era5 <- function(
       extra_rows = extra_rows
     )
   }
+  setcolorder(mm$dt_ref, neworder = names(mm$dt))
 
   dt_gaps <- detect_gaps(
     dt_in = mm$dt,
@@ -154,7 +155,7 @@ add_era5 <- function(
 ##' @details
 ##' - Sets the `site` column in `dt_ref` using the value from `dt_site`.
 ##' - Matches column names in `dt` to those in `dt_ref` using the
-##'   `standard_name_era5` field in `dt_meta`.
+##'   `name_era5` field in `dt_meta`.
 ##' - Reorders and renames columns in `dt_ref` to match the structure of `dt`.
 ##'
 ##' @return The updated `metamet` object `mm`, with ERA5 reference data columns
@@ -170,8 +171,9 @@ add_era5 <- function(
 rename_era5 <- function(mm) {
   mm$dt_ref[, site := mm$dt_site$site]
   ind <- match(names(mm$dt), mm$dt_meta$name_dt)
-  v_names_era5 <- mm$dt_meta$standard_name_era5[ind]
+  v_names_era5 <- mm$dt_meta$name_era5[ind]
   mm$dt_ref <- mm$dt_ref[, ..v_names_era5]
   names(mm$dt_ref) <- names(mm$dt)
+  setcolorder(mm$dt_ref, neworder = names(mm$dt))
   return(mm)
 }

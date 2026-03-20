@@ -47,7 +47,11 @@ be processed relatively easily so as to:
 
 ``` r
 library(metamet)
-fname_dt <- testthat::test_path("data-raw/UK-AMO_BM_dt_2026.csv")
+#> Loading required package: data.table
+#> data.table 1.17.8 using 7 threads (see ?getDTthreads).  Latest news: r-datatable.com
+#> Loading required package: ggplot2
+#> Warning: package 'ggplot2' was built under R version 4.5.2
+fname_dt <- testthat::test_path("data-raw/UK-AMO/UK-AMO_BM_dt_2026.csv")
 fname_meta <- testthat::test_path("data-raw/dt_meta.xlsx")
 fname_site <- testthat::test_path("data-raw/dt_site.csv")
 
@@ -57,7 +61,7 @@ mm <- metamet(
   dt_site = fname_site,
   site_id = "UK-AMO"
 )
-#> Loading file: tests/testthat/data-raw/UK-AMO_BM_dt_2026.csv
+#> Loading file: tests/testthat/data-raw/UK-AMO/UK-AMO_BM_dt_2026.csv
 #> Reading data table ...
 
 # print the outline strucutre:
@@ -80,19 +84,19 @@ mm
 #> 1488: 2026-02-01 00:00:00 4.785532 53.82335 -1.0490556 -0.18402600  -0.60073
 #> 
 #> Metadata (dt_meta) - first 6 cols:
-#>      site name_dt standard_name      long_name  units        type
-#>    <char>  <char>        <char>         <char> <char>      <char>
-#> 1: UK-AMO    site          site           site   <NA>        site
-#> 2: UK-AMO  D_SNOW        D_SNOW     Snow depth     cm      height
-#> 3: UK-AMO  DATECT        DATECT      timestamp   <NA>        time
-#> 4: UK-AMO       G             G Soil heat flux  W m-2 energy flux
-#> 5: UK-AMO G_4_1_1             G Soil heat flux  W m-2 energy flux
-#> 6: UK-AMO G_4_1_2             G Soil heat flux  W m-2 energy flux
+#>      site start_date   end_date name_dt name_local long_name_local
+#>    <char>     <POSc>     <POSc>  <char>     <char>          <char>
+#> 1: UK-AMO 1995-01-01 2030-01-01    site       site            site
+#> 2: UK-AMO 1995-01-01 2030-01-01  D_SNOW     D_SNOW      Snow depth
+#> 3: UK-AMO 1995-01-01 2030-01-01  DATECT     DATECT       timestamp
+#> 4: UK-AMO 1995-01-01 2030-01-01       G          G  Soil heat flux
+#> 5: UK-AMO 1995-01-01 2030-01-01 G_4_1_1    G_4_1_1  Soil heat flux
+#> 6: UK-AMO 1995-01-01 2030-01-01 G_4_1_2    G_4_1_2  Soil heat flux
 #> 
 #> Site information (dt_site):
-#>      site        long_name   lon   lat  elev
-#>    <char>           <char> <num> <num> <int>
-#> 1: UK-AMO Auchencorth Moss -3.25 55.75   120
+#>      site        long_name    lon     lat  elev
+#>    <char>           <char>  <num>   <num> <int>
+#> 1: UK-AMO Auchencorth Moss -3.243 55.7923   120
 #> 
 #> QC information (dt_qc) - first 6 cols:
 #> NULL

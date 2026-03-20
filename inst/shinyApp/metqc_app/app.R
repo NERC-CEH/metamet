@@ -5,7 +5,6 @@ library(shinyjs)
 library(shinyvalidate)
 library(shinyFiles)
 library(ggiraph)
-getwd()
 
 # Set the gap-filling methods and codes----
 gf_choices <- setNames(df_method$method, df_method$method_longname)

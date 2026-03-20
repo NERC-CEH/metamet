@@ -9,6 +9,9 @@ articles:
   contents:
   - metamet
   - workflow_example
+  - workflow_multisite
+  - met_data_standards
+  - changing_names
   - gap_fill_methods
   - openairmaps
   - app_user_guide

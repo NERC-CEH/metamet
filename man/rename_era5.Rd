@@ -22,7 +22,7 @@ observation table (`dt`). The mapping is based on the `dt_meta` metadata table.
 \details{
 - Sets the `site` column in `dt_ref` using the value from `dt_site`.
 - Matches column names in `dt` to those in `dt_ref` using the
-  `standard_name_era5` field in `dt_meta`.
+  `name_era5` field in `dt_meta`.
 - Reorders and renames columns in `dt_ref` to match the structure of `dt`.
 }
 \examples{

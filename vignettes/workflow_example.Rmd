@@ -1,10 +1,10 @@
 ---
-title: "Workflow Example"
+title: "Workflow Example 1"
 author: "Peter Levy"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Workflow Example}
+  %\VignetteIndexEntry{Workflow Example 1}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
@@ -61,7 +61,7 @@ dim(dt)
 dt
 ```
 
-The data consistent of a timestamp column, and 13 variables observed every 15 
+The data consist of a timestamp column, and 13 variables observed every 15 
 minutes from 2003 until 2023, giving `r nrow(dt)` rows and `r ncol(dt)` columns.
 
 ### Observation metadata `dt_meta`
@@ -73,9 +73,8 @@ dt_meta <- setDT(readxl::read_excel(fname))
 v_col <- c(
   "site",
   "name_dt",
-  "standard_name",
-  "long_name",
-  "units",
+  "name_local",
+  "units_local",
   "type",
   "time_char_format",
   # "start_date",
@@ -91,8 +90,8 @@ v_col <- c(
   # "sensor_model",
   "range_min",
   "range_max",
-  "standard_name_era5",
-  "era5_units",
+  "name_era5",
+  "units_era5",
   "imputation_method"
 )
 ```
@@ -129,40 +128,6 @@ dt_site <- fread(fname)
 knitr::kable(dt_site, format = "html")
 ```
 
-### - Create `metamet` object
+### Create `metamet` object
 
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
-
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
-
-## Figures
-
-The figure sizes have been customised so that you can easily put two images side-by-side. 
-
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
-```
-
-You can enable figure captions by `fig_caption: yes` in YAML:
-
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
-
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
-
-## More Examples
-
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
-
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
-```
-
-Also a quote using `>`:
-
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
+TBC

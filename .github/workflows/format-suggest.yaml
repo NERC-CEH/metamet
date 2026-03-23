@@ -28,7 +28,7 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           token: ${{ secrets.UNTIL12APR }} # `UNTIL12APR` is a secret that contains your PAT
           ref: ${{ github.event.pull_request.head.sha }}

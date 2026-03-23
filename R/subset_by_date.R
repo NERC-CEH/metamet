@@ -37,6 +37,13 @@ subset_by_date <- function(
   start_date <- as.POSIXct(start_date)
   end_date <- as.POSIXct(end_date)
   time_name <- mm$dt_meta[type == "time", name_dt]
+  # if duplicate time variables, stop or discard if all the same
+  if (length(unique(time_name)) > 1) {
+    stop("Multiple time variables present in input file.")
+  } else {
+    time_name <<- unique(time_name)
+  }
+  time_name <- "TIMESTAMP" ##* WIP: temp test
 
   if (time_name %!in% names(mm$dt)) {
     stop("Date variable not present when trying to subset by date")

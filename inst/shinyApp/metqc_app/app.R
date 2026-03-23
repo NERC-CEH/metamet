@@ -118,18 +118,18 @@ ui <- dashboardPage(
             actionButton("retrieve_data", "Retrieve from database"),
             actionButton("compare_vars", "Compare variables"),
           ),
-          hidden(
-            div(
-              id = "validation_calendar_outer",
-              box(
-                id = 'validation_calendar',
-                title = "Validation Calendar",
-                status = "success",
-                solidHeader = TRUE,
-                shinycssloaders::withSpinner(plotOutput("heatmap_plot"))
-              )
-            )
-          )
+          # hidden(
+          #   div(
+          #     id = "validation_calendar_outer",
+          #     box(
+          #       id = 'validation_calendar',
+          #       title = "Validation Calendar",
+          #       status = "success",
+          #       solidHeader = TRUE,
+          #       shinycssloaders::withSpinner(plotOutput("heatmap_plot"))
+          #     )
+          #   )
+          # )
         ),
         hidden(
           fluidRow(
@@ -233,7 +233,14 @@ server <- function(input, output, session) {
     mm <- readRDS(input$file$datapath)
     print(input$file$datapath)
     time_name <- mm$dt_meta[type == "time", name_dt]
-    v_names <- mm$dt_meta[type != "time" & type != "site", name_dt]
+    # if duplicate time variables, stop or discard if all the same
+    if (length(unique(time_name)) > 1) {
+      stop("Multiple time variables present in input file.")
+    } else {
+      time_name <<- unique(time_name)
+    }
+    time_name <- "TIMESTAMP" ##* WIP: temp test
+    v_names <- unique(mm$dt_meta[type != "time" & type != "site", name_icos])
     date_of_first_new_record <- mm$dt[, min(get(time_name), na.rm = TRUE)]
     date_of_last_new_record <- mm$dt[, max(get(time_name), na.rm = TRUE)]
     list(
@@ -302,6 +309,7 @@ server <- function(input, output, session) {
 
   # Create a date input for the user to select start date
   output$start_date <- renderUI({
+    print(as.Date(uploaded()$date_of_first_new_record, tz = "UTC"))
     dateInput(
       "sdate",
       value = as.Date(uploaded()$date_of_first_new_record, tz = "UTC"),
@@ -313,6 +321,7 @@ server <- function(input, output, session) {
 
   # Create a date input for the user to select end date
   output$end_date <- renderUI({
+    print(as.Date(uploaded()$date_of_last_new_record, tz = "UTC"))
     dateInput(
       "edate",
       value = as.Date(uploaded()$date_of_last_new_record, tz = "UTC"),
@@ -431,16 +440,13 @@ server <- function(input, output, session) {
       })
     )
 
-    # Creating a calendar heatmap plot that will be plotted depending on the tab selected in plotTabs
-    heatmap_plot_selected <- reactive({
-      req(input$plotTabs)
-      plot_heatmap_calendar(
-        mm_qry$dt_qc,
-        time_name = mm_qry$dt_meta[type == "time", name_dt]
-      )
-    })
+    # # Creating a calendar heatmap plot that will be plotted depending on the tab selected in plotTabs
+    # heatmap_plot_selected <- reactive({
+    #   req(input$plotTabs)
+    #   plot_heatmap_calendar(mm_qry$dt_qc)
+    # })
 
-    output$heatmap_plot <- renderPlot(heatmap_plot_selected())
+    # output$heatmap_plot <- renderPlot(heatmap_plot_selected())
 
     enable('compare_vars')
   })

@@ -4,7 +4,7 @@
 \alias{plot_heatmap_calendar}
 \title{plot_heatmap_calendar}
 \usage{
-plot_heatmap_calendar(df)
+plot_heatmap_calendar(df, time_name)
 }
 \arguments{
 \item{df}{A data frame of met data}

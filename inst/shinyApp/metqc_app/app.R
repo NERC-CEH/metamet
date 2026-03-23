@@ -216,8 +216,19 @@ server <- function(input, output, session) {
   # increase input file size limit to 200 MB
   options(shiny.maxRequestSize = 200 * 1024^2)
 
-  # define root path with shinyFiles
-  roots <- c(home = fs::path_home(), wd = getwd())
+  # maps all drives that users have on windows
+  get_drives <- function() {
+    if (.Platform$OS.type == "windows") {
+      drives <- letters
+      drives <- paste0(drives, ":/")
+      drives <- drives[dir.exists(drives)]
+      return(setNames(drives, drives))
+    } else {
+      return(c(home = fs::path_home()))
+    }
+  }
+
+  roots <- get_drives()
 
   shinyFileChoose(
     input,

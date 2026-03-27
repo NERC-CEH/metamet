@@ -28,6 +28,7 @@ Imports:
     readxl,
     powerjoin,
     shiny,
+    shinyFiles,
     openairmaps,
     mgcv,
     dplyr,

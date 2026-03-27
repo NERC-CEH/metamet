@@ -10,13 +10,14 @@ mod_upload_ui <- function(id) {
     checkboxInput(ns("use_custom_site"), "Upload custom site file", value = FALSE),
     uiOutput(ns("site_file_ui")),
     uiOutput(ns("site_select_ui")),
+    checkboxInput(ns("use_era5"), "Add ERA5 ref data", value = FALSE),
     br(),
-    uiOutput(ns("file_preview_ui")),
-    br(), br(),
     fluidRow(
       column(12, actionButton(ns("load_preview"), "Load and preview file(s)", class = "btn-primary")),
       column(12, actionButton(ns("remove_file"), "Remove file", class = "btn-danger"))
-    )
+    ),
+    br(), br(),
+    uiOutput(ns("file_preview_ui"))
   )
 }
 
@@ -24,7 +25,6 @@ mod_upload_ui <- function(id) {
 mod_upload_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-
     data_rv <- reactiveValues(
       data = NULL,
       metadata = NULL,
@@ -100,117 +100,95 @@ mod_upload_server <- function(id) {
       }
     })
 
-# Observe events for loading and previewing files
+    # Observe events for loading and previewing files
     observeEvent(input$load_preview, {
       req(input$csv_file)
 
-      # Data
+      # Load data
       data_df <- readr::read_csv(input$csv_file$datapath, show_col_types = FALSE) |> as.data.frame()
       data_rv$data <- data_df
 
-      # Metadata
+      # Load metadata
       if (isTRUE(input$use_metadata)) {
         req(input$metadata_file)
-
         ext <- tools::file_ext(input$metadata_file$name)
-
         chosen_meta <- if (ext == "csv") {
           readr::read_csv(input$metadata_file$datapath, show_col_types = FALSE)
         } else {
           read_excel_smart(input$metadata_file$datapath, "dt_meta")
         }
-
       } else {
         chosen_meta <- builtin_dt_meta
       }
 
-      # Site
+      # Load site
       if (isTRUE(input$use_custom_site)) {
         req(input$site_file)
-
         ext <- tools::file_ext(input$site_file$name)
-
         chosen_site <- if (ext == "csv") {
           readr::read_csv(input$site_file$datapath, show_col_types = FALSE)
         } else {
           read_excel_smart(input$site_file$datapath, "dt_site")
         }
-
       } else {
         chosen_site <- builtin_dt_site
       }
 
-      # Standardise
-      #chosen_meta <- standardise_site_col(chosen_meta)
+      # Standardise site
       chosen_site <- standardise_site_col(chosen_site)
 
-      # Filter by site if site selection exists
+      # Filter by selected site
       req(input$site_select)
       site_id <- input$site_select
-
       chosen_meta <- chosen_meta[chosen_meta$site == site_id, , drop = FALSE]
       chosen_site <- chosen_site[chosen_site$site == site_id, , drop = FALSE]
 
-      # Build metamet object with error handling and debug output
+      # Build metamet object with error handling
       mm_obj <- tryCatch({
-
-        # Debug
-        message("---- DEBUG: Inspecting arguments before metamet ----")
-        message("data_df type: ", class(data_df))
-        message("chosen_meta type: ", class(chosen_meta))
-        message("chosen_site type: ", class(chosen_site))
-        message("site_id: ", site_id)
-        message("nrow data_df: ", nrow(data_df))
-        message("nrow chosen_meta: ", nrow(chosen_meta))
-        message("nrow chosen_site: ", nrow(chosen_site))
-        message("Column names data_df: ", paste(names(data_df), collapse = ", "))
-        message("Column names chosen_meta: ", paste(names(chosen_meta), collapse = ", "))
-        message("Column names chosen_site: ", paste(names(chosen_site), collapse = ", "))
-
-        # show first few rows for data, metadata & site
-        print(head(data_df, 5))
-        print(head(chosen_meta, 5))
-        print(head(chosen_site, 5))
-
-        # make sure it's a df not a tibble!
-        chosen_site <- as.data.frame(chosen_site)
-        # call metamet
         metamet::metamet(
           dt = data_df,
           dt_meta = chosen_meta,
           dt_site = chosen_site,
           site_id = site_id
         )
-
       }, error = function(e) {
-        message("❌ metamet failed with error: ", e$message)
-        # keep debugging info
-        message("---- END DEBUG ----")
+        message("❌ metamet failed: ", e$message)
         NULL
       })
 
-      data_rv$mm <- mm_obj
-    })
+      # Optionally add ERA5 data
+      if (!is.null(mm_obj) && isTRUE(input$use_era5)) {
+        mm_obj <- tryCatch({
+          era5_path <- system.file("tests/testthat/data-raw/dt_era5.csv", package = "metamet")
+          if (era5_path == "") stop("ERA5 file not found")
+          mm_tmp <- add_era5(mm_obj, fname_era5 = era5_path)
+          mm_tmp <- apply_qc(join(mm_tmp, mm_obj))
+          if ("TS" %in% names(mm_tmp$dt)) mm_tmp <- impute(mm_tmp)
+          mm_tmp
+        }, error = function(e) {
+          message("ERA5 failed: ", e$message)
+          mm_obj
+        })
+      }
 
-# Preview of loaded files
+      # Save to reactiveValues
+      data_rv$mm <- mm_obj
+    })  # end observeEvent(input$load_preview)
+
+    # File preview UI
     output$file_preview_ui <- renderUI({
       req(data_rv$data)
-
       tagList(
         h4("Data"),
         DT::dataTableOutput(ns("data_preview")),
-
         if (!is.null(data_rv$mm)) {
           tagList(
             h4("Metamet summary"),
             verbatimTextOutput(ns("mm_summary")),
-
             h4("dt"),
             DT::dataTableOutput(ns("mm_dt")),
-
             h4("dt_meta"),
             DT::dataTableOutput(ns("mm_meta")),
-
             h4("dt_site"),
             DT::dataTableOutput(ns("mm_site"))
           )
@@ -218,27 +196,16 @@ mod_upload_server <- function(id) {
       )
     })
 
+    # Render outputs
     output$data_preview <- DT::renderDataTable({
       DT::datatable(head(data_rv$data, 10))
     })
+    output$mm_summary <- renderPrint({ req(data_rv$mm); data_rv$mm })
+    output$mm_dt <- DT::renderDataTable({ DT::datatable(head(data_rv$mm$dt, 10)) })
+    output$mm_meta <- DT::renderDataTable({ DT::datatable(head(data_rv$mm$dt_meta, 10)) })
+    output$mm_site <- DT::renderDataTable({ DT::datatable(head(data_rv$mm$dt_site, 10)) })
 
-    output$mm_summary <- renderPrint({
-      req(data_rv$mm)
-      data_rv$mm
-    })
-
-    output$mm_dt <- DT::renderDataTable({
-      DT::datatable(head(data_rv$mm$dt, 10))
-    })
-
-    output$mm_meta <- DT::renderDataTable({
-      DT::datatable(head(data_rv$mm$dt_meta, 10))
-    })
-
-    output$mm_site <- DT::renderDataTable({
-      DT::datatable(head(data_rv$mm$dt_site, 10))
-    })
-
+    # Return reactive list
     return(
       reactive({
         list(
@@ -249,6 +216,5 @@ mod_upload_server <- function(id) {
         )
       })
     )
-
-  })
-}
+  })  # end moduleServer(
+}  # end mod_upload_server(

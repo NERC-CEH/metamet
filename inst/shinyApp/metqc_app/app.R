@@ -38,19 +38,13 @@ ui <- dashboardPage(
   dashboardSidebar(
     sidebarMenu(
       id = 'tabs',
-      # tab to upload raw files
+      # tab to upload raw files or .rds
       menuItem(
-        "Choose a raw file to transform",
+        "Load a file",
         tabName = "upload",
         icon = icon("upload")
       ),
-      # with shinyfiles lib
-      shinyFilesButton(
-        id = "file",
-        label = "Open metamet .rds file",
-        title = "Select a file",
-        multiple = FALSE
-      ),
+
       menuItem(
         "Choose date range",
         tabName = "dashboard",
@@ -74,8 +68,43 @@ ui <- dashboardPage(
       tabItem(
         tabName = "upload",
         fluidPage(
-          mod_upload_ui("upload_module"),
-          mod_colmap_ui("colmap_module")
+
+          # Source selector
+          radioButtons(
+            "data_source",
+            label = "Select dataset source:",
+            choices = c(
+              "RDS Upload" = "rds",
+              "Convert a CSV into metamet" = "csv"
+            ),
+            selected = "rds"
+          ),
+
+          # ---------------------
+          # RDS upload
+          # ---------------------
+          conditionalPanel(
+            condition = "input.data_source == 'rds'",
+            div(
+              shinyFilesButton(
+                id = "file",
+                label = "Open metamet .rds file",
+                title = "Select a file",
+                multiple = FALSE
+              )
+            )
+          ),
+
+          # ---------------------
+          # CSV upload + mapping
+          # ---------------------
+          conditionalPanel(
+            condition = "input.data_source == 'csv'",
+            div(
+              mod_upload_ui("upload_module"),
+              mod_colmap_ui("colmap_module")
+            )
+          )
         )
       ),
       tabItem(
@@ -235,12 +264,50 @@ server <- function(input, output, session) {
   # increase input file size limit to 200 MB
   options(shiny.maxRequestSize = 200 * 1024^2)
 
+  # state of reactive vals
+  mm_qry <- reactiveVal(NULL)
+  v_names_checklist <- reactiveValues()
+
   # load mapping for upload module
   uploaded_upload <- mod_upload_server("upload_module")
   mapped_data <- mod_colmap_server(
     "colmap_module",
     uploaded_upload
   )
+  # processing csv
+  mapped_data_processed <- reactive({
+    req(input$data_source == "csv", mapped_data())
+
+    mm <- mapped_data()
+
+    time_name <- mm$dt_meta[type == "time", name_dt]
+    v_names <- mm$dt_meta[type != "time" & type != "site", name_dt]
+
+    list(
+      mm = mm,
+      time_name = time_name,
+      v_names = v_names,
+      date_of_first_new_record = mm$dt[, min(get(time_name), na.rm = TRUE)],
+      date_of_last_new_record  = mm$dt[, max(get(time_name), na.rm = TRUE)],
+      fname = "mapped_from_csv"
+    )
+  })
+
+  active_data <- reactive({
+    req(input$data_source)
+
+    if (input$data_source == "rds") {
+      req(uploaded_rds())
+      return(uploaded_rds())
+    }
+
+    if (input$data_source == "csv") {
+      req(mapped_data_processed())
+      return(mapped_data_processed())
+    }
+
+    return(NULL)  # fallback safety
+  })
 
   observeEvent(mapped_data(), {
     showNotification("✅ Mapping confirmed! Ready to process data.")
@@ -283,6 +350,7 @@ server <- function(input, output, session) {
 
   # Reactive expression to load the RDS file
   uploaded_rds <- reactive({
+    req(input$data_source == "rds")
     req(input$file)
     fileinfo <- parseFilePaths(roots, input$file)
     req(nrow(fileinfo) > 0)
@@ -302,16 +370,43 @@ server <- function(input, output, session) {
     )
   })
 
-  # Simple status message instead of displaying the object
+  # switches to active dataset
+  active_data <- reactive({
+    req(input$data_source)
+
+    if (input$data_source == "rds") return(uploaded_rds())
+    if (input$data_source == "csv") return(mapped_data_processed())
+
+    NULL
+  })
+
+  # confirms files have been uploaded
   output$status <- renderText({
-    if (is.null(input$file)) {
-      return("No file selected yet.")
+    req(active_data())
+    if (input$data_source == "rds") {
+      paste("RDS file successfully loaded:", basename(active_data()$fname))
+    } else {
+      "CSV file successfully mapped and loaded."
     }
-    req(uploaded_rds())
-    paste(
-      "RDS file successfully loaded:",
-      basename(uploaded_rds()$fname)
-    )
+  })
+
+  # POPUP notification of uploaded files
+  observe({
+    req(active_data())  # triggers when CSV or RDS data is ready
+
+    if (input$data_source == "csv") {
+      showNotification(
+        "✅ CSV file ssuccessfully loaded.",
+        type = "message",
+        duration = 5
+      )
+    } else if (input$data_source == "rds") {
+      showNotification(
+        paste0("✅ RDS file successfully loaded: ", basename(active_data()$fname)),
+        type = "message",
+        duration = 5
+      )
+    }
   })
 
   ##########################
@@ -363,7 +458,7 @@ server <- function(input, output, session) {
   output$start_date <- renderUI({
     dateInput(
       "sdate",
-      value = as.Date(uploaded_rds()$date_of_first_new_record, tz = "UTC"),
+      value = as.Date(active_data()$date_of_first_new_record, tz = "UTC"),
       min = first_start_date(),
       max = last_end_date(),
       label = "Start date"
@@ -374,7 +469,7 @@ server <- function(input, output, session) {
   output$end_date <- renderUI({
     dateInput(
       "edate",
-      value = as.Date(uploaded_rds()$date_of_last_new_record, tz = "UTC"),
+      value = as.Date(active_data()$date_of_last_new_record, tz = "UTC"),
       min = first_start_date(),
       max = last_end_date(),
       label = "End date"
@@ -426,6 +521,7 @@ server <- function(input, output, session) {
   # The optional rendering of UI elements depending on which
   # imputation method has been selected
   output$impute_extra_info <- renderUI({
+    req(active_data())
     req(input$select_imputation)
     if (input$select_imputation == "time") {
       sliderInput(
@@ -440,15 +536,15 @@ server <- function(input, output, session) {
       selectInput(
         "select_covariate",
         label = h5("Covariate"),
-        choices = uploaded_rds()$v_names
+        choices = active_data()$v_names
       )
     }
   })
 
   # Data retrieval functionality-----
   observeEvent(input$retrieve_data, {
-    for (i in 1:length(uploaded_rds()$v_names)) {
-      v_names_checklist[[uploaded_rds()$v_names[i]]] <- FALSE
+    for (i in 1:length(active_data()$v_names)) {
+      v_names_checklist[[active_data()$v_names[i]]] <- FALSE
     }
 
     # enabling previously disabled buttons
@@ -456,17 +552,17 @@ server <- function(input, output, session) {
     shinyjs::show("validation_calendar_outer")
 
     mm_qry <<- metamet::subset_by_date(
-      uploaded_rds()$mm,
+      active_data()$mm,
       start_date = df_daterange()$start_date,
       end_date = df_daterange()$end_date
     )
 
     mm_qry$dt$checked <<- as.factor(rownames(mm_qry$dt))
-    mm_qry$dt$datect_num <<- as.numeric(mm_qry$dt[, get(uploaded_rds()$time_name)])
+    mm_qry$dt$datect_num <<- as.numeric(mm_qry$dt[, get(active_data()$time_name)])
 
     # Add a tab to the plotting panel for each variable that has been selected by the user.
     output$mytabs <- renderUI({
-      my_tabs <- lapply(paste(uploaded_rds()$v_names), function(i) {
+      my_tabs <- lapply(paste(active_data()$v_names), function(i) {
         tabPanel(
           i,
           value = i,
@@ -484,7 +580,7 @@ server <- function(input, output, session) {
     })
 
     observe(
-      lapply(paste(uploaded_rds()$v_names), function(i) {
+      lapply(paste(active_data()$v_names), function(i) {
         output[[paste0(i, "_interactive_plot")]] <-
           renderGirafe(metamet:::ggiraph_plot(i))
       })
@@ -523,15 +619,15 @@ server <- function(input, output, session) {
           fluidRow(
             column(
               6,
-              selectInput('x_var', 'X variable:', choices = uploaded_rds()$v_names)
+              selectInput('x_var', 'X variable:', choices = active_data()$v_names)
             ),
             column(
               6,
               selectInput(
                 'y_var',
                 'Y variable:',
-                choices = uploaded_rds()$v_names,
-                selected = uploaded_rds()$v_names[1]
+                choices = active_data()$v_names,
+                selected = active_data()$v_names[1]
               )
             )
           ),

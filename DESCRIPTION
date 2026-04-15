@@ -41,6 +41,7 @@ Imports:
     glue,
     shinydashboard,
     shinyvalidate,
-    ggiraph
+    ggiraph,
+    shinyFiles
 Config/testthat/edition: 3
 URL: https://nerc-ceh.github.io/metamet/

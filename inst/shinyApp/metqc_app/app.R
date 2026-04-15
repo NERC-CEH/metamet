@@ -243,6 +243,7 @@ server <- function(input, output, session) {
     v_names <- unique(mm$dt_meta[type != "time" & type != "site", name_icos])
     date_of_first_new_record <- mm$dt[, min(get(time_name), na.rm = TRUE)]
     date_of_last_new_record <- mm$dt[, max(get(time_name), na.rm = TRUE)]
+    setkeyv(mm$dt, c("name_icos", "site", time_name))
     list(
       mm = mm,
       time_name = time_name,
@@ -410,8 +411,9 @@ server <- function(input, output, session) {
       start_date = df_daterange()$start_date,
       end_date = df_daterange()$end_date
     )
-
-    mm_qry$dt$checked <<- as.factor(rownames(mm_qry$dt))
+    setkeyv(mm_qry$dt, c("name_icos", "site", time_name))
+    mm_qry$dt[, row_name := as.factor(rownames(mm_qry$dt))]
+    # line below not used I think
     mm_qry$dt$datect_num <<- as.numeric(mm_qry$dt[, get(uploaded()$time_name)])
 
     # Add a tab to the plotting panel for each variable that has been selected by the user.
@@ -511,7 +513,7 @@ server <- function(input, output, session) {
         x = input$select_covariate,
         k = input$intslider,
         plot_graph = FALSE,
-        selection = mm_qry$dt$checked %in% selected_state()
+        row_selected = selected_state()
       )
 
       # Re-plotting plot after imputation is confirmed to illustrate changes
@@ -520,7 +522,7 @@ server <- function(input, output, session) {
       enable("impute")
       enable("finished_check")
 
-      # Creating a reactive plot that will be plotted depending on the tab selected in plotTabs
+      # Creating a reactive plot for the variable selected in plotTabs
       plot_selected <- reactive({
         req(input$plotTabs)
         metamet::ggiraph_plot(input$plotTabs)

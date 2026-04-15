@@ -27,8 +27,8 @@
 ##'   }
 ##' @param qc_tokeep Integer QC code(s) indicating "good" or "raw" data to retain unchanged.
 ##'   Default \code{0}. Data with QC codes not in \code{qc_tokeep} are candidates for imputation.
-##' @param selection Logical. If \code{TRUE} (default), applies selection filtering
-##'   from metadata. If \code{FALSE}, imputes all values matching \code{qc_tokeep} criteria.
+##' @param is_selected Logical. If \code{TRUE} (default), applies imputation to all missing values
+##'   If called from the shiny app, this will be a vector showing which points were selected by the user.
 ##' @param k Integer. Smoothing basis dimension for GAM in "time" method (default: 40).
 ##'   Automatically reduced if data is sparse. Controls temporal smoothness.
 ##' @param fit Logical. If \code{TRUE} (default), fits regression/GAM models for
@@ -55,7 +55,7 @@
 ##' **Imputation Process:**
 ##' The function iterates over each variable in \code{v_y}. For each variable:
 ##' 1. Determines the imputation method (from parameter or metadata).
-##' 2. Identifies which rows to impute based on QC codes and \code{selection} flag.
+##' 2. Identifies which rows to impute based on QC codes and \code{is_selected} flag.
 ##' 3. Applies the selected imputation method.
 ##' 4. Updates the QC table to flag imputed values.
 ##' 5. Optionally generates a diagnostic plot.
@@ -118,7 +118,7 @@ impute <- function(
   mm,
   method = NULL,
   qc_tokeep = 0,
-  selection = TRUE,
+  row_selected = TRUE,
   k = 40,
   fit = TRUE,
   n_min = 10,
@@ -134,30 +134,30 @@ impute <- function(
     use_method_from_meta <- FALSE
   }
 
-  time_name <- mm$dt_meta[type == "time", name_dt]
+  time_name <- unique(mm$dt_meta[type == "time", name_dt])
+  if (length(time_name) > 1) {
+    stop("More than one time variable found in data.")
+  }
   v_cols_to_exclude <- c("site", time_name)
   if (is.null(v_y)) {
-    v_y <- names(mm$dt)[names(mm$dt) %!in% v_cols_to_exclude]
+    v_y <- unique(mm$dt$name_icos)
   }
 
-  # these 3 lines not needed if we prefix with mm$ throughout
+  # this line not needed if we prefix with mm$ throughout
   dt <- mm$dt
-  dt_qc <- mm$dt_qc
-  dt_ref <- mm$dt_ref
 
   for (y in v_y) {
     print(paste("Getting ready to impute", y))
     if (use_method_from_meta) {
       method <- mm$dt_meta[name_dt == y, imputation_method]
     }
-    # method <- match.arg(method, df_method$method)
     method <- df_method$method[match(method, df_method$method)]
     # get the qc code for the selected method
     qc <- df_method$qc[match(method, df_method$method)]
     print(paste("using method", qc, method))
 
     # how many non-missing data are there?
-    n_data <- sum(!is.na(dt[, get(y)]))
+    n_data <- sum(!is.na(dt[y == name_icos, ]))
     # with very few/no data, just replace with era5 data rather than trying to fit a regression
     if (n_data <= n_min && method == "era5") {
       print(paste("Too few data to fit regression; using ERA5 data directly"))
@@ -170,12 +170,16 @@ impute <- function(
     }
 
     # qc_tokeep typically set to 0, so this selects any other value (missing or imputed)
-    # selection optionally adds those selected in the metdb app ggiraph plots
-    # isel = TRUE  = missing (AND selected), to be imputed
-    # isel = FALSE = raw
-    i_sel <- dt_qc[, get(y)] %!in% qc_tokeep & selection
+    # is_selected optionally adds those selected in the metqc app ggiraph plots
+    # by default, this selects all points marked as missing because the only
+    # qc_tokeep is the raw data. Run interactively in the app, this applies only
+    # to those selected with the additional condition "is_selected".
+    dt[y == name_icos, is_selected := row_name %in% row_selected]
+    dt[y == name_icos, is_selected := qc %!in% qc_tokeep & is_selected]
+
     if (method == "noneg") {
-      i_sel <- i_sel & dt[, y] < 0
+      # only previously selected values which are negative stay selected
+      dt[, is_selected := y == name_icos & is_selected & value < 0]
     }
     if (method == "nightzero") {
       dt$date <- dt[, ..date_field] # needs to be called "date" for openair functions
@@ -185,7 +189,10 @@ impute <- function(
         latitude = lat,
         longitude = lon
       )
-      i_sel <- i_sel & dt$daylight == "nighttime"
+      # only previously selected values which are in night-time stay selected
+      dt[,
+        is_selected := y == name_icos & is_selected & daylight == "nighttime"
+      ]
       dt$daylight <- NULL
       # if date is not the original variable name, delete it - we don't want an extra column
       if (time_name != "date") dt$date <- NULL
@@ -194,62 +201,73 @@ impute <- function(
     # calculate replacement values depending on the method
     # if a constant zero
     if (method == "nightzero" | method == "noneg" | method == "zero") {
-      dt[i_sel, eval(y) := 0]
+      dt[is_selected & y == name_icos, value := 0]
     } else if (method == "time") {
       if (k > n_data / 4) {
         k <- as.integer(n_data / 4)
       }
-      v_date <- dt[, get(time_name)]
+      v_date <- dt[y == name_icos, get(time_name)]
       datect_num <- as.numeric(v_date) ## !dt_qry$
       hour <- as.POSIXlt(v_date)$hour
 
       # cannot include hour if daily avg, as no spread in hours
       m <- mgcv::gam(
-        dt[, get(y)] ~
+        dt[y == name_icos, value] ~
           s(datect_num, k = k, bs = "cr"),
         # s(yday, k = k_yday, bs = "cr") +
         # s(hour, k = -1, bs = "cc"),
         na.action = na.exclude #, data = dt
       )
-      v_pred <- predict(m, newdata = data.frame(datect_num, hour))
-      dt[i_sel, y] <- v_pred[i_sel]
+      dt[
+        y == name_icos,
+        pred := predict(m, newdata = data.frame(datect_num, hour))
+      ]
+      # this is a test that the number of predictions produced is correct
+      # xx = sum(!is.na(dt[y == name_icos, pred]))
+      # yy = sum(is.na(dt[y != name_icos, pred]))
+      # nrow(dt); xx + yy
+
+      dt[is_selected & y == name_icos, value := pred]
     } else if (method == "regn" || method == "era5") {
       if (method == "era5") {
-        v_x <- dt_ref[, get(y)] # use ERA5 data
+        v_x <- dt[y == name_icos, ref] # use ERA5 data
       } else {
-        v_x <- dt[, get(x)] # use x variable in the obs data
+        # v_x <- dt[, get(x)] # use x variable in the obs data
+        stop("regn method does not currently work with long-format data")
       }
       if (fit) {
-        dtt <- data.frame(y = dt[, get(y)], x = v_x)
-        # exclude indices i_sel i.e. do not fit to those we are replacing
-        dtt$y[i_sel] <- NA
+        dtt <- data.table(
+          y = dt[y == name_icos, value],
+          x = v_x,
+          is_selected = dt[y == name_icos, is_selected]
+        )
+        # exclude selected rows i.e. do not fit to those we are replacing
+        dtt[is_selected == TRUE, y := NA]
         m <- lm(y ~ x, data = dtt, na.action = na.exclude)
         v_pred <- predict(m, newdata = dtt)
       } else {
         # or just replace y with x
         v_pred <- v_x
       }
-      dt[i_sel, eval(y) := v_pred[i_sel]]
+      dt[y == name_icos & is_selected == TRUE, value := v_pred[dtt$is_selected]]
     }
 
     # add code for each replaced value in the qc dt
-    dt_qc[i_sel, eval(y) := qc]
+    dt[y == name_icos & is_selected == TRUE, qc := ..qc]
 
     if (plot_graph) {
-      dtt <- data.table(
-        date = dt[, get(time_name)],
-        y = dt[, get(y)],
-        qc = dt_qc[, get(y)]
-      )
-      p <- ggplot(dtt, aes(date, y))
+      dtt <- dt[y == name_icos, .(date = get(time_name), y = value, qc)]
+
+      p <- ggplot(dt[y == name_icos], aes(get(time_name), value))
+      p <- p + geom_line(aes(y = ref), colour = "black")
       p <- p +
-        geom_line(
-          data = dt_ref,
-          aes(x = dt_ref[, get(time_name)], y = dt_ref[, get(y)]),
-          colour = "black"
-        )
-      # }
-      p <- p + geom_point(aes(y = y, colour = factor(qc)), size = 1) + ylab(y)
+        geom_point(
+          aes(colour = method_longname, shape = method_longname),
+          size = 1
+        ) +
+        ylab(y)
+      p <- p + facet_wrap(~site)
+      p <- p + facet_grid(~ site * var_name)
       fs::dir_create("output")
       fname <- paste0("plot_", y, "_", method, ".png")
       ggsave(p, filename = fname)

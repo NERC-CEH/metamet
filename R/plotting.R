@@ -9,18 +9,7 @@
 #' @details DETAILS
 #' @export
 ggiraph_plot <- function(input_variable) {
-  df <- data.table(
-    site = mm_qry$dt[name_icos == input_variable, site],
-    DATECT = mm_qry$dt[name_icos == input_variable, get(time_name)],
-    ##* WIP: how to extract correct variables when in long format?
-    var_name = mm_qry$dt[name_icos == input_variable, var_name],
-    y = mm_qry$dt[name_icos == input_variable, value],
-    qc = mm_qry$dt[name_icos == input_variable, qc],
-    ref = mm_qry$dt[name_icos == input_variable, ref],
-    checked = mm_qry$dt[name_icos == input_variable, checked]
-  )
-
-  df <- left_join(df, df_method, by = "qc")
+  mm_qry$dt <- mm_qry$dt[df_method, on = .(qc = qc)]
 
   col_pal <- c(
     '#5b5b5b',
@@ -35,11 +24,16 @@ ggiraph_plot <- function(input_variable) {
   )
   names(col_pal) <- levels(df_method$method_longname)
 
-  p1_ggplot <- ggplot(df, aes(DATECT, y)) +
+  p1_ggplot <- ggplot(
+    mm_qry$dt[name_icos == input_variable],
+    aes(get(time_name), value)
+  ) +
     geom_point_interactive(
       aes(
-        data_id = checked,
-        tooltip = glue::glue("Timestamp: {DATECT}\nMeasure: {y}"),
+        data_id = row_name,
+        tooltip = glue::glue(
+          "Timestamp: {get(time_name)}\nRowname: {row_name}"
+        ),
         shape = factor(method_longname),
         colour = factor(var_name)
       ),

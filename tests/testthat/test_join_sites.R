@@ -12,9 +12,9 @@ test_that("joining metamet from different sites works", {
     file = testthat::test_path("data-raw/UK-WHM/UK-WHM_BM_mm_2023.rds")
   )
 
-  mm_amo <- subset_by_date(mm_amo, "2023-09-01", "2023-09-02")
-  mm_ebu <- subset_by_date(mm_ebu, "2023-09-01", "2023-09-02")
-  mm_whm <- subset_by_date(mm_whm, "2023-09-01", "2023-09-02")
+  # mm_amo <- subset_by_date(mm_amo, "2023-09-01", "2023-09-02")
+  # mm_ebu <- subset_by_date(mm_ebu, "2023-09-01", "2023-09-02")
+  # mm_whm <- subset_by_date(mm_whm, "2023-09-01", "2023-09-02")
 
   dim(mm_amo$dt)
   dim(mm_whm$dt)
@@ -38,6 +38,8 @@ test_that("joining metamet from different sites works", {
   )
   dim(mm$dt)
   names(mm$dt)
+  saveRDS(mm, file = "data-raw/mm_amo_ebu_whm_2023.rds")
+  mm <- readRDS(file = "data-raw/mm_amo_ebu_whm_2023.rds")
 
   p <- ggplot(
     mm$dt[name_icos == "TS", ],

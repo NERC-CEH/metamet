@@ -9,16 +9,7 @@
 #' @details DETAILS
 #' @export
 ggiraph_plot <- function(input_variable) {
-  time_name <- mm_qry$dt_meta[type == "time", name_dt]
-  df <- data.frame(
-    # DATECT = mm_qry$dt$DATECT,
-    DATECT = mm_qry$dt[, get(time_name)],
-    y = mm_qry$dt[, ..input_variable][[1]],
-    qc = mm_qry$dt_qc[, ..input_variable][[1]],
-    checked = mm_qry$dt$checked
-  )
-
-  df <- left_join(df, df_method, by = "qc")
+  mm_qry$dt <- mm_qry$dt[df_method, on = .(qc = qc)]
 
   col_pal <- c(
     '#5b5b5b',
@@ -33,16 +24,34 @@ ggiraph_plot <- function(input_variable) {
   )
   names(col_pal) <- levels(df_method$method_longname)
 
-  p1_ggplot <- ggplot(df, aes(DATECT, y)) +
+  p1_ggplot <- ggplot(
+    mm_qry$dt[name_icos == input_variable],
+    aes(get(time_name), value)
+  ) +
     geom_point_interactive(
       aes(
-        data_id = checked,
-        tooltip = glue::glue("Timestamp: {DATECT}\nMeasure: {y}"),
-        colour = factor(method_longname)
+        data_id = row_name,
+        tooltip = glue::glue(
+          "Timestamp: {get(time_name)}\nRowname: {row_name}"
+        ),
+        shape = factor(method_longname),
+        colour = factor(var_name)
       ),
       size = 3
     ) +
-    scale_color_manual(values = col_pal, limits = force) +
+
+    facet_wrap_interactive(
+      ncol = 2,
+      interactive_on = "text",
+      vars(site),
+      labeller = labeller_interactive(aes(
+        tooltip = paste("The site is", site),
+        data_id = site
+      ))
+    ) +
+
+    geom_line(aes(y = ref), colour = "black") +
+    # scale_color_manual(values = col_pal, limits = force) +
     xlab("Date") +
     ylab(paste("Your variable:", input_variable)) +
     ggtitle(paste(input_variable, "time series")) +
@@ -67,7 +76,7 @@ ggiraph_plot <- function(input_variable) {
 #'
 
 #' @title plot_heatmap_calendar
-#' @description Plots a calendar showing who has checked the data by date
+#' @description Plots a calendar showing who has validated the data by date
 #' @param df A data frame of met data
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS

@@ -83,27 +83,26 @@ mod_upload_server <- function(id) {
     # -------------------------
     # Built-in data
     # -------------------------
-    builtin_dt_site <- tryCatch(
-      {
-        path <- system.file(
-          "tests/testthat/data-raw/dt_site.csv",
-          package = "metamet"
-        )
-        readr::read_csv(path, show_col_types = FALSE) |> as.data.frame()
-      },
-      error = function(e) NULL
-    )
+    path_site <- system.file("extdata", "dt_site.csv", package = "metamet")
 
-    builtin_dt_meta <- tryCatch(
-      {
-        path <- system.file(
-          "tests/testthat/data-raw/dt_meta.xlsx",
-          package = "metamet"
-        )
-        read_excel_smart(path, "dt_meta")
-      },
-      error = function(e) NULL
-    )
+    if (path_site == "") {
+      stop("dt_site.csv not found in package extdata/")
+    }
+
+    builtin_dt_site <- readr::read_csv(path_site, show_col_types = FALSE) |>
+      as.data.frame()
+
+    # -------------------------
+    # Built-in metadata
+    # -------------------------
+    path_meta <- system.file("extdata", "dt_meta.xlsx", package = "metamet")
+
+    if (path_meta == "") {
+      stop("dt_meta.xlsx not found in package extdata/")
+    }
+
+    builtin_dt_meta <- readxl::read_excel(path_meta, sheet = "dt_meta") |>
+      as.data.frame()
 
     # -------------------------
     # UI
@@ -152,10 +151,21 @@ mod_upload_server <- function(id) {
         builtin_dt_meta
       }
 
-      # Site
+      # Site - handles both xlsx and csv
       chosen_site <- if (isTRUE(input$use_custom_site)) {
         req(input$site_file)
-        read_excel_smart(input$site_file$datapath, "dt_site")
+
+        file_path <- input$site_file$datapath
+        file_ext  <- tools::file_ext(input$site_file$name)
+
+        if (file_ext %in% c("xls", "xlsx")) {
+          read_excel_smart(file_path, "dt_site")
+        } else if (file_ext == "csv") {
+          read.csv(file_path)
+        } else {
+          stop("Unsupported file type. Please upload an Excel or CSV file.")
+        }
+
       } else {
         builtin_dt_site
       }
@@ -166,8 +176,8 @@ mod_upload_server <- function(id) {
       req(input$site_select)
       site_id <- input$site_select
 
-      chosen_meta <- chosen_meta[chosen_meta$site == site_id, , drop = FALSE]
-      chosen_site <- chosen_site[chosen_site$site == site_id, , drop = FALSE]
+      chosen_meta <- as.data.frame(chosen_meta[chosen_meta$site == site_id, , drop = FALSE])
+      chosen_site <- as.data.frame(chosen_site[chosen_site$site == site_id, , drop = FALSE])
 
       # Save
       data_rv$metadata <- chosen_meta

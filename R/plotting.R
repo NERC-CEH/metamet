@@ -11,7 +11,6 @@
 ggiraph_plot <- function(input_variable) {
   time_name <- mm_qry$dt_meta[type == "time", name_dt]
   df <- data.frame(
-    # DATECT = mm_qry$dt$DATECT,
     DATECT = mm_qry$dt[, get(time_name)],
     y = mm_qry$dt[, ..input_variable][[1]],
     qc = mm_qry$dt_qc[, ..input_variable][[1]],
@@ -33,7 +32,7 @@ ggiraph_plot <- function(input_variable) {
   )
   names(col_pal) <- levels(df_method$method_longname)
 
-  p1_ggplot <- ggplot(df, aes(DATECT, y)) +
+  p <- ggplot(df, aes(DATECT, y)) +
     geom_point_interactive(
       aes(
         data_id = checked,
@@ -50,7 +49,7 @@ ggiraph_plot <- function(input_variable) {
       plot.title = element_text(hjust = 0.5),
       legend.title = element_blank()
     )
-  p1_girafe <- girafe(code = print(p1_ggplot), width_svg = 10, height_svg = 5)
+  p1_girafe <- girafe(code = print(p), width_svg = 10, height_svg = 5)
   p1_girafe <- girafe_options(
     p1_girafe,
     opts_selection(

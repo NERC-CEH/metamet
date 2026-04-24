@@ -32,8 +32,6 @@ Imports:
     mgcv,
     dplyr,
     leaflet,
-    forcats,
-    ggExtra,
     utils,
     here,
     shinycssloaders,

@@ -2,35 +2,34 @@
 # also testing handling time variables with different names in different files
 
 test_that("applying imputing works for more files", {
-  fname_dt_32 <- testthat::test_path(
-    "data-raw/UK-AMO/UK-AMO_BM_20250822_L03_F02.dat"
+  fname_dt_32 <- pkg_extdata(
+    "UK-AMO/UK-AMO_BM_20250822_L03_F02.dat"
   )
-  fname_dt_41 <- testthat::test_path(
-    "data-raw/UK-AMO/UK-AMO_BM_20250822_L04_F01.dat"
+  fname_dt_41 <- pkg_extdata(
+    "UK-AMO/UK-AMO_BM_20250822_L04_F01.dat"
   )
-  fname_dt_42 <- testthat::test_path(
-    "data-raw/UK-AMO/UK-AMO_BM_20250822_L04_F02.dat"
+  fname_dt_42 <- pkg_extdata(
+    "UK-AMO/UK-AMO_BM_20250822_L04_F02.dat"
   )
-  fname_meta <- testthat::test_path("data-raw/dt_meta.xlsx")
-  fname_site <- testthat::test_path("data-raw/dt_site.csv")
-  fname_era5 <- testthat::test_path("data-raw/dt_era5.csv")
+
+  fname_era5 <- pkg_extdata("dt_era5.csv")
   # half-hourly data
   mm_32 <- metamet(
     dt = fname_dt_32,
-    dt_meta = fname_meta,
-    dt_site = fname_site,
+    dt_meta = dt_meta,
+    dt_site = dt_site,
     site_id = "UK-AMO"
   )
   mm_41 <- metamet(
     dt = fname_dt_41,
-    dt_meta = fname_meta,
-    dt_site = fname_site,
+    dt_meta = dt_meta,
+    dt_site = dt_site,
     site_id = "UK-AMO"
   )
   mm_42 <- metamet(
     dt = fname_dt_42,
-    dt_meta = fname_meta,
-    dt_site = fname_site,
+    dt_meta = dt_meta,
+    dt_site = dt_site,
     site_id = "UK-AMO"
   )
 

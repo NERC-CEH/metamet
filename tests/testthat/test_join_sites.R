@@ -3,13 +3,13 @@
 
 test_that("joining metamet from different sites works", {
   mm_amo <- readRDS(
-    file = testthat::test_path("data-raw/UK-AMO/UK-AMO_BM_mm_2023.rds")
+    file = pkg_extdata("UK-AMO/UK-AMO_BM_mm_2023.rds")
   )
   mm_ebu <- readRDS(
-    file = testthat::test_path("data-raw/UK-EBU/UK-EBU_BM_mm_2023.rds")
+    file = pkg_extdata("UK-EBU/UK-EBU_BM_mm_2023.rds")
   )
   mm_whm <- readRDS(
-    file = testthat::test_path("data-raw/UK-WHM/UK-WHM_BM_mm_2023.rds")
+    file = pkg_extdata("UK-WHM/UK-WHM_BM_mm_2023.rds")
   )
 
   mm_amo <- subset_by_date(mm_amo, "2023-09-01", "2023-09-02")
@@ -20,7 +20,10 @@ test_that("joining metamet from different sites works", {
   dim(mm_whm$dt)
   dim(mm_ebu$dt)
 
-  mm_whm <- change_naming_convention(mm_whm, name_convention = "name_icos")
+  mm_whm <- suppressWarnings(change_naming_convention(
+    mm_whm,
+    name_convention = "name_icos"
+  ))
 
   mm_amo <- reshape_wide_to_long(mm_amo)
   mm_ebu <- reshape_wide_to_long(mm_ebu)

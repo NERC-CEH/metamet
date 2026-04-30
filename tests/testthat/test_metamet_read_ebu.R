@@ -23,7 +23,10 @@ test_that("reading metamet from files from EBU works", {
   dim(mm$dt)
   names(mm$dt)
 
-  mm <- change_naming_convention(mm, name_convention = "name_icos")
+  mm <- suppressWarnings(change_naming_convention(
+    mm,
+    name_convention = "name_icos"
+  ))
 
   detect_gaps(mm$dt, expected_interval_mins = 30, time_name = "TIMESTAMP")
 

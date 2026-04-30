@@ -1,7 +1,7 @@
 # test the helper constructor function with file paths as argument
 # also testing handling time variables with different names in different files
 
-test_that("reading metamet from files from EBU works", {
+test_that("reading metamet from files from AMO works", {
   # paths should be testthat::test_path for testing - usr a shortcut to point
   # back to data-raw?
   fname_dt <- testthat::test_path("data-raw/UK-AMO/UK-AMO_BM_dt_2023.csv")
@@ -23,7 +23,10 @@ test_that("reading metamet from files from EBU works", {
   dim(mm$dt)
   names(mm$dt)
 
-  mm <- change_naming_convention(mm, name_convention = "name_icos")
+  mm <- suppressWarnings(change_naming_convention(
+    mm,
+    name_convention = "name_icos"
+  ))
 
   detect_gaps(mm$dt, expected_interval_mins = 30, time_name = "TIMESTAMP")
 

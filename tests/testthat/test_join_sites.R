@@ -20,7 +20,10 @@ test_that("joining metamet from different sites works", {
   dim(mm_whm$dt)
   dim(mm_ebu$dt)
 
-  mm_whm <- change_naming_convention(mm_whm, name_convention = "name_icos")
+  mm_whm <- suppressWarnings(change_naming_convention(
+    mm_whm,
+    name_convention = "name_icos"
+  ))
 
   mm_amo <- reshape_wide_to_long(mm_amo)
   mm_ebu <- reshape_wide_to_long(mm_ebu)

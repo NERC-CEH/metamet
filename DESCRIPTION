@@ -26,7 +26,7 @@ Suggests:
     ggiraph,
     shinyFiles
 Depends: 
-    R (>= 3.5)
+    R (>= 4.1.0)
 Imports:
     data.table,
     ggplot2,

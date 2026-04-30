@@ -5,9 +5,15 @@ test_that("changing naming convention works", {
   dim(mm1$dt_ref)
 
   names(mm1$dt)
-  mm1_icos <- change_naming_convention(mm1, name_convention = "name_icos")
+  mm1_icos <- suppressWarnings(change_naming_convention(
+    mm1,
+    name_convention = "name_icos"
+  ))
   names(mm1_icos$dt)
-  mm1_era5 <- change_naming_convention(mm1, name_convention = "name_era5")
+  mm1_era5 <- suppressWarnings(change_naming_convention(
+    mm1,
+    name_convention = "name_era5"
+  ))
   names(mm1_era5$dt)
 
   expect_s3_class(mm1, "metamet")

@@ -39,8 +39,6 @@ Imports:
     mgcv,
     dplyr,
     leaflet,
-    forcats,
-    ggExtra,
     utils,
     here
 Config/testthat/edition: 3

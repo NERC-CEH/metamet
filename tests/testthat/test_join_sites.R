@@ -3,13 +3,13 @@
 
 test_that("joining metamet from different sites works", {
   mm_amo <- readRDS(
-    file = testthat::test_path("data-raw/UK-AMO/UK-AMO_BM_mm_2023.rds")
+    file = pkg_extdata("UK-AMO/UK-AMO_BM_mm_2023.rds")
   )
   mm_ebu <- readRDS(
-    file = testthat::test_path("data-raw/UK-EBU/UK-EBU_BM_mm_2023.rds")
+    file = pkg_extdata("UK-EBU/UK-EBU_BM_mm_2023.rds")
   )
   mm_whm <- readRDS(
-    file = testthat::test_path("data-raw/UK-WHM/UK-WHM_BM_mm_2023.rds")
+    file = pkg_extdata("UK-WHM/UK-WHM_BM_mm_2023.rds")
   )
 
   mm_amo <- subset_by_date(mm_amo, "2023-09-01", "2023-09-02")

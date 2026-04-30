@@ -6,7 +6,7 @@
 
 df_method <- data.frame(
   method = c(
-    'raw',
+    "raw",
     "missing",
     "time",
     "regn",
@@ -16,7 +16,7 @@ df_method <- data.frame(
     "era5"
   ),
   method_longname = c(
-    'Original observation (raw data)',
+    "Original observation (raw data)",
     "Missing",
     "Time",
     "Regression with covariate",
@@ -31,7 +31,7 @@ df_method <- data.frame(
 df_method$method_longname <- factor(
   df_method$method_longname,
   levels = c(
-    'Original observation (raw data)',
+    "Original observation (raw data)",
     "Missing",
     "Time",
     "Regression with covariate",
@@ -82,11 +82,11 @@ usethis::use_data(dt_site, dt_meta, overwrite = TRUE)
 # and copy the meta and site files to the test data
 fs::file_copy(
   fname_meta,
-  fs::path(testthat::test_path(), fname_meta),
+  fs::path(pkg_extdata(), fs::path_file(fname_meta)),
   overwrite = TRUE
 )
 fs::file_copy(
   fname_site,
-  fs::path(testthat::test_path(), fname_site),
+  fs::path(pkg_extdata(), fs::path_file(fname_site)),
   overwrite = TRUE
 )

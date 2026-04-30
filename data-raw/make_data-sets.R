@@ -74,6 +74,11 @@ mm3 <- metamet(
 
 usethis::use_data(mm1, mm2, mm3, overwrite = TRUE)
 
+# write the metadata and site files in /data-raw to objects in /data
+dt_meta <- setDT(readxl::read_excel(fname_meta))
+dt_site <- fread(fname_site)
+usethis::use_data(dt_site, dt_meta, overwrite = TRUE)
+
 # and copy the meta and site files to the test data
 fs::file_copy(
   fname_meta,

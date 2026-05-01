@@ -24,7 +24,9 @@ Suggests:
     shinydashboard,
     shinyvalidate,
     ggiraph,
-    shinyFiles
+    shinyFiles,
+    openairmaps,
+    leaflet
 Depends: 
     R (>= 4.1.0)
 Imports:
@@ -35,10 +37,8 @@ Imports:
     lubridate,
     readxl,
     powerjoin,
-    openairmaps,
     mgcv,
     dplyr,
-    leaflet,
     utils,
     here
 Config/testthat/edition: 3

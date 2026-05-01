@@ -146,7 +146,7 @@ metamet.character <- function(
   ...
 ) {
   message("Loading file: ", dt)
-  dt <- data.table::fread(dt)
+  dt <- read_obs_autodetect(dt)
 
   # read metadata from file if a path is specified
   # otherwise the argument is assumed to be a data table/frame

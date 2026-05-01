@@ -16,30 +16,30 @@ Suggests:
     testthat (>= 3.0.0),
     knitr,
     covr,
-    rmarkdown
-Depends: 
-    data.table,
-    ggplot2,
-    R (>= 3.5)
-Imports:
-    fs (>= 1.5.0),
-    openair,
-    lubridate,
-    readxl,
-    powerjoin,
+    rmarkdown,
     shiny,
-    openairmaps,
-    mgcv,
-    dplyr,
-    leaflet,
-    utils,
-    here,
     shinycssloaders,
     shinyjs,
     glue,
     shinydashboard,
     shinyvalidate,
     ggiraph,
-    shinyFiles
+    shinyFiles,
+    openairmaps,
+    leaflet
+Depends: 
+    R (>= 4.1.0)
+Imports:
+    data.table,
+    ggplot2,
+    fs (>= 1.5.0),
+    openair,
+    lubridate,
+    readxl,
+    powerjoin,
+    mgcv,
+    dplyr,
+    utils,
+    here
 Config/testthat/edition: 3
 URL: https://nerc-ceh.github.io/metamet/

@@ -50,7 +50,7 @@ site_id <- "UK-AMO"
 fname_dt1 <- "data-raw/UK-AMO/UK-AMo_BM_20250822_L03_F02.dat"
 fname_dt2 <- "data-raw/UK-AMO/UK-AMo_BM_20250822_L04_F01.dat"
 fname_dt3 <- "data-raw/UK-AMO/UK-AMo_BM_20260203_L03_F02.dat"
-fname_meta <- "data-raw/dt_meta.xlsx"
+fname_meta <- "data-raw/dt_meta.csv"
 fname_site <- "data-raw/dt_site.csv"
 
 mm1 <- metamet(
@@ -75,7 +75,11 @@ mm3 <- metamet(
 usethis::use_data(mm1, mm2, mm3, overwrite = TRUE)
 
 # write the metadata and site files in /data-raw to objects in /data
-dt_meta <- setDT(readxl::read_excel(fname_meta))
+dt_meta <- read_csv_with_excel_datetimes(
+  file = fname_meta,
+  datetime_cols = c("start_date", "end_date")
+)
+
 dt_site <- fread(fname_site)
 usethis::use_data(dt_site, dt_meta, overwrite = TRUE)
 

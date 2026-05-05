@@ -44,8 +44,11 @@ dt_meta <- data.table(
 )
 fwrite(dt_meta, "data-raw/UK-WHM/dt_meta.csv")
 
-fname <- "data-raw/dt_meta.xlsx"
-dt_meta <- setDT(readxl::read_excel(fname))
+fname <- "data-raw/dt_meta.csv"
+dt_meta <- read_csv_with_excel_datetimes(
+  file = fname_meta,
+  datetime_cols = c("start_date", "end_date")
+)
 dt_meta[site == "UK-WHM"]
 names(dt_meta)
 v_col <- c(
@@ -84,13 +87,16 @@ dt_site <- data.table(
 )
 
 fname_dt <- here("data-raw/UK-WHM/whim_met_2002_2023.csv")
-fname_meta <- here("data-raw/dt_meta.xlsx")
+fname_meta <- here("data-raw/dt_meta.csv")
 fname_site <- here("data-raw/dt_site.csv")
 fname_era5 <- here("data-raw/dt_era5.csv")
 
 dt <- fread(fname_dt)
 dt_site <- fread(fname_site)
-dt_meta <- setDT(readxl::read_excel(fname_meta))
+dt_meta <- read_csv_with_excel_datetimes(
+  file = fname_meta,
+  datetime_cols = c("start_date", "end_date")
+)
 
 mm <- metamet(
   dt = dt,

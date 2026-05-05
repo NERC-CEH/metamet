@@ -4,7 +4,7 @@
 test_that("applying QC works", {
   fname_dt <- pkg_extdata("UK-AMO/UK-AMO_BM_dt_2026.csv")
   fname_qc <- pkg_extdata("UK-AMO/UK-AMO_BM_qc_2026.csv")
-  fname_meta <- pkg_extdata("dt_meta.xlsx")
+  fname_meta <- pkg_extdata("dt_meta.csv")
   fname_site <- pkg_extdata("dt_site.csv")
   fname_era5 <- pkg_extdata("dt_era5.csv")
   # half-hourly data

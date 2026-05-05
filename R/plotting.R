@@ -21,15 +21,14 @@ ggiraph_plot <- function(input_variable) {
   df <- left_join(df, df_method, by = "qc")
 
   col_pal <- c(
-    '#5b5b5b',
-    '#377EB8',
-    '#4DAF4A',
-    '#984EA3',
-    '#00ff7f',
-    '#FFFF33',
-    '#A65628',
-    '#F781BF',
-    '#FF7F00'
+    "#000000",
+    "#E69F00",
+    "#56B4E9",
+    "#009E73",
+    "#F0E442",
+    "#0072B2",
+    "#D55E00",
+    "#CC79A7"
   )
   names(col_pal) <- levels(df_method$method_longname)
 
@@ -40,7 +39,8 @@ ggiraph_plot <- function(input_variable) {
         tooltip = glue::glue("Timestamp: {DATECT}\nMeasure: {y}"),
         colour = factor(method_longname)
       ),
-      size = 3
+      size = 3,
+      alpha = 0.4
     ) +
     scale_color_manual(values = col_pal, limits = force) +
     xlab("Date") +
@@ -55,10 +55,10 @@ ggiraph_plot <- function(input_variable) {
     p1_girafe,
     opts_selection(
       type = "multiple",
-      css = "fill:#FF3333;stroke:black;"
+      css = "fill:#0072B2;stroke:#003F5C;stroke-width:2;opacity:1;"
     ),
     opts_tooltip(zindex = 9999),
-    opts_hover(css = "fill:#FF3333;stroke:black;cursor:pointer;"),
+    opts_hover(css = "stroke:#003F5C;stroke-width:2;cursor:pointer;opacity:1"),
     opts_zoom(max = 5)
   )
 }
@@ -105,6 +105,7 @@ plot_heatmap_calendar <- function(df, time_name) {
   heatmap_plot <- ggplot(df, aes(day_of_the_week, week, fill = f_validator)) +
     geom_tile(color = "white", linewidth = 0.1) +
     labs(x = 'Day of week', y = 'Week', fill = 'Validator') +
+    scale_fill_viridis_d() + # provides colourblind friendly palette
     facet_wrap(year ~ month, nrow = 4, ncol = 3, scales = "free") +
     scale_y_reverse() +
     theme_minimal(base_size = 8) +

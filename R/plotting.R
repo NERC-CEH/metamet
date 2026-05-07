@@ -55,7 +55,9 @@ ggiraph_plot <- function(input_variable) {
     p1_girafe,
     opts_selection(
       type = "multiple",
-      css = "fill:#0072B2;stroke:#003F5C;stroke-width:2;opacity:1;"
+      #css = "fill:#0072B2;stroke:#003F5C;stroke-width:2;opacity:1;"
+      css = "fill:#00D5FF;stroke:#003049;stroke-width:2;opacity:1;"
+
     ),
     opts_tooltip(zindex = 9999),
     opts_hover(css = "stroke:#003F5C;stroke-width:2;cursor:pointer;opacity:1"),

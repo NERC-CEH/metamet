@@ -59,7 +59,7 @@ test_that("reading metamet from files from BUC works", {
     fit = TRUE,
     plot_graph = FALSE
   )
-  sum(is.na(mm_imp$dt))
+  sum(is.na(mm$dt))
 
   # saveRDS(mm, file = here::here("data-raw/UK-BUC/UK-BUC_BM_mm.rds"))
 

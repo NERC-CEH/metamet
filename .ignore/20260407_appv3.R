@@ -1,3 +1,9 @@
+#install.packages('metamet')
+#install.packages("pak")
+#pak::pak("NERC-CEH/metamet")
+#install.packages('shinyFiles')
+#install.packages('shiny')
+library(shiny)
 library(metamet)
 library(dplyr)
 library(shinydashboard)
@@ -5,6 +11,12 @@ library(shinyjs)
 library(shinyvalidate)
 library(shinyFiles)
 library(ggiraph)
+library(data.table)
+
+# loading scripts for inputting files
+#source(here::here("R", "mod_rawdata_upload.R"))
+#source(here::here("R", "mod_rawdata_colmap.R"))
+#source(here::here("R", "mod_campbell_logger_import.R"))
 
 # Set the gap-filling methods and codes----
 gf_choices <- setNames(df_method$method, df_method$method_longname)
@@ -26,14 +38,13 @@ ui <- dashboardPage(
   dashboardSidebar(
     sidebarMenu(
       id = 'tabs',
-      menuItem("Choose file", tabName = "upload", icon = icon("upload")),
-      # with shinyfiles lib
-      shinyFilesButton(
-        id = "file",
-        label = "Open metamet .rds file",
-        title = "Select a file",
-        multiple = FALSE
+      # tab to upload raw files or .rds
+      menuItem(
+        "Load a file",
+        tabName = "upload",
+        icon = icon("upload")
       ),
+
       menuItem(
         "Choose date range",
         tabName = "dashboard",
@@ -53,6 +64,49 @@ ui <- dashboardPage(
   dashboardBody(
     useShinyjs(),
     tabItems(
+      # upload raw data tab
+      tabItem(
+        tabName = "upload",
+        fluidPage(
+
+          # Source selector
+          radioButtons(
+            "data_source",
+            label = "Select dataset source:",
+            choices = c(
+              "RDS Upload" = "rds",
+              "Convert a CSV into metamet" = "csv"
+            ),
+            selected = "rds"
+          ),
+
+          # ---------------------
+          # RDS upload
+          # ---------------------
+          conditionalPanel(
+            condition = "input.data_source == 'rds'",
+            div(
+              shinyFilesButton(
+                id = "file",
+                label = "Open metamet .rds file",
+                title = "Select a file",
+                multiple = FALSE
+              )
+            )
+          ),
+
+          # ---------------------
+          # CSV upload + mapping
+          # ---------------------
+          conditionalPanel(
+            condition = "input.data_source == 'csv'",
+            div(
+              mod_upload_ui("upload_module"),
+              mod_colmap_ui("colmap_module")
+            )
+          )
+        )
+      ),
       tabItem(
         tabName = "dashboard",
         fluidRow(
@@ -164,12 +218,6 @@ ui <- dashboardPage(
           )
         ),
       ),
-
-      # upload file tab
-      tabItem(
-        tabName = "upload",
-        verbatimTextOutput("status")
-      ),
       tabItem(
         tabName = 'download',
         fluidRow(
@@ -216,6 +264,17 @@ server <- function(input, output, session) {
   # increase input file size limit to 200 MB
   options(shiny.maxRequestSize = 200 * 1024^2)
 
+  # load mapping for upload module
+  uploaded_upload <- mod_upload_server("upload_module")
+  mapped_data <- mod_colmap_server(
+    "colmap_module",
+    uploaded_upload
+  )
+
+  observeEvent(mapped_data(), {
+    showNotification("✅ Mapping confirmed! Ready to process data.")
+  })
+
   # maps all drives that users have on windows
   get_drives <- function() {
     if (.Platform$OS.type == "windows") {
@@ -252,7 +311,7 @@ server <- function(input, output, session) {
   df_proc$end_date <- as.POSIXct(Sys.Date() - 2, tz = "UTC")
 
   # Reactive expression to load the RDS file
-  uploaded <- reactive({
+  uploaded_rds <- reactive({
     req(input$file)
     fileinfo <- parseFilePaths(roots, input$file)
     req(nrow(fileinfo) > 0)
@@ -277,18 +336,11 @@ server <- function(input, output, session) {
     if (is.null(input$file)) {
       return("No file selected yet.")
     }
-    req(uploaded())
-    paste("Loaded file:", basename(uploaded()$fname))
-  })
-
-  # confirms upload was succesful and then switches to calendar selection
-  observeEvent(uploaded(), {
-    showNotification(
-      paste("Upload successful:", basename(uploaded()$fname)),
-      type = "message",
-      duration = 4
+    req(uploaded_rds())
+    paste(
+      "RDS file successfully loaded:",
+      basename(uploaded_rds()$fname)
     )
-    updateTabItems(session, "tabs", "dashboard")
   })
 
   ##########################
@@ -340,7 +392,7 @@ server <- function(input, output, session) {
   output$start_date <- renderUI({
     dateInput(
       "sdate",
-      value = as.Date(uploaded()$date_of_first_new_record, tz = "UTC"),
+      value = as.Date(uploaded_rds()$date_of_first_new_record, tz = "UTC"),
       min = first_start_date(),
       max = last_end_date(),
       label = "Start date"
@@ -351,7 +403,7 @@ server <- function(input, output, session) {
   output$end_date <- renderUI({
     dateInput(
       "edate",
-      value = as.Date(uploaded()$date_of_last_new_record, tz = "UTC"),
+      value = as.Date(uploaded_rds()$date_of_last_new_record, tz = "UTC"),
       min = first_start_date(),
       max = last_end_date(),
       label = "End date"
@@ -417,15 +469,15 @@ server <- function(input, output, session) {
       selectInput(
         "select_covariate",
         label = h5("Covariate"),
-        choices = uploaded()$v_names
+        choices = uploaded_rds()$v_names
       )
     }
   })
 
   # Data retrieval functionality-----
   observeEvent(input$retrieve_data, {
-    for (i in 1:length(uploaded()$v_names)) {
-      v_names_checklist[[uploaded()$v_names[i]]] <- FALSE
+    for (i in 1:length(uploaded_rds()$v_names)) {
+      v_names_checklist[[uploaded_rds()$v_names[i]]] <- FALSE
     }
 
     # enabling previously disabled buttons
@@ -433,17 +485,17 @@ server <- function(input, output, session) {
     shinyjs::show("validation_calendar_outer")
 
     mm_qry <<- metamet::subset_by_date(
-      uploaded()$mm,
+      uploaded_rds()$mm,
       start_date = df_daterange()$start_date,
       end_date = df_daterange()$end_date
     )
 
     mm_qry$dt$checked <<- as.factor(rownames(mm_qry$dt))
-    mm_qry$dt$datect_num <<- as.numeric(mm_qry$dt[, get(uploaded()$time_name)])
+    mm_qry$dt$datect_num <<- as.numeric(mm_qry$dt[, get(uploaded_rds()$time_name)])
 
     # Add a tab to the plotting panel for each variable that has been selected by the user.
     output$mytabs <- renderUI({
-      my_tabs <- lapply(paste(uploaded()$v_names), function(i) {
+      my_tabs <- lapply(paste(uploaded_rds()$v_names), function(i) {
         tabPanel(
           i,
           value = i,
@@ -461,7 +513,7 @@ server <- function(input, output, session) {
     })
 
     observe(
-      lapply(paste(uploaded()$v_names), function(i) {
+      lapply(paste(uploaded_rds()$v_names), function(i) {
         output[[paste0(i, "_interactive_plot")]] <-
           renderGirafe(metamet:::ggiraph_plot(i))
       })
@@ -500,15 +552,15 @@ server <- function(input, output, session) {
           fluidRow(
             column(
               6,
-              selectInput('x_var', 'X variable:', choices = uploaded()$v_names)
+              selectInput('x_var', 'X variable:', choices = uploaded_rds()$v_names)
             ),
             column(
               6,
               selectInput(
                 'y_var',
                 'Y variable:',
-                choices = uploaded()$v_names,
-                selected = uploaded()$v_names[1]
+                choices = uploaded_rds()$v_names,
+                selected = uploaded_rds()$v_names[1]
               )
             )
           ),
@@ -553,7 +605,7 @@ server <- function(input, output, session) {
       # Creating a reactive plot that will be plotted depending on the tab selected in plotTabs
       plot_selected <- reactive({
         req(input$plotTabs)
-        metamet:::ggiraph_plot(input$plotTabs)
+        metamet:::ggirafe_plot(input$plotTabs)
       })
       # Re-render
       output[[paste0(
@@ -647,13 +699,13 @@ server <- function(input, output, session) {
     mm_qry$dt_qc$validator <- username
 
     # overwrite existing data with changes in query
-    mm <- join(uploaded()$mm, mm_qry)
+    mm <- join(uploaded_rds()$mm, mm_qry)
 
     # write output to new file in same location as input
     ##* WIP: this does not work - input$file$datapath does not return the
     ##* original path but a temp copy. Needs shinyFiles to do this.
-    fname <- uploaded()$fname
-    print(uploaded()$fname)
+    fname <- uploaded_rds()$fname
+    print(uploaded_rds()$fname)
     saveRDS(
       mm,
       file = paste0(

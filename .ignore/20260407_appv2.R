@@ -1,3 +1,9 @@
+#install.packages('metamet')
+#install.packages("pak")
+#pak::pak("NERC-CEH/metamet")
+#install.packages('shinyFiles')
+#install.packages('shiny')
+library(shiny)
 library(metamet)
 library(dplyr)
 library(shinydashboard)
@@ -5,6 +11,12 @@ library(shinyjs)
 library(shinyvalidate)
 library(shinyFiles)
 library(ggiraph)
+library(data.table)
+
+# loading scripts for inputting files
+#source(here::here("R", "mod_rawdata_upload.R"))
+#source(here::here("R", "mod_rawdata_colmap.R"))
+#source(here::here("R", "mod_campbell_logger_import.R"))
 
 # Set the gap-filling methods and codes----
 gf_choices <- setNames(df_method$method, df_method$method_longname)
@@ -12,6 +24,7 @@ gf_choices <- setNames(df_method$method, df_method$method_longname)
 # Define UI for the app
 ui <- dashboardPage(
   skin = "green",
+
   dashboardHeader(
     title = "Met Data Validation",
     tags$li(
@@ -23,23 +36,25 @@ ui <- dashboardPage(
       )
     )
   ),
+
   dashboardSidebar(
     sidebarMenu(
       id = 'tabs',
-      menuItem("Choose file", tabName = "upload", icon = icon("upload")),
-      # with shinyfiles lib
-      shinyFilesButton(
-        id = "file",
-        label = "Open metamet .rds file",
-        title = "Select a file",
-        multiple = FALSE
+
+      menuItem(
+        "Load a file",
+        tabName = "upload",
+        icon = icon("upload")
       ),
+
       menuItem(
         "Choose date range",
         tabName = "dashboard",
         icon = icon('database')
       ),
+
       menuItem("Download", tabName = "download", icon = icon('download')),
+
       menuItem(
         "Information",
         tabName = "information",
@@ -50,9 +65,61 @@ ui <- dashboardPage(
       )
     )
   ),
+
   dashboardBody(
     useShinyjs(),
+
     tabItems(
+
+      # =========================
+      # Upload tab
+      # =========================
+      tabItem(
+        tabName = "upload",
+        fluidPage(
+
+          # Source selector
+          radioButtons(
+            "data_source",
+            label = "Select dataset source:",
+            choices = c(
+              "RDS Upload" = "rds",
+              "Convert a CSV into metamet" = "csv"
+            ),
+            selected = "rds"
+          ),
+
+          # ---------------------
+          # RDS upload
+          # ---------------------
+          conditionalPanel(
+            condition = "input.data_source == 'rds'",
+            div(
+              shinyFilesButton(
+                id = "file",
+                label = "Open metamet .rds file",
+                title = "Select a file",
+                multiple = FALSE
+              )
+            )
+          ),
+
+          # ---------------------
+          # CSV upload + mapping
+          # ---------------------
+          conditionalPanel(
+            condition = "input.data_source == 'csv'",
+            div(
+              mod_upload_ui("upload_module"),
+              mod_colmap_ui("colmap_module")
+            )
+          )
+        )
+      ),
+
+      # =========================
+      # Dashboard tab
+      # =========================
       tabItem(
         tabName = "dashboard",
         fluidRow(
@@ -60,65 +127,41 @@ ui <- dashboardPage(
             title = "Data Selection",
             status = "success",
             solidHeader = TRUE,
-            helpText(
-              "Select your required processing start and end times below."
-            ),
-            column(
-              width = 6,
-              uiOutput("start_date")
-            ),
+
+            helpText("Select your required processing start and end times below."),
+
+            column(width = 6, uiOutput("start_date")),
+
             column(
               width = 3,
-              numericInput(
-                "shour",
-                value = 00,
-                label = "Hour (24 hour)",
-                min = 0,
-                max = 23,
-                step = 1
-              )
+              numericInput("shour", value = 0, label = "Hour (24 hour)", min = 0, max = 23)
             ),
+
             column(
               width = 3,
-              numericInput(
-                "smin",
-                value = 00,
-                label = "Minute",
-                min = 0,
-                max = 59,
-                step = 1
-              )
+              numericInput("smin", value = 0, label = "Minute", min = 0, max = 59)
             ),
+
             column(
               width = 6,
               uiOutput("end_date"),
               tags$style(HTML(".datepicker {z-index:99999 !important;}"))
             ),
+
             column(
               width = 3,
-              numericInput(
-                "ehour",
-                value = 00,
-                label = "Hour  (24 hour)",
-                min = 0,
-                max = 23,
-                step = 1
-              )
+              numericInput("ehour", value = 0, label = "Hour (24 hour)", min = 0, max = 23)
             ),
+
             column(
               width = 3,
-              numericInput(
-                "emin",
-                value = 00,
-                label = "Minute",
-                min = 0,
-                max = 59,
-                step = 1
-              )
+              numericInput("emin", value = 0, label = "Minute", min = 0, max = 59)
             ),
+
             actionButton("retrieve_data", "Retrieve from database"),
-            actionButton("compare_vars", "Compare variables"),
+            actionButton("compare_vars", "Compare variables")
           ),
+
           hidden(
             div(
               id = "validation_calendar_outer",
@@ -132,6 +175,7 @@ ui <- dashboardPage(
             )
           )
         ),
+
         hidden(
           fluidRow(
             id = "extracted_data",
@@ -140,36 +184,37 @@ ui <- dashboardPage(
               status = "success",
               solidHeader = TRUE,
               width = 12,
+
               shinycssloaders::withSpinner(uiOutput("mytabs")),
+
               selectInput(
                 "select_imputation",
                 label = h5("Gap-Filling Method"),
                 choices = gf_choices
               ),
-              actionButton("impute", label = "Impute selection"),
-              actionButton(
-                "finished_check",
-                label = "Finished checking variable for date range."
-              ),
+
+              actionButton("impute", "Impute selection"),
+              actionButton("finished_check", "Finished checking variable for date range."),
+
               checkboxGroupInput(
                 "qc_tokeep",
                 "Do not alter data estimated by",
                 choiceNames = df_method$method_longname,
                 choiceValues = df_method$qc
               ),
+
               uiOutput("impute_extra_info"),
-              actionButton("reset", label = "Restart app"),
+
+              actionButton("reset", "Restart app"),
               actionButton("submitchanges", "Submit changes")
-            ),
+            )
           )
-        ),
+        )
       ),
 
-      # upload file tab
-      tabItem(
-        tabName = "upload",
-        verbatimTextOutput("status")
-      ),
+      # =========================
+      # Download tab
+      # =========================
       tabItem(
         tabName = 'download',
         fluidRow(
@@ -178,6 +223,7 @@ ui <- dashboardPage(
             title = 'Data download',
             status = "success",
             solidHeader = TRUE,
+
             selectInput(
               'download_file',
               'Data to download:',
@@ -187,27 +233,15 @@ ui <- dashboardPage(
                 'CEDA' = 'ceda'
               )
             ),
-            downloadButton('download_data', label = 'Download')
+
+            downloadButton('download_data', 'Download')
           )
         )
       ),
-      tabItem(
-        tabName = "information",
-      ),
-      tabItem(
-        tabName = "gapfill_guide"
-        # includeMarkdown(here::here("vignettes/gap_fill_methods.md"))
-      ),
-      tabItem(
-        tabName = "app_guide"
-        # includeMarkdown(here::here("vignettes/app_user_guide.md"))
-      ) # ,
-      # tabItem(
-      #   tabName = "data_guide",
-      #   includeHTML(
-      #     here::here("vignettes/metdb_shiny_version.html")
-      #   )
-      # )
+
+      tabItem(tabName = "information"),
+      tabItem(tabName = "gapfill_guide"),
+      tabItem(tabName = "app_guide")
     )
   )
 )
@@ -216,7 +250,57 @@ server <- function(input, output, session) {
   # increase input file size limit to 200 MB
   options(shiny.maxRequestSize = 200 * 1024^2)
 
-  # maps all drives that users have on windows
+  # state of reactive vals
+  mm_qry <- reactiveVal(NULL)
+  v_names_checklist <- reactiveValues()
+
+  # load convention and uploading mods
+  uploaded_upload <- mod_upload_server(
+    "upload_module")
+  mapped_data <- mod_colmap_server(
+    "colmap_module",
+    uploaded_upload
+  )
+# processing csv
+  mapped_data_processed <- reactive({
+    req(input$data_source == "csv", mapped_data())
+
+    mm <- mapped_data()
+
+    time_name <- mm$dt_meta[type == "time", name_dt]
+    v_names <- mm$dt_meta[type != "time" & type != "site", name_dt]
+
+    list(
+      mm = mm,
+      time_name = time_name,
+      v_names = v_names,
+      date_of_first_new_record = mm$dt[, min(get(time_name), na.rm = TRUE)],
+      date_of_last_new_record  = mm$dt[, max(get(time_name), na.rm = TRUE)],
+      fname = "mapped_from_csv"
+    )
+  })
+
+  active_data <- reactive({
+    req(input$data_source)
+
+    if (input$data_source == "rds") {
+      req(uploaded_rds())
+      return(uploaded_rds())
+    }
+
+    if (input$data_source == "csv") {
+      req(mapped_data_processed())
+      return(mapped_data_processed())
+    }
+
+    return(NULL)  # fallback safety
+  })
+
+  observeEvent(mapped_data(), {
+    showNotification("✅ Mapping confirmed! Ready to process data.")
+  })
+
+# maps all drives that users have on windows for shinyfiles
   get_drives <- function() {
     if (.Platform$OS.type == "windows") {
       drives <- letters
@@ -237,7 +321,54 @@ server <- function(input, output, session) {
     session = session,
     filetypes = c("rds")
   )
+#############################
 
+## load the RDS file
+  uploaded_rds <- reactive({
+    req(input$data_source == "rds")   # 🔴 IMPORTANT
+
+    req(input$file)
+    fileinfo <- parseFilePaths(roots, input$file)
+    req(nrow(fileinfo) > 0)
+
+    fname <- as.character(fileinfo$datapath)
+    mm <- readRDS(fname)
+
+    time_name <- mm$dt_meta[type == "time", name_dt]
+    v_names <- mm$dt_meta[type != "time" & type != "site", name_dt]
+
+    date_of_first_new_record <- mm$dt[, min(get(time_name), na.rm = TRUE)]
+    date_of_last_new_record  <- mm$dt[, max(get(time_name), na.rm = TRUE)]
+
+    list(
+      mm = mm,
+      time_name = time_name,
+      v_names = v_names,
+      date_of_first_new_record = date_of_first_new_record,
+      date_of_last_new_record  = date_of_last_new_record,
+      fname = fname
+    )
+  })
+
+  # switches to active dataset
+  active_data <- reactive({
+    req(input$data_source)
+
+    if (input$data_source == "rds") return(uploaded_rds())
+    if (input$data_source == "csv") return(mapped_data_processed())
+
+    NULL
+  })
+
+# confirms files have been uploaded
+    output$status <- renderText({
+    req(active_data())
+    if (input$data_source == "rds") {
+      paste("RDS file successfully loaded:", basename(active_data()$fname))
+    } else {
+      "CSV file successfully mapped and loaded."
+    }
+  })
   # Non-reactive code
   # Format the start and end dates----
   df_proc <- data.frame(
@@ -250,46 +381,6 @@ server <- function(input, output, session) {
     tz = "UTC"
   )
   df_proc$end_date <- as.POSIXct(Sys.Date() - 2, tz = "UTC")
-
-  # Reactive expression to load the RDS file
-  uploaded <- reactive({
-    req(input$file)
-    fileinfo <- parseFilePaths(roots, input$file)
-    req(nrow(fileinfo) > 0)
-    fname <- as.character(fileinfo$datapath)
-    mm <- readRDS(fname)
-    time_name <- mm$dt_meta[type == "time", name_dt]
-    v_names <- mm$dt_meta[type != "time" & type != "site", name_dt]
-    date_of_first_new_record <- mm$dt[, min(get(time_name), na.rm = TRUE)]
-    date_of_last_new_record <- mm$dt[, max(get(time_name), na.rm = TRUE)]
-    list(
-      mm = mm,
-      time_name = time_name,
-      v_names = v_names,
-      date_of_first_new_record = date_of_first_new_record,
-      date_of_last_new_record = date_of_last_new_record,
-      fname = fname
-    )
-  })
-
-  # Simple status message instead of displaying the object
-  output$status <- renderText({
-    if (is.null(input$file)) {
-      return("No file selected yet.")
-    }
-    req(uploaded())
-    paste("Loaded file:", basename(uploaded()$fname))
-  })
-
-  # confirms upload was succesful and then switches to calendar selection
-  observeEvent(uploaded(), {
-    showNotification(
-      paste("Upload successful:", basename(uploaded()$fname)),
-      type = "message",
-      duration = 4
-    )
-    updateTabItems(session, "tabs", "dashboard")
-  })
 
   ##########################
   #shinyvalidate statements#
@@ -308,6 +399,7 @@ server <- function(input, output, session) {
   ##Observe event for shinyvalidate dates
   ##
   observeEvent(input$retrieve_data, label = "validator for dates", {
+    req(active_data())
     if (!iv$is_valid()) {
       showModal(modalDialog("Please fill in both dates.", easyClose = TRUE))
       return()
@@ -338,9 +430,10 @@ server <- function(input, output, session) {
 
   # Create a date input for the user to select start date
   output$start_date <- renderUI({
+    req(active_data())
     dateInput(
       "sdate",
-      value = as.Date(uploaded()$date_of_first_new_record, tz = "UTC"),
+      value = as.Date(active_data()$date_of_first_new_record, tz = "UTC"),
       min = first_start_date(),
       max = last_end_date(),
       label = "Start date"
@@ -349,9 +442,10 @@ server <- function(input, output, session) {
 
   # Create a date input for the user to select end date
   output$end_date <- renderUI({
+    req(active_data())
     dateInput(
       "edate",
-      value = as.Date(uploaded()$date_of_last_new_record, tz = "UTC"),
+      value = as.Date(active_data()$date_of_last_new_record, tz = "UTC"),
       min = first_start_date(),
       max = last_end_date(),
       label = "End date"
@@ -403,6 +497,7 @@ server <- function(input, output, session) {
   # The optional rendering of UI elements depending on which
   # imputation method has been selected
   output$impute_extra_info <- renderUI({
+    req(active_data())
     req(input$select_imputation)
     if (input$select_imputation == "time") {
       sliderInput(
@@ -417,15 +512,15 @@ server <- function(input, output, session) {
       selectInput(
         "select_covariate",
         label = h5("Covariate"),
-        choices = uploaded()$v_names
+        choices = active_data()$v_names
       )
     }
   })
 
   # Data retrieval functionality-----
   observeEvent(input$retrieve_data, {
-    for (i in 1:length(uploaded()$v_names)) {
-      v_names_checklist[[uploaded()$v_names[i]]] <- FALSE
+    for (i in 1:length(active_data()$v_names)) {
+      v_names_checklist[[active_data()$v_names[i]]] <- FALSE
     }
 
     # enabling previously disabled buttons
@@ -433,17 +528,17 @@ server <- function(input, output, session) {
     shinyjs::show("validation_calendar_outer")
 
     mm_qry <<- metamet::subset_by_date(
-      uploaded()$mm,
+      active_data()$mm,
       start_date = df_daterange()$start_date,
       end_date = df_daterange()$end_date
     )
 
     mm_qry$dt$checked <<- as.factor(rownames(mm_qry$dt))
-    mm_qry$dt$datect_num <<- as.numeric(mm_qry$dt[, get(uploaded()$time_name)])
+    mm_qry$dt$datect_num <<- as.numeric(mm_qry$dt[, get(active_data()$time_name)])
 
     # Add a tab to the plotting panel for each variable that has been selected by the user.
     output$mytabs <- renderUI({
-      my_tabs <- lapply(paste(uploaded()$v_names), function(i) {
+      my_tabs <- lapply(paste(active_data()$v_names), function(i) {
         tabPanel(
           i,
           value = i,
@@ -454,14 +549,14 @@ server <- function(input, output, session) {
             ifelse(v_names_checklist[[i]] == TRUE, '#bcbcbc', 'transparent'),
             ';}'
           ))),
-          girafeOutput(paste0(i, "_interactive_plot")),
+          girafeOutput(paste0(i, "_interactive_plot"))
         )
       })
       do.call(tabsetPanel, c(my_tabs, id = "plotTabs"))
     })
 
     observe(
-      lapply(paste(uploaded()$v_names), function(i) {
+      lapply(paste(active_data()$v_names), function(i) {
         output[[paste0(i, "_interactive_plot")]] <-
           renderGirafe(metamet:::ggiraph_plot(i))
       })
@@ -483,6 +578,7 @@ server <- function(input, output, session) {
 
   # compare variables modal
   observeEvent(input$compare_vars, {
+    req(active_data())
     plot_data <- reactive({
       data.frame(x = mm_qry$dt[, input$x_var], y = mm_qry$dt[, input$y_var])
     })
@@ -500,15 +596,15 @@ server <- function(input, output, session) {
           fluidRow(
             column(
               6,
-              selectInput('x_var', 'X variable:', choices = uploaded()$v_names)
+              selectInput('x_var', 'X variable:', choices = active_data()$v_names)
             ),
             column(
               6,
               selectInput(
                 'y_var',
                 'Y variable:',
-                choices = uploaded()$v_names,
-                selected = uploaded()$v_names[1]
+                choices = active_data()$v_names,
+                selected = active_data()$v_names[1]
               )
             )
           ),
@@ -553,7 +649,7 @@ server <- function(input, output, session) {
       # Creating a reactive plot that will be plotted depending on the tab selected in plotTabs
       plot_selected <- reactive({
         req(input$plotTabs)
-        metamet:::ggiraph_plot(input$plotTabs)
+        metamet:::ggirafe_plot(input$plotTabs)
       })
       # Re-render
       output[[paste0(
@@ -591,7 +687,7 @@ server <- function(input, output, session) {
         paste("level_1-", Sys.Date(), ".zip", sep = "")
       } else if (input$download_file == 'lev2') {
         paste("level_2-", Sys.Date(), ".zip", sep = "")
-      } else if (input$download_file == 'ceda') {
+      } else {
         paste("ceda-", Sys.Date(), ".zip", sep = "")
       }
     },
@@ -629,14 +725,6 @@ server <- function(input, output, session) {
       }
     }
   )
-
-  # Writing validated data to file---- From main Dashboard
-  observeEvent(input$submitchanges, {
-    # Update button text
-    runjs(
-      'document.getElementById("submitchanges").textContent="Submitting changes...";'
-    )
-
     # disable button while working
     shinyjs::disable("submitchanges")
     shinyjs::disable("edit_table_cols")
@@ -647,13 +735,13 @@ server <- function(input, output, session) {
     mm_qry$dt_qc$validator <- username
 
     # overwrite existing data with changes in query
-    mm <- join(uploaded()$mm, mm_qry)
+    mm <- join(active_data()$mm, mm_qry)
 
     # write output to new file in same location as input
     ##* WIP: this does not work - input$file$datapath does not return the
     ##* original path but a temp copy. Needs shinyFiles to do this.
-    fname <- uploaded()$fname
-    print(uploaded()$fname)
+    fname <- active_data()$fname
+    print(active_data()$fname)
     saveRDS(
       mm,
       file = paste0(

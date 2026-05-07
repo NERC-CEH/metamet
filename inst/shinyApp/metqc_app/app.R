@@ -266,10 +266,17 @@ server <- function(input, output, session) {
       return("No file selected yet.")
     }
     req(uploaded())
-    paste(
-      "RDS file successfully loaded:",
-      basename(uploaded()$fname)
+    paste("Loaded file:", basename(uploaded()$fname))
+  })
+
+  # confirms upload was succesful and then switches to calendar selection
+  observeEvent(uploaded(), {
+    showNotification(
+      paste("Upload successful:", basename(uploaded()$fname)),
+      type = "message",
+      duration = 4
     )
+    updateTabItems(session, "tabs", "dashboard")
   })
 
   ##########################

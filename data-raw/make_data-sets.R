@@ -6,7 +6,7 @@
 
 df_method <- data.frame(
   method = c(
-    'raw',
+    "raw",
     "missing",
     "time",
     "regn",
@@ -16,7 +16,7 @@ df_method <- data.frame(
     "era5"
   ),
   method_longname = c(
-    'Original observation (raw data)',
+    "Original observation (raw data)",
     "Missing",
     "Time",
     "Regression with covariate",
@@ -31,7 +31,7 @@ df_method <- data.frame(
 df_method$method_longname <- factor(
   df_method$method_longname,
   levels = c(
-    'Original observation (raw data)',
+    "Original observation (raw data)",
     "Missing",
     "Time",
     "Regression with covariate",
@@ -50,7 +50,7 @@ site_id <- "UK-AMO"
 fname_dt1 <- "data-raw/UK-AMO/UK-AMo_BM_20250822_L03_F02.dat"
 fname_dt2 <- "data-raw/UK-AMO/UK-AMo_BM_20250822_L04_F01.dat"
 fname_dt3 <- "data-raw/UK-AMO/UK-AMo_BM_20260203_L03_F02.dat"
-fname_meta <- "data-raw/dt_meta.xlsx"
+fname_meta <- "data-raw/dt_meta.csv"
 fname_site <- "data-raw/dt_site.csv"
 
 mm1 <- metamet(
@@ -74,14 +74,23 @@ mm3 <- metamet(
 
 usethis::use_data(mm1, mm2, mm3, overwrite = TRUE)
 
+# write the metadata and site files in /data-raw to objects in /data
+dt_meta <- read_csv_with_excel_datetimes(
+  file = fname_meta,
+  datetime_cols = c("start_date", "end_date")
+)
+
+dt_site <- fread(fname_site)
+usethis::use_data(dt_site, dt_meta, overwrite = TRUE)
+
 # and copy the meta and site files to the test data
 fs::file_copy(
   fname_meta,
-  fs::path(testthat::test_path(), fname_meta),
+  fs::path(pkg_extdata(), fs::path_file(fname_meta)),
   overwrite = TRUE
 )
 fs::file_copy(
   fname_site,
-  fs::path(testthat::test_path(), fname_site),
+  fs::path(pkg_extdata(), fs::path_file(fname_site)),
   overwrite = TRUE
 )

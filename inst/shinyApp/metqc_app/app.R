@@ -118,18 +118,6 @@ ui <- dashboardPage(
             ),
             actionButton("retrieve_data", "Retrieve from database"),
             actionButton("compare_vars", "Compare variables"),
-          ),
-          hidden(
-            div(
-              id = "validation_calendar_outer",
-              box(
-                id = 'validation_calendar',
-                title = "Validation Calendar",
-                status = "success",
-                solidHeader = TRUE,
-                shinycssloaders::withSpinner(plotOutput("heatmap_plot"))
-              )
-            )
           )
         ),
         hidden(
@@ -423,7 +411,6 @@ server <- function(input, output, session) {
 
     # enabling previously disabled buttons
     shinyjs::show("extracted_data")
-    shinyjs::show("validation_calendar_outer")
 
     mm_qry <<- metamet::subset_by_date(
       uploaded()$mm,
@@ -459,17 +446,6 @@ server <- function(input, output, session) {
           renderGirafe(metamet:::ggiraph_plot(i))
       })
     )
-
-    # Creating a calendar heatmap plot that will be plotted depending on the tab selected in plotTabs
-    heatmap_plot_selected <- reactive({
-      req(input$plotTabs)
-      plot_heatmap_calendar(
-        mm_qry$dt_qc,
-        time_name = mm_qry$dt_meta[type == "time", name_dt]
-      )
-    })
-
-    output$heatmap_plot <- renderPlot(heatmap_plot_selected())
 
     enable('compare_vars')
   })

@@ -146,7 +146,7 @@ metamet.character <- function(
   ...
 ) {
   message("Loading file: ", dt)
-  dt <- data.table::fread(dt)
+  dt <- read_obs_autodetect(dt)
 
   # read metadata from file if a path is specified
   # otherwise the argument is assumed to be a data table/frame
@@ -155,8 +155,11 @@ metamet.character <- function(
     if (fs::path_ext(dt_meta) == "xlsx") {
       dt_meta <- readxl::read_excel(dt_meta)
     } else {
-      # .csv format
-      dt_meta <- data.table::fread(dt_meta)
+      # assume csv format but date cols need parsing
+      dt_meta <- read_csv_with_excel_datetimes(
+        file = dt_meta,
+        datetime_cols = c("start_date", "end_date")
+      )
     }
   }
   data.table::setDT(dt_meta)
@@ -215,7 +218,11 @@ metamet.data.frame <- function(
   # read metadata from file if a path is specified
   # otherwise the argument is assumed to be a data table/frame
   if ("character" %in% class(dt_meta)) {
-    dt_meta <- data.table::fread(dt_meta)
+    # assume csv format but date cols need parsing
+    dt_meta <- read_csv_with_excel_datetimes(
+      file = dt_meta,
+      datetime_cols = c("start_date", "end_date")
+    )
   }
   data.table::setDT(dt_meta)
 
@@ -270,7 +277,11 @@ metamet.data.table <- function(
   # read metadata from file if a path is specified
   # otherwise the argument is assumed to be a data table/frame
   if ("character" %in% class(dt_meta)) {
-    dt_meta <- data.table::fread(dt_meta)
+    # assume csv format but date cols need parsing
+    dt_meta <- read_csv_with_excel_datetimes(
+      file = dt_meta,
+      datetime_cols = c("start_date", "end_date")
+    )
   }
   data.table::setDT(dt_meta)
 

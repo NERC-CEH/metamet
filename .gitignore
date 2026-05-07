@@ -8,3 +8,4 @@ data-raw/*
 !data-raw/make_data-sets.R
 tests/testthat/*.png
 .positai
+.ignore/

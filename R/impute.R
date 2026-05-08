@@ -154,8 +154,12 @@ impute <- function(
     method <- df_method$method[match(method, df_method$method)]
     if (is.na(method)) {
       warning(
-        "No valid imputation method found for '", y, "'. ",
-        "Check that '", y, "' appears in dt_meta$name_icos (not dt_meta$name_dt). ",
+        "No valid imputation method found for '",
+        y,
+        "'. ",
+        "Check that '",
+        y,
+        "' appears in dt_meta$name_icos (not dt_meta$name_dt). ",
         "Skipping."
       )
       next
@@ -271,7 +275,8 @@ impute <- function(
       dt_plot <- merge(
         dt[name_icos == y],
         data.table::as.data.table(df_method)[, .(qc, method_longname)],
-        by = "qc", all.x = TRUE
+        by = "qc",
+        all.x = TRUE
       )
       p <- ggplot(dt_plot, aes(TIMESTAMP, value))
       p <- p + geom_line(aes(y = ref), colour = "black")

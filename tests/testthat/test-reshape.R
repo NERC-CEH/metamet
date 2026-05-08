@@ -14,8 +14,15 @@ test_that("wide_to_long produces expected long-format columns", {
   mm_long <- metamet_wide_to_long(mm)
 
   expected_cols <- c(
-    "site", "TIMESTAMP", "var_name", "value",
-    "qc", "validator", "ref", "type", "name_icos"
+    "site",
+    "TIMESTAMP",
+    "var_name",
+    "value",
+    "qc",
+    "validator",
+    "ref",
+    "type",
+    "name_icos"
   )
   expect_true(all(expected_cols %in% names(mm_long$dt)))
 })

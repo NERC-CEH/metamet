@@ -62,5 +62,8 @@ test_that("reading metamet from files from Whim works", {
   expect_true("ref" %in% names(mm$dt))
   expect_equal(sum(is.na(mm$dt$TIMESTAMP)), 0)
   # should not be any duplicate keys
-  expect_equal(nrow(mm$dt[duplicated(mm$dt[, .(site, TIMESTAMP, var_name)]), ]), 0)
+  expect_equal(
+    nrow(mm$dt[duplicated(mm$dt[, .(site, TIMESTAMP, var_name)]), ]),
+    0
+  )
 })

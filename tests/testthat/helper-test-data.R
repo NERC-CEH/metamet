@@ -14,9 +14,9 @@ make_test_metamet <- function(include_qc = TRUE, include_ref = TRUE) {
 
   dt_meta <- data.table::data.table(
     site      = "A",
-    name_dt   = c("temp", "flux"),
-    type      = c("climate", "flux"),
-    name_icos = c("TA", "NEE")
+    name_dt   = c("TIMESTAMP", "temp", "flux"),
+    type      = c("time", "climate", "flux"),
+    name_icos = c(NA_character_, "TA", "NEE")
   )
 
   dt_site <- data.table::data.table(

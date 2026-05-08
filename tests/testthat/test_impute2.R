@@ -56,6 +56,7 @@ test_that("applying imputing works for more files", {
   dim(mm$dt_ref)
 
   mm <- apply_qc(mm)
+  mm <- metamet_reshape(mm, "long")
 
   summary(mm$dt)
   mm$dt[, sapply(.SD, function(x) sum(is.na(x))), .SDcols = names(mm$dt)]

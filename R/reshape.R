@@ -50,11 +50,23 @@ metamet_wide_to_long <- function(mm) {
   .assert_is_dt(mm$dt)
   .assert_is_dt(mm$dt_meta)
 
+  time_name <- unique(mm$dt_meta[type == "time", name_dt])
+  if (length(time_name) != 1) {
+    stop(
+      "Expected exactly one time variable in dt_meta; found: ",
+      length(time_name),
+      call. = FALSE
+    )
+  }
+
   mm$dt <- data.table::melt(
     mm$dt,
-    id.vars = c("site", "TIMESTAMP"),
+    id.vars = c("site", time_name),
     variable.name = "var_name"
   )
+  if (time_name != "TIMESTAMP") {
+    data.table::setnames(mm$dt, time_name, "TIMESTAMP")
+  }
 
   data.table::setkeyv(mm$dt, .met_keys)
   data.table::setkeyv(mm$dt_meta, c("site", "name_dt"))
@@ -69,10 +81,13 @@ metamet_wide_to_long <- function(mm) {
     .assert_is_dt(mm$dt_qc)
     dt_qc <- data.table::melt(
       mm$dt_qc,
-      id.vars = c("site", "TIMESTAMP", "validator"),
+      id.vars = c("site", time_name, "validator"),
       variable.name = "var_name",
       value.name = "qc"
     )
+    if (time_name != "TIMESTAMP") {
+      data.table::setnames(dt_qc, time_name, "TIMESTAMP")
+    }
     data.table::setkeyv(dt_qc, .met_keys)
     mm$dt[dt_qc, `:=`(qc = qc, validator = validator)]
     mm$dt_qc <- NULL
@@ -84,10 +99,13 @@ metamet_wide_to_long <- function(mm) {
     .assert_is_dt(mm$dt_ref)
     dt_ref <- data.table::melt(
       mm$dt_ref,
-      id.vars = c("site", "TIMESTAMP"),
+      id.vars = c("site", time_name),
       variable.name = "var_name",
       value.name = "ref"
     )
+    if (time_name != "TIMESTAMP") {
+      data.table::setnames(dt_ref, time_name, "TIMESTAMP")
+    }
     data.table::setkeyv(dt_ref, .met_keys)
     mm$dt[dt_ref, ref := ref]
     mm$dt_ref <- NULL
@@ -206,8 +224,8 @@ metamet_reshape <- function(mm, format = c("wide", "long")) {
 #'
 #' @export
 rbind_metamet <- function(mm, l_dt, l_dt_meta, l_dt_site) {
-  mm$dt <- data.table::rbindlist(l_dt)
-  mm$dt_meta <- data.table::rbindlist(l_dt_meta)
-  mm$dt_site <- data.table::rbindlist(l_dt_site)
+  mm$dt <- data.table::rbindlist(l_dt, fill = TRUE)
+  mm$dt_meta <- data.table::rbindlist(l_dt_meta, fill = TRUE)
+  mm$dt_site <- data.table::rbindlist(l_dt_site, fill = TRUE)
   mm
 }

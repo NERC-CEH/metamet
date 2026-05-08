@@ -43,8 +43,6 @@ subset_by_date <- function(
   } else {
     time_name <<- unique(time_name)
   }
-  time_name <- "TIMESTAMP" ##* WIP: temp test
-
   if (time_name %!in% names(mm$dt)) {
     stop("Date variable not present when trying to subset by date")
   }

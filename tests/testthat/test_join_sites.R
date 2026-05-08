@@ -20,11 +20,6 @@ test_that("joining metamet from different sites works", {
   dim(mm_whm$dt)
   dim(mm_ebu$dt)
 
-  mm_whm <- suppressWarnings(change_naming_convention(
-    mm_whm,
-    name_convention = "name_icos"
-  ))
-
   mm_amo <- metamet_reshape(mm_amo, "long")
   mm_ebu <- metamet_reshape(mm_ebu, "long")
   mm_whm <- metamet_reshape(mm_whm, "long")
@@ -41,8 +36,6 @@ test_that("joining metamet from different sites works", {
   )
   dim(mm$dt)
   names(mm$dt)
-  saveRDS(mm, file = "data-raw/mm_amo_ebu_whm_2023.rds")
-  mm <- readRDS(file = "data-raw/mm_amo_ebu_whm_2023.rds")
 
   p <- ggplot(
     mm$dt[name_icos == "TS", ],

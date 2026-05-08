@@ -149,15 +149,23 @@ impute <- function(
   for (y in v_y) {
     print(paste("Getting ready to impute", y))
     if (use_method_from_meta) {
-      method <- mm$dt_meta[name_dt == y, imputation_method]
+      method <- mm$dt_meta[name_icos == y, imputation_method][1]
     }
     method <- df_method$method[match(method, df_method$method)]
+    if (is.na(method)) {
+      warning(
+        "No valid imputation method found for '", y, "'. ",
+        "Check that '", y, "' appears in dt_meta$name_icos (not dt_meta$name_dt). ",
+        "Skipping."
+      )
+      next
+    }
     # get the qc code for the selected method
     qc <- df_method$qc[match(method, df_method$method)]
     print(paste("using method", qc, method))
 
     # how many non-missing data are there?
-    n_data <- sum(!is.na(dt[y == name_icos, ]))
+    n_data <- sum(!is.na(dt[name_icos == y, value]))
     # with very few/no data, just replace with era5 data rather than trying to fit a regression
     if (n_data <= n_min && method == "era5") {
       print(paste("Too few data to fit regression; using ERA5 data directly"))
@@ -174,8 +182,12 @@ impute <- function(
     # by default, this selects all points marked as missing because the only
     # qc_tokeep is the raw data. Run interactively in the app, this applies only
     # to those selected with the additional condition "is_selected".
-    dt[y == name_icos, is_selected := row_name %in% row_selected]
-    dt[y == name_icos, is_selected := qc %!in% qc_tokeep & is_selected]
+    if (isTRUE(row_selected)) {
+      dt[name_icos == y, is_selected := TRUE]
+    } else {
+      dt[name_icos == y, is_selected := row_name %in% row_selected]
+    }
+    dt[name_icos == y, is_selected := qc %!in% qc_tokeep & is_selected]
 
     if (method == "noneg") {
       # only previously selected values which are negative stay selected
@@ -206,7 +218,7 @@ impute <- function(
       if (k > n_data / 4) {
         k <- as.integer(n_data / 4)
       }
-      v_date <- dt[y == name_icos, get(time_name)]
+      v_date <- dt[name_icos == y, TIMESTAMP]
       datect_num <- as.numeric(v_date) ## !dt_qry$
       hour <- as.POSIXlt(v_date)$hour
 
@@ -256,9 +268,12 @@ impute <- function(
     dt[y == name_icos & is_selected == TRUE, qc := ..qc]
 
     if (plot_graph) {
-      dtt <- dt[y == name_icos, .(date = get(time_name), y = value, qc)]
-
-      p <- ggplot(dt[y == name_icos], aes(get(time_name), value))
+      dt_plot <- merge(
+        dt[name_icos == y],
+        data.table::as.data.table(df_method)[, .(qc, method_longname)],
+        by = "qc", all.x = TRUE
+      )
+      p <- ggplot(dt_plot, aes(TIMESTAMP, value))
       p <- p + geom_line(aes(y = ref), colour = "black")
       p <- p +
         geom_point(
@@ -266,7 +281,6 @@ impute <- function(
           size = 1
         ) +
         ylab(y)
-      p <- p + facet_wrap(~site)
       p <- p + facet_grid(~ site * var_name)
       fs::dir_create("output")
       fname <- paste0("plot_", y, "_", method, ".png")

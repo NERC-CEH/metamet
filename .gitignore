@@ -10,3 +10,4 @@ tests/testthat/*.png
 .positai
 .ignore/
 .claude/
+tests/testthat/Rplots.pdf

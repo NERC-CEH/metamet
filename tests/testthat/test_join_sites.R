@@ -25,9 +25,9 @@ test_that("joining metamet from different sites works", {
     name_convention = "name_icos"
   ))
 
-  mm_amo <- reshape_wide_to_long(mm_amo)
-  mm_ebu <- reshape_wide_to_long(mm_ebu)
-  mm_whm <- reshape_wide_to_long(mm_whm)
+  mm_amo <- metamet_reshape(mm_amo, "long")
+  mm_ebu <- metamet_reshape(mm_ebu, "long")
+  mm_whm <- metamet_reshape(mm_whm, "long")
 
   dim(mm_amo$dt)
   dim(mm_ebu$dt)

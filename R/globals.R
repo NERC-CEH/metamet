@@ -43,7 +43,12 @@ utils::globalVariables(c(
   "method_longname",
   "mm",
   "mm_qry",
-  "y"
+  "y",
+
+  # reshape long/wide
+  "var_name",
+  "value",
+  "N"
   # "..date_field", # these probably better changed in code so they don't appear
   # "..input_variable",
   # "..time_name",

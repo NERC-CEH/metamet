@@ -3,8 +3,8 @@ library(dplyr)
 library(shinydashboard)
 library(shinyjs)
 library(shinyvalidate)
+library(shinyFiles)
 library(ggiraph)
-getwd()
 
 # Set the gap-filling methods and codes----
 gf_choices <- setNames(df_method$method, df_method$method_longname)
@@ -27,11 +27,12 @@ ui <- dashboardPage(
     sidebarMenu(
       id = 'tabs',
       menuItem("Choose file", tabName = "upload", icon = icon("upload")),
-
-      fileInput(
-        inputId = "file",
-        label = "Open a metamet .rds file",
-        accept = ".rds"
+      # with shinyfiles lib
+      shinyFilesButton(
+        id = "file",
+        label = "Open metamet .rds file",
+        title = "Select a file",
+        multiple = FALSE
       ),
       menuItem(
         "Choose date range",
@@ -46,6 +47,15 @@ ui <- dashboardPage(
         menuSubItem('Gap-fill methods', tabName = 'gapfill_guide'),
         menuSubItem('App guide', tabName = 'app_guide'),
         menuSubItem('Data process guide', tabName = 'data_guide')
+      )
+    ),
+    tags$ul(
+      class = "sidebar-menu",
+      tags$li(
+        actionLink(
+          "stop_app",
+          tagList(icon("stop"), tags$span("Stop App"))
+        )
       )
     )
   ),
@@ -117,19 +127,7 @@ ui <- dashboardPage(
             ),
             actionButton("retrieve_data", "Retrieve from database"),
             actionButton("compare_vars", "Compare variables"),
-          ),
-          # hidden(
-          #   div(
-          #     id = "validation_calendar_outer",
-          #     box(
-          #       id = 'validation_calendar',
-          #       title = "Validation Calendar",
-          #       status = "success",
-          #       solidHeader = TRUE,
-          #       shinycssloaders::withSpinner(plotOutput("heatmap_plot"))
-          #     )
-          #   )
-          # )
+          )
         ),
         hidden(
           fluidRow(
@@ -214,6 +212,29 @@ ui <- dashboardPage(
 server <- function(input, output, session) {
   # increase input file size limit to 200 MB
   options(shiny.maxRequestSize = 200 * 1024^2)
+
+  # maps all drives that users have on windows
+  get_drives <- function() {
+    if (.Platform$OS.type == "windows") {
+      drives <- letters
+      drives <- paste0(drives, ":/")
+      drives <- drives[dir.exists(drives)]
+      return(setNames(drives, drives))
+    } else {
+      return(c(home = fs::path_home()))
+    }
+  }
+
+  roots <- get_drives()
+
+  shinyFileChoose(
+    input,
+    "file",
+    roots = roots,
+    session = session,
+    filetypes = c("rds")
+  )
+
   # Non-reactive code
   # Format the start and end dates----
   df_proc <- data.frame(
@@ -230,8 +251,10 @@ server <- function(input, output, session) {
   # Reactive expression to load the RDS file
   uploaded <- reactive({
     req(input$file)
-    mm <- readRDS(input$file$datapath)
-    print(input$file$datapath)
+    fileinfo <- parseFilePaths(roots, input$file)
+    req(nrow(fileinfo) > 0)
+    fname <- as.character(fileinfo$datapath)
+    mm <- readRDS(fname)
     time_name <- mm$dt_meta[type == "time", name_dt]
     # if duplicate time variables, stop or discard if all the same
     if (length(unique(time_name)) > 1) {
@@ -250,17 +273,27 @@ server <- function(input, output, session) {
       v_names = v_names,
       date_of_first_new_record = date_of_first_new_record,
       date_of_last_new_record = date_of_last_new_record,
-      fname = input$file$datapath
+      fname = fname
     )
   })
 
   # Simple status message instead of displaying the object
   output$status <- renderText({
     if (is.null(input$file)) {
-      "No file uploaded yet."
-    } else {
-      "RDS file successfully loaded."
+      return("No file selected yet.")
     }
+    req(uploaded())
+    paste("Loaded file:", basename(uploaded()$fname))
+  })
+
+  # confirms upload was succesful and then switches to calendar selection
+  observeEvent(uploaded(), {
+    showNotification(
+      paste("Upload successful:", basename(uploaded()$fname)),
+      type = "message",
+      duration = 4
+    )
+    updateTabItems(session, "tabs", "dashboard")
   })
 
   ##########################
@@ -275,6 +308,14 @@ server <- function(input, output, session) {
   # save the username
   username <<- Sys.info()[["user"]]
   print(paste("Proceeding with", username, "as data validator"))
+
+  observeEvent(input$stop_app, {
+    stopApp()
+  })
+
+  session$onSessionEnded(function() {
+    stopApp()
+  })
 
   ###
   ##Observe event for shinyvalidate dates
@@ -404,7 +445,6 @@ server <- function(input, output, session) {
 
     # enabling previously disabled buttons
     shinyjs::show("extracted_data")
-    shinyjs::show("validation_calendar_outer")
 
     mm_qry <<- metamet::subset_by_date(
       uploaded()$mm,
@@ -438,17 +478,9 @@ server <- function(input, output, session) {
     observe(
       lapply(paste(uploaded()$v_names), function(i) {
         output[[paste0(i, "_interactive_plot")]] <-
-          renderGirafe(metamet::ggiraph_plot(i))
+          renderGirafe(metamet:::ggiraph_plot(i))
       })
     )
-
-    # # Creating a calendar heatmap plot that will be plotted depending on the tab selected in plotTabs
-    # heatmap_plot_selected <- reactive({
-    #   req(input$plotTabs)
-    #   plot_heatmap_calendar(mm_qry$dt_qc)
-    # })
-
-    # output$heatmap_plot <- renderPlot(heatmap_plot_selected())
 
     enable('compare_vars')
   })
@@ -525,7 +557,7 @@ server <- function(input, output, session) {
       # Creating a reactive plot for the variable selected in plotTabs
       plot_selected <- reactive({
         req(input$plotTabs)
-        metamet::ggiraph_plot(input$plotTabs)
+        metamet:::ggiraph_plot(input$plotTabs)
       })
       # Re-render
       output[[paste0(
@@ -619,7 +651,7 @@ server <- function(input, output, session) {
     mm_qry$dt_qc$validator <- username
 
     # overwrite existing data with changes in query
-    mm <<- join(mm, mm_qry)
+    mm <- join(uploaded()$mm, mm_qry)
 
     # write output to new file in same location as input
     ##* WIP: this does not work - input$file$datapath does not return the
@@ -652,6 +684,14 @@ server <- function(input, output, session) {
         fs::path_ext(fname)
       )
     )
+
+    # notify user that file was created
+    showNotification(
+      "Your file was successfully created.",
+      type = "message",
+      duration = 5
+    )
+
     # remove button activation and reactivate button
     runjs(
       'document.getElementById("submitchanges").textContent="Submit";'

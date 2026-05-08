@@ -2,14 +2,9 @@
 # also testing handling time variables with different names in different files
 
 test_that("reading metamet from files from Whim works", {
-  fname_dt <- testthat::test_path("data-raw/UK-WHM/whim_met_2002_2023.csv")
-  fname_meta <- testthat::test_path("data-raw/dt_meta.xlsx")
-  fname_site <- testthat::test_path("data-raw/dt_site.csv")
-  fname_era5 <- testthat::test_path("data-raw/UK-WHM/dt_era5.csv")
-
+  fname_dt <- pkg_extdata("UK-WHM/whim_met_2002_2023.csv")
+  fname_era5 <- pkg_extdata("UK-WHM/dt_era5.csv")
   dt <- fread(fname_dt)
-  dt_site <- fread(fname_site)
-  dt_meta <- setDT(readxl::read_excel(fname_meta))
 
   mm <- metamet(
     dt = dt,
@@ -57,7 +52,7 @@ test_that("reading metamet from files from Whim works", {
     fit = TRUE,
     plot_graph = TRUE
   )
-  saveRDS(mm, file = here::here("data-raw/UK-WHM/UK-WHM_BM_mm_2023.rds"))
+  # saveRDS(mm, file = pkg_extdata("UK-WHM/UK-WHM_BM_mm_2023.rds"))
 
   time_name <- mm$dt_meta[type == "time", name_dt]
 

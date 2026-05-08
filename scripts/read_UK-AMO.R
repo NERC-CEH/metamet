@@ -38,11 +38,14 @@ l_lev2$dt_era5 <- power_full_join(
 
 fname_dt <- here("data-raw/UK-AMO/le1v/UK-AMO_BM_dt_2025.csv")
 fname_qc <- here("data-raw/UK-AMO/lev1/UK-AMO_BM_qc_2025.csv")
-fname_meta <- here("data-raw/dt_meta.xlsx")
+fname_meta <- here("data-raw/dt_meta.csv")
 fname_site <- here("data-raw/dt_site.csv")
 fname_era5 <- here("data-raw/UK-AMO/dt_era5.csv")
 
-dt_meta <- readxl::read_excel(fname_meta)
+dt_meta <- read_csv_with_excel_datetimes(
+  file = fname_meta,
+  datetime_cols = c("start_date", "end_date")
+)
 dt_site <- fread(fname_site)
 
 # UK-AMO half-hourly level 1 data

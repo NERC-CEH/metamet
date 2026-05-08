@@ -22,6 +22,14 @@
 #'
 #' @export
 polar_map <- function(mm, var_name) {
+  .check_suggests(
+    c(
+      "openairmaps",
+      "leaflet"
+    ),
+    context = "the metamet polar map function"
+  )
+
   dt <- copy(mm$dt)
   # get the name and format of the time, precip, ws & wd variables
   time_name <- mm$dt_meta[type == "time", name_dt]
@@ -64,6 +72,13 @@ polar_map <- function(mm, var_name) {
 #'
 #' @export
 network_map <- function(dt_site = mm$dt_site) {
+  .check_suggests(
+    c(
+      "openairmaps",
+      "leaflet"
+    ),
+    context = "the metamet network map function"
+  )
   map_data <-
     dt_site |>
     # build a popup

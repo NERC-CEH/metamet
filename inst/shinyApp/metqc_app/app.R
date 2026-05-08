@@ -48,6 +48,15 @@ ui <- dashboardPage(
         menuSubItem('App guide', tabName = 'app_guide'),
         menuSubItem('Data process guide', tabName = 'data_guide')
       )
+    ),
+    tags$ul(
+      class = "sidebar-menu",
+      tags$li(
+        actionLink(
+          "stop_app",
+          tagList(icon("stop"), tags$span("Stop App"))
+        )
+      )
     )
   ),
   dashboardBody(
@@ -291,6 +300,14 @@ server <- function(input, output, session) {
   # save the username
   username <<- Sys.info()[["user"]]
   print(paste("Proceeding with", username, "as data validator"))
+
+  observeEvent(input$stop_app, {
+    stopApp()
+  })
+
+  session$onSessionEnded(function() {
+    stopApp()
+  })
 
   ###
   ##Observe event for shinyvalidate dates

@@ -647,16 +647,16 @@ server <- function(input, output, session) {
     shinyjs::disable("edit_table_cols")
 
     # update lev2 with mm_qry
-    ##* WIP: this labels every row with current user whenever file is saved
-    ##* Should only do this if finished checking all variables.
-    mm_qry$dt_qc$validator <- username
+    # update validator on imputed rows (qc != 0 means imputed or flagged)
+    if (identical(attr(mm_qry, "format"), "long")) {
+      mm_qry$dt[!is.na(qc) & qc != 0L, validator := username]
+    } else {
+      mm_qry$dt_qc$validator <- username
+    }
 
     # overwrite existing data with changes in query
     mm <- join(uploaded()$mm, mm_qry)
 
-    # write output to new file in same location as input
-    ##* WIP: this does not work - input$file$datapath does not return the
-    ##* original path but a temp copy. Needs shinyFiles to do this.
     fname <- uploaded()$fname
     print(uploaded()$fname)
     saveRDS(
@@ -671,8 +671,9 @@ server <- function(input, output, session) {
         fs::path_ext(fname)
       )
     )
-    # write CEDA formatted data to file
-    df_ceda <- format_for_ceda(mm)
+    # write CEDA formatted data to file — CEDA requires wide format
+    mm_wide <- metamet_reshape(mm, "wide")
+    df_ceda <- format_for_ceda(mm_wide)
     saveRDS(
       df_ceda,
       file = paste0(

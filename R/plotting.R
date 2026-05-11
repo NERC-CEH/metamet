@@ -9,7 +9,12 @@
 #' @details DETAILS
 #' @export
 ggiraph_plot <- function(input_variable) {
-  mm_qry$dt <- mm_qry$dt[df_method, on = .(qc = qc)]
+  dt_plot <- merge(
+    mm_qry$dt,
+    data.table::as.data.table(df_method)[, .(qc, method_longname)],
+    by = "qc",
+    all.x = TRUE
+  )
 
   col_pal <- c(
     '#5b5b5b',
@@ -25,7 +30,7 @@ ggiraph_plot <- function(input_variable) {
   names(col_pal) <- levels(df_method$method_longname)
 
   p1_ggplot <- ggplot(
-    mm_qry$dt[name_icos == input_variable],
+    dt_plot[name_icos == input_variable],
     aes(TIMESTAMP, value)
   ) +
     geom_point_interactive(

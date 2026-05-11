@@ -35,3 +35,27 @@ test_that("joining metamet objects works", {
   expect_equal(nrow(mm1$dt), nrow(mm_joined$dt))
   expect_equal(nrow(mm2$dt), nrow(mm_joined$dt))
 })
+
+test_that("join works on long-format objects (submitchanges scenario)", {
+  mm <- readRDS(pkg_extdata("UK-AMO/UK-AMO_BM_mm_2023.rds"))
+  mm_long <- suppressWarnings(metamet_reshape(mm, "long"))
+
+  # simulate subset_by_date + impute as the app does
+  mm_qry <- subset_by_date(
+    mm_long,
+    start_date = "2023-06-01 00:30:00",
+    end_date   = "2023-06-02 00:00:00"
+  )
+
+  mm_joined <- join(mm_long, mm_qry)
+
+  expect_s3_class(mm_joined, "metamet")
+  expect_equal(attr(mm_joined, "format"), "long")
+  # full dataset row count is preserved (mm_qry is a strict subset)
+  expect_equal(nrow(mm_joined$dt), nrow(mm_long$dt))
+  # no duplicate keys introduced
+  n_dup <- nrow(mm_joined$dt[
+    duplicated(mm_joined$dt[, .(site, TIMESTAMP, var_name)]),
+  ])
+  expect_equal(n_dup, 0L)
+})

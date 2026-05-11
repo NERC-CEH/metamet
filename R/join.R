@@ -22,26 +22,48 @@
 ##' # mm_joined <- join(mm1, mm2)
 ##' @export
 join <- function(mm1, mm2) {
-  # check the time variable are the same, and rename if not.
-  time_name_1 <- mm1$dt_meta[type == "time", name_dt]
-  time_name_2 <- mm2$dt_meta[type == "time", name_dt]
-  if (time_name_1 != time_name_2) {
-    # rename the row in dt_meta
-    mm2$dt_meta[type == "time", name_dt := time_name_1]
-    # rename the col in dt
-    setnames(mm2$dt, time_name_2, time_name_1)
-  }
-  time_name <- time_name_1
+  if (identical(attr(mm1, "format"), "long")) {
+    mm2$dt <- powerjoin::power_full_join(
+      mm1$dt,
+      mm2$dt,
+      by = c("site", "TIMESTAMP", "var_name"),
+      conflict = powerjoin::coalesce_yx
+    )
+  } else {
+    # check the time variable are the same, and rename if not.
+    time_name_1 <- unique(mm1$dt_meta[type == "time", name_dt])
+    time_name_2 <- unique(mm2$dt_meta[type == "time", name_dt])
+    if (time_name_1 != time_name_2) {
+      mm2$dt_meta[type == "time", name_dt := time_name_1]
+      setnames(mm2$dt, time_name_2, time_name_1)
+    }
+    time_name <- time_name_1
 
-  # with conflict = coalesce_yx, we take values from the second data table in preference
-  mm2$dt <- powerjoin::power_full_join(
-    mm1$dt,
-    mm2$dt,
-    by = c("site", time_name),
-    conflict = powerjoin::coalesce_yx
-  )
-  # we may want to add start_date to 'by =' list to cope with same variable at
-  # different times
+    mm2$dt <- powerjoin::power_full_join(
+      mm1$dt,
+      mm2$dt,
+      by = c("site", time_name),
+      conflict = powerjoin::coalesce_yx
+    )
+
+    if (!is.null(mm1$dt_qc) && !is.null(mm2$dt_qc)) {
+      mm2$dt_qc <- powerjoin::power_full_join(
+        mm1$dt_qc,
+        mm2$dt_qc,
+        by = c("site", time_name),
+        conflict = powerjoin::coalesce_yx
+      )
+    }
+
+    if (!is.null(mm1$dt_ref) && !is.null(mm2$dt_ref)) {
+      mm2$dt_ref <- powerjoin::power_full_join(
+        mm1$dt_ref,
+        mm2$dt_ref,
+        by = c("site", time_name),
+        conflict = powerjoin::coalesce_yx
+      )
+    }
+  }
   mm2$dt_meta <- powerjoin::power_full_join(
     mm1$dt_meta,
     mm2$dt_meta,
@@ -55,26 +77,6 @@ join <- function(mm1, mm2) {
     by = "site",
     conflict = powerjoin::coalesce_yx
   )
-
-  # repeat for qc same as dt
-  if (!is.null(mm1$dt_qc) && !is.null(mm2$dt_qc)) {
-    mm2$dt_qc <- powerjoin::power_full_join(
-      mm1$dt_qc,
-      mm2$dt_qc,
-      by = c("site", time_name),
-      conflict = powerjoin::coalesce_yx
-    )
-  }
-
-  # repeat for ref same as dt
-  if (!is.null(mm1$dt_ref) && !is.null(mm2$dt_ref)) {
-    mm2$dt_ref <- powerjoin::power_full_join(
-      mm1$dt_ref,
-      mm2$dt_ref,
-      by = c("site", time_name),
-      conflict = powerjoin::coalesce_yx
-    )
-  }
 
   return(mm2)
 }

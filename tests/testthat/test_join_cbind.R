@@ -59,3 +59,29 @@ test_that("join works on long-format objects (submitchanges scenario)", {
   ])
   expect_equal(n_dup, 0L)
 })
+
+test_that("join then reshape to wide does not crash (submitchanges full path)", {
+  mm <- readRDS(pkg_extdata("UK-AMO/UK-AMO_BM_mm_2023.rds"))
+  mm_long <- suppressWarnings(metamet_reshape(mm, "long"))
+
+  mm_qry <- subset_by_date(
+    mm_long,
+    start_date = "2023-06-01 00:30:00",
+    end_date   = "2023-06-02 00:00:00"
+  )
+  mm_joined <- join(mm_long, mm_qry)
+
+  # this is what submitchanges does before format_for_ceda — previously
+  # crashed with "index 'type' exists but is invalid" from stale secondary
+  # index left by power_full_join on dt_meta
+  expect_no_error(mm_wide <- metamet_reshape(mm_joined, "wide"))
+  expect_equal(attr(mm_wide, "format"), "wide")
+  expect_true("TIMESTAMP" %in% names(mm_wide$dt))
+
+  # format_for_ceda must not warn about recycled rows — dt_qc has fewer rows
+  # than dt (only timestamps with non-NA QC codes), so cbind by position is wrong
+  expect_no_warning(df_ceda <- metamet:::format_for_ceda(mm_wide))
+  expect_s3_class(df_ceda, "data.table")
+  # every row in the CEDA output corresponds to a row in mm_wide$dt
+  expect_equal(nrow(df_ceda), nrow(mm_wide$dt))
+})

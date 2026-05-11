@@ -152,7 +152,10 @@ metamet_long_to_wide <- function(mm) {
     NULL
   }
 
-  # dcast always produces a TIMESTAMP column; normalise dt_meta to match
+  # dcast always produces a TIMESTAMP column; normalise dt_meta to match.
+  # Clear any stale secondary index (can be left invalid by power_full_join)
+  # before the i-expression so data.table does not try to use it.
+  data.table::setindex(mm$dt_meta, NULL)
   mm$dt_meta[type == "time", name_dt := "TIMESTAMP"]
 
   mm

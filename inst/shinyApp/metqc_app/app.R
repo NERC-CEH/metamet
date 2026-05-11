@@ -255,22 +255,15 @@ server <- function(input, output, session) {
     req(nrow(fileinfo) > 0)
     fname <- as.character(fileinfo$datapath)
     mm <- readRDS(fname)
-    if (identical(attr(mm, "format"), "long")) {
-      time_name <<- "TIMESTAMP"
-    } else {
-      time_name <- mm$dt_meta[type == "time", name_dt]
-      if (length(unique(time_name)) > 1) {
-        stop("Multiple time variables present in input file.")
-      }
-      time_name <<- unique(time_name)
+    if (!identical(attr(mm, "format"), "long")) {
+      mm <- metamet_reshape(mm, "long")
     }
     v_names <- unique(mm$dt_meta[type != "time" & type != "site", name_icos])
-    date_of_first_new_record <- mm$dt[, min(get(time_name), na.rm = TRUE)]
-    date_of_last_new_record <- mm$dt[, max(get(time_name), na.rm = TRUE)]
-    setkeyv(mm$dt, c("name_icos", "site", time_name))
+    date_of_first_new_record <- mm$dt[, min(TIMESTAMP, na.rm = TRUE)]
+    date_of_last_new_record <- mm$dt[, max(TIMESTAMP, na.rm = TRUE)]
+    setkeyv(mm$dt, c("name_icos", "site", "TIMESTAMP"))
     list(
       mm = mm,
-      time_name = time_name,
       v_names = v_names,
       date_of_first_new_record = date_of_first_new_record,
       date_of_last_new_record = date_of_last_new_record,
@@ -452,10 +445,9 @@ server <- function(input, output, session) {
       start_date = df_daterange()$start_date,
       end_date = df_daterange()$end_date
     )
-    setkeyv(mm_qry$dt, c("name_icos", "site", time_name))
+    setkeyv(mm_qry$dt, c("name_icos", "site", "TIMESTAMP"))
     mm_qry$dt[, row_name := as.factor(rownames(mm_qry$dt))]
-    # line below not used I think
-    mm_qry$dt$datect_num <<- as.numeric(mm_qry$dt[, get(uploaded()$time_name)])
+    mm_qry$dt$datect_num <<- as.numeric(mm_qry$dt$TIMESTAMP)
 
     # Add a tab to the plotting panel for each variable that has been selected by the user.
     output$mytabs <- renderUI({
@@ -648,11 +640,7 @@ server <- function(input, output, session) {
 
     # update lev2 with mm_qry
     # update validator on imputed rows (qc != 0 means imputed or flagged)
-    if (identical(attr(mm_qry, "format"), "long")) {
-      mm_qry$dt[!is.na(qc) & qc != 0L, validator := username]
-    } else {
-      mm_qry$dt_qc$validator <- username
-    }
+    mm_qry$dt[!is.na(qc) & qc != 0L, validator := username]
 
     # overwrite existing data with changes in query
     mm <- join(uploaded()$mm, mm_qry)

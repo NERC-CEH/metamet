@@ -26,13 +26,13 @@ ggiraph_plot <- function(input_variable) {
 
   p1_ggplot <- ggplot(
     mm_qry$dt[name_icos == input_variable],
-    aes(get(time_name), value)
+    aes(TIMESTAMP, value)
   ) +
     geom_point_interactive(
       aes(
         data_id = row_name,
         tooltip = glue::glue(
-          "Timestamp: {get(time_name)}\nRowname: {row_name}"
+          "Timestamp: {TIMESTAMP}\nRowname: {row_name}"
         ),
         shape = factor(method_longname),
         colour = factor(var_name)
@@ -59,7 +59,7 @@ ggiraph_plot <- function(input_variable) {
       plot.title = element_text(hjust = 0.5),
       legend.title = element_blank()
     )
-  p1_girafe <- girafe(code = print(p), width_svg = 10, height_svg = 5)
+  p1_girafe <- girafe(code = print(p1_ggplot), width_svg = 10, height_svg = 5)
   p1_girafe <- girafe_options(
     p1_girafe,
     opts_selection(
@@ -70,4 +70,5 @@ ggiraph_plot <- function(input_variable) {
     opts_hover(css = "fill:#FF3333;stroke:black;cursor:pointer;"),
     opts_zoom(max = 5)
   )
+  return(p1_girafe)
 }

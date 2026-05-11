@@ -255,14 +255,15 @@ server <- function(input, output, session) {
     req(nrow(fileinfo) > 0)
     fname <- as.character(fileinfo$datapath)
     mm <- readRDS(fname)
-    time_name <- mm$dt_meta[type == "time", name_dt]
-    # if duplicate time variables, stop or discard if all the same
-    if (length(unique(time_name)) > 1) {
-      stop("Multiple time variables present in input file.")
+    if (identical(attr(mm, "format"), "long")) {
+      time_name <<- "TIMESTAMP"
     } else {
+      time_name <- mm$dt_meta[type == "time", name_dt]
+      if (length(unique(time_name)) > 1) {
+        stop("Multiple time variables present in input file.")
+      }
       time_name <<- unique(time_name)
     }
-    time_name <- "TIMESTAMP" ##* WIP: temp test
     v_names <- unique(mm$dt_meta[type != "time" & type != "site", name_icos])
     date_of_first_new_record <- mm$dt[, min(get(time_name), na.rm = TRUE)]
     date_of_last_new_record <- mm$dt[, max(get(time_name), na.rm = TRUE)]

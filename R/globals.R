@@ -48,7 +48,8 @@ utils::globalVariables(c(
   # reshape long/wide
   "var_name",
   "value",
-  "N"
+  "N",
+  "TIMESTAMP"
   # "..date_field", # these probably better changed in code so they don't appear
   # "..input_variable",
   # "..time_name",

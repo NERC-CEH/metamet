@@ -36,12 +36,15 @@ subset_by_date <- function(
 ) {
   start_date <- as.POSIXct(start_date)
   end_date <- as.POSIXct(end_date)
-  time_name <- mm$dt_meta[type == "time", name_dt]
-  # if duplicate time variables, stop or discard if all the same
-  if (length(unique(time_name)) > 1) {
+
+  if (identical(attr(mm, "format"), "long")) {
+    mm$dt <- mm$dt[TIMESTAMP >= start_date & TIMESTAMP <= end_date]
+    return(mm)
+  }
+
+  time_name <- unique(mm$dt_meta[type == "time", name_dt])
+  if (length(time_name) > 1) {
     stop("Multiple time variables present in input file.")
-  } else {
-    time_name <<- unique(time_name)
   }
   if (time_name %!in% names(mm$dt)) {
     stop("Date variable not present when trying to subset by date")
@@ -49,13 +52,11 @@ subset_by_date <- function(
 
   mm$dt <- mm$dt[get(time_name) >= start_date & get(time_name) <= end_date]
 
-  # repeat for qc if present
   if (!is.null(mm$dt_qc)) {
     mm$dt_qc <- mm$dt_qc[
       get(time_name) >= start_date & get(time_name) <= end_date
     ]
   }
-  # repeat for ref if present
   if (!is.null(mm$dt_ref)) {
     mm$dt_ref <- mm$dt_ref[
       get(time_name) >= start_date & get(time_name) <= end_date

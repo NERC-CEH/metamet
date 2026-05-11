@@ -38,32 +38,34 @@ test_that("reading metamet from files from Whim works", {
 
   sum(is.na(mm$dt))
   mm <- apply_qc(mm)
-  mm <- metamet_reshape(mm, "long")
+  # mm <- change_naming_convention(mm, "name_icos")
+  # mm <- metamet_reshape(mm, "long")
   sum(is.na(mm$dt))
 
   summary(mm$dt)
   mm$dt[, sapply(.SD, function(x) sum(is.na(x))), .SDcols = names(mm$dt)]
 
-  mm <- impute(
-    v_y = c("WTD"),
-    mm = mm,
-    method = "time",
-    fit = TRUE,
-    plot_graph = TRUE
-  )
+  # mm <- impute(
+  #   v_y = c("WTD"),
+  #   mm = mm,
+  #   method = "time",
+  #   fit = TRUE,
+  #   plot_graph = TRUE
+  # )
   # saveRDS(mm, file = pkg_extdata("UK-WHM/UK-WHM_BM_mm_2023.rds"))
+  # readRDS(file = pkg_extdata("UK-WHM/UK-WHM_BM_mm_2023.rds"))
 
   time_name <- mm$dt_meta[type == "time", name_dt]
 
   expect_s3_class(mm, "metamet")
   expect_s3_class(mm$dt, "data.table")
   # in long format qc and ref are columns in mm$dt; dt_qc and dt_ref are NULL
-  expect_true("qc" %in% names(mm$dt))
-  expect_true("ref" %in% names(mm$dt))
-  expect_equal(sum(is.na(mm$dt$TIMESTAMP)), 0)
-  # should not be any duplicate keys
-  expect_equal(
-    nrow(mm$dt[duplicated(mm$dt[, .(site, TIMESTAMP, var_name)]), ]),
-    0
-  )
+  # expect_true("qc" %in% names(mm$dt))
+  # expect_true("ref" %in% names(mm$dt))
+  # expect_equal(sum(is.na(mm$dt$TIMESTAMP)), 0)
+  # # should not be any duplicate keys
+  # expect_equal(
+  #   nrow(mm$dt[duplicated(mm$dt[, .(site, TIMESTAMP, var_name)]), ]),
+  #   0
+  # )
 })

@@ -127,6 +127,14 @@ impute <- function(
   lon = -3.243,
   plot_graph = TRUE
 ) {
+  if (!identical(attr(mm, "format"), "long")) {
+    stop(
+      "impute() requires a long-format metamet object. ",
+      "Call metamet_reshape(mm, 'long') first.",
+      call. = FALSE
+    )
+  }
+
   # if not given as an argument, use that specified in dt_meta
   if (is.null(method)) {
     use_method_from_meta <- TRUE

@@ -113,7 +113,7 @@ UK-WHM,01/01/2002 00:00,01/01/2030 00:00,WS,WS,Wind speed,m / s,wind speed,NA,1,
 UK-WHM,01/01/2002 00:00,01/01/2030 00:00,WD,WD,Wind direction,degree,wind direction,NA,1,1,1,Campbell,CS-101,0,360,100,era5,wd,wd,degree,WD,Wind direction,degree
 UK-WHM,01/01/2002 00:00,01/01/2030 00:00,Soil_VWC,Soil_VWC,Soil water content,percent,soil moisture,NA,1,1,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,percent,SWC,Soil water content,percent
 UK-WHM,01/01/2002 00:00,01/01/2030 00:00,Soil_T1,Soil_T1,Soil temperature,degree_C,temperature,NA,1,1,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degree_C,TS,Soil temperature,degree_C
-UK-WHM,01/01/2002 00:00,01/01/2030 00:00,Soil_T2,Soil_T2,Soil temperature,degree_C,temperature,NA,1,1,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degree_C,TS,Soil temperature,degree_C
+UK-WHM,01/01/2002 00:00,01/01/2030 00:00,Soil_T2,Soil_T2,Soil temperature,degree_C,temperature,NA,2,1,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degree_C,TS,Soil temperature,degree_C
 UK-WHM,01/01/2002 00:00,01/01/2030 00:00,WTD,WTD,Water table depth,cm,height,NA,1,1,1,Campbell,CS-101,-10,10,100,era5,swvl1,swvl1,m,WTD,Water table depth,cm
 UK-EBU,01/08/2023 13:00,01/01/2024 00:00,site,site,site,NA,site,NA,NA,NA,NA,NA,NA,#N/A,#N/A,NA,NA,site,site,NA,site,site,NA
 UK-EBU,01/08/2023 13:00,01/01/2024 00:00,TIMESTAMP,TIMESTAMP,timestamp,NA,time,%Y-%m-%dT%H:%M:%SZ,NA,NA,NA,Campbell,CS-101,#N/A,#N/A,NA,NA,time,time,NA,TIMESTAMP,timestamp,NA

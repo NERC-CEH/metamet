@@ -49,7 +49,7 @@ test_that("reading metamet from files from BUC works", {
   mm$dt[, sapply(.SD, function(x) sum(is.na(x))), .SDcols = names(mm$dt)]
 
   mm <- apply_qc(mm)
-  summary(mm$dt)
+  mm <- metamet_reshape(mm, "long")
   sum(is.na(mm$dt))
 
   mm <- impute(
@@ -63,14 +63,12 @@ test_that("reading metamet from files from BUC works", {
 
   # saveRDS(mm, file = here::here("data-raw/UK-BUC/UK-BUC_BM_mm.rds"))
 
-  time_name <- mm$dt_meta[type == "time", name_dt]
-
   expect_s3_class(mm, "metamet")
-  expect_s3_class(mm$dt_qc, "data.table")
-  expect_equal(sum(is.na(mm$dt_qc[, ..time_name])), 0)
-  expect_equal(nrow(mm$dt_ref), nrow(mm$dt_qc))
-  # qc loses the extra validator column when averaged, so should be same
-  expect_equal(ncol(mm$dt), ncol(mm$dt_qc) - 1)
-  # should not be any duplicate times
-  expect_equal(nrow(mm$dt[duplicated(mm$dt[, ..time_name]), ]), 0)
+  expect_s3_class(mm$dt, "data.table")
+  # in long format qc and ref are columns in mm$dt; dt_qc and dt_ref are NULL
+  expect_true("qc" %in% names(mm$dt))
+  expect_true("ref" %in% names(mm$dt))
+  expect_equal(sum(is.na(mm$dt$TIMESTAMP)), 0L)
+  # should not be any duplicate keys
+  expect_equal(nrow(mm$dt[duplicated(mm$dt[, .(site, TIMESTAMP, var_name)]), ]), 0L)
 })

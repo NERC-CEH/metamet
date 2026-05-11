@@ -152,6 +152,9 @@ metamet_long_to_wide <- function(mm) {
     NULL
   }
 
+  # dcast always produces a TIMESTAMP column; normalise dt_meta to match
+  mm$dt_meta[type == "time", name_dt := "TIMESTAMP"]
+
   mm
 }
 

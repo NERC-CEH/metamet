@@ -182,7 +182,10 @@ test_that("wide->long->wide round-trip preserves EBU dt values", {
   v_time <- mm$dt_meta[type == "time", name_dt]
   mm2 <- suppressWarnings(metamet_long_to_wide(metamet_wide_to_long(mm)))
 
-  expect_equal(normalise_wide(mm2$dt, v_time), normalise_wide(mm$dt, v_time))
+  # NA-site rows (all-NA padding artefacts) are intentionally dropped during
+  # the wide->long step, so exclude them from the original before comparing.
+  mm_dt_clean <- mm$dt[!is.na(mm$dt$site)]
+  expect_equal(normalise_wide(mm2$dt, v_time), normalise_wide(mm_dt_clean, v_time))
 })
 
 test_that("wide->long->wide round-trip preserves WHM dt values (Timestamp -> TIMESTAMP rename)", {

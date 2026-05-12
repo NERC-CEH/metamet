@@ -68,6 +68,10 @@ metamet_wide_to_long <- function(mm) {
     data.table::setnames(mm$dt, time_name, "TIMESTAMP")
   }
 
+  # Drop rows where site is NA — these are padding/join artefacts with no
+  # useful data; keeping them creates spurious NA facets in plots.
+  mm$dt <- mm$dt[!is.na(site)]
+
   data.table::setkeyv(mm$dt, .met_keys)
   data.table::setkeyv(mm$dt_meta, c("site", "name_dt"))
 

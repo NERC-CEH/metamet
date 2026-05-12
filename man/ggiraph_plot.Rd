@@ -4,7 +4,7 @@
 \alias{ggiraph_plot}
 \title{ggiraph_plot}
 \usage{
-ggiraph_plot(input_variable)
+ggiraph_plot(input_variable, scale_ref = FALSE)
 }
 \arguments{
 \item{input_variable}{The name of the variable within the query data frame to plot.}

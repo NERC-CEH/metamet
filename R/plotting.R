@@ -1,6 +1,7 @@
 #' Custom plotting function for each variable
 #'
 
+#' @importFrom ggplot2 scale_linetype_manual
 #' @title ggiraph_plot
 #' @description Creates an interactive girafe plot, whereby the user can select
 #'   points with dubious quality and impute new values.
@@ -55,7 +56,11 @@ ggiraph_plot <- function(input_variable) {
       ))
     ) +
 
-    geom_line(aes(y = ref), colour = "black") +
+    geom_line(
+      aes(y = ref, linetype = paste0("Reference: ", input_variable)),
+      colour = "black"
+    ) +
+    scale_linetype_manual(name = NULL, values = "solid") +
     # scale_color_manual(values = col_pal, limits = force) +
     xlab("Date") +
     ylab(paste("Your variable:", input_variable)) +

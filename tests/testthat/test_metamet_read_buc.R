@@ -70,5 +70,8 @@ test_that("reading metamet from files from BUC works", {
   expect_true("ref" %in% names(mm$dt))
   expect_equal(sum(is.na(mm$dt$TIMESTAMP)), 0L)
   # should not be any duplicate keys
-  expect_equal(nrow(mm$dt[duplicated(mm$dt[, .(site, TIMESTAMP, var_name)]), ]), 0L)
+  expect_equal(
+    nrow(mm$dt[duplicated(mm$dt[, .(site, TIMESTAMP, var_name)]), ]),
+    0L
+  )
 })

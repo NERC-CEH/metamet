@@ -15,10 +15,12 @@ test_that("df_daterange parses date and time inputs to POSIXct", {
   skip_if_not_installed("shiny")
   shiny::testServer(app_file, {
     session$setInputs(
-      sdate         = as.Date("2023-06-01"),
-      edate         = as.Date("2023-06-30"),
-      shour = 0L,   smin = 30L,
-      ehour = 23L,  emin = 30L,
+      sdate = as.Date("2023-06-01"),
+      edate = as.Date("2023-06-30"),
+      shour = 0L,
+      smin = 30L,
+      ehour = 23L,
+      emin = 30L,
       retrieve_data = 1L
     )
     res <- df_daterange()
@@ -39,10 +41,12 @@ test_that("df_daterange start_date_ch is a correctly formatted string", {
   skip_if_not_installed("shiny")
   shiny::testServer(app_file, {
     session$setInputs(
-      sdate         = as.Date("2023-01-05"),
-      edate         = as.Date("2023-01-06"),
-      shour = 9L,   smin = 5L,
-      ehour = 0L,   emin = 0L,
+      sdate = as.Date("2023-01-05"),
+      edate = as.Date("2023-01-06"),
+      shour = 9L,
+      smin = 5L,
+      ehour = 0L,
+      emin = 0L,
       retrieve_data = 1L
     )
     res <- df_daterange()
@@ -59,7 +63,7 @@ test_that("ggiraph_plot returns a girafe object for a valid variable", {
   mm_s <- subset_by_date(
     mm_long,
     start_date = "2023-06-01 00:30:00",
-    end_date   = "2023-06-02 00:00:00"
+    end_date = "2023-06-02 00:00:00"
   )
   mm_s$dt[, row_name := as.factor(.I)]
 
@@ -77,7 +81,7 @@ test_that("ggiraph_plot does not mutate mm_qry$dt", {
   mm_s <- subset_by_date(
     mm_long,
     start_date = "2023-06-01 00:30:00",
-    end_date   = "2023-06-02 00:00:00"
+    end_date = "2023-06-02 00:00:00"
   )
   mm_s$dt[, row_name := as.factor(.I)]
   cols_before <- names(mm_s$dt)

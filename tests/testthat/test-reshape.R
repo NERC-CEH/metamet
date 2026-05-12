@@ -142,8 +142,9 @@ test_that("metamet_reshape warns and assumes wide if format attribute is missing
 # so that originals with e.g. "Timestamp" can be compared after round-trip.
 normalise_wide <- function(dt, time_col = "TIMESTAMP") {
   dt <- data.table::copy(dt)
-  if (time_col %in% names(dt) && time_col != "TIMESTAMP")
+  if (time_col %in% names(dt) && time_col != "TIMESTAMP") {
     data.table::setnames(dt, time_col, "TIMESTAMP")
+  }
   data.table::setkey(dt, NULL)
   data.table::setcolorder(dt, sort(names(dt)))
   dt[order(site, TIMESTAMP)]
@@ -165,7 +166,10 @@ test_that("wide->long->wide round-trip preserves AMO dt_qc values", {
   mm2 <- suppressWarnings(metamet_long_to_wide(metamet_wide_to_long(mm)))
 
   expect_false(is.null(mm2$dt_qc))
-  expect_equal(normalise_wide(mm2$dt_qc, v_time), normalise_wide(mm$dt_qc, v_time))
+  expect_equal(
+    normalise_wide(mm2$dt_qc, v_time),
+    normalise_wide(mm$dt_qc, v_time)
+  )
 })
 
 test_that("wide->long->wide round-trip preserves AMO dt_ref values", {
@@ -174,7 +178,10 @@ test_that("wide->long->wide round-trip preserves AMO dt_ref values", {
   mm2 <- suppressWarnings(metamet_long_to_wide(metamet_wide_to_long(mm)))
 
   expect_false(is.null(mm2$dt_ref))
-  expect_equal(normalise_wide(mm2$dt_ref, v_time), normalise_wide(mm$dt_ref, v_time))
+  expect_equal(
+    normalise_wide(mm2$dt_ref, v_time),
+    normalise_wide(mm$dt_ref, v_time)
+  )
 })
 
 test_that("wide->long->wide round-trip preserves EBU dt values", {
@@ -185,13 +192,16 @@ test_that("wide->long->wide round-trip preserves EBU dt values", {
   # NA-site rows (all-NA padding artefacts) are intentionally dropped during
   # the wide->long step, so exclude them from the original before comparing.
   mm_dt_clean <- mm$dt[!is.na(mm$dt$site)]
-  expect_equal(normalise_wide(mm2$dt, v_time), normalise_wide(mm_dt_clean, v_time))
+  expect_equal(
+    normalise_wide(mm2$dt, v_time),
+    normalise_wide(mm_dt_clean, v_time)
+  )
 })
 
 test_that("wide->long->wide round-trip preserves WHM dt values (Timestamp -> TIMESTAMP rename)", {
   mm <- readRDS(pkg_extdata("UK-WHM/UK-WHM_BM_mm_2023.rds"))
   v_time <- mm$dt_meta[type == "time", name_dt]
-  expect_false(v_time == "TIMESTAMP")  # confirm non-standard time name
+  expect_false(v_time == "TIMESTAMP") # confirm non-standard time name
   mm2 <- suppressWarnings(metamet_long_to_wide(metamet_wide_to_long(mm)))
 
   expect_equal(normalise_wide(mm2$dt, v_time), normalise_wide(mm$dt, v_time))
@@ -203,7 +213,10 @@ test_that("wide->long->wide round-trip preserves WHM dt_qc values", {
   mm2 <- suppressWarnings(metamet_long_to_wide(metamet_wide_to_long(mm)))
 
   expect_false(is.null(mm2$dt_qc))
-  expect_equal(normalise_wide(mm2$dt_qc, v_time), normalise_wide(mm$dt_qc, v_time))
+  expect_equal(
+    normalise_wide(mm2$dt_qc, v_time),
+    normalise_wide(mm$dt_qc, v_time)
+  )
 })
 
 # ---- Round-trip: long -> wide -> long (combined multi-site data) ---------
@@ -217,10 +230,12 @@ test_that("long->wide->long round-trip preserves non-NA values in combined data"
   # All non-NA observations from the original should be present and unchanged
   v_keys <- c("site", "TIMESTAMP", "var_name")
   dt_orig <- data.table::setkeyv(
-    mm$dt[!is.na(value), c(v_keys, "value"), with = FALSE], v_keys
+    mm$dt[!is.na(value), c(v_keys, "value"), with = FALSE],
+    v_keys
   )
   dt_rt <- data.table::setkeyv(
-    mm2$dt[!is.na(value), c(v_keys, "value"), with = FALSE], v_keys
+    mm2$dt[!is.na(value), c(v_keys, "value"), with = FALSE],
+    v_keys
   )
   expect_equal(dt_rt, dt_orig)
 })
@@ -253,7 +268,9 @@ test_that("reshape to long on real AMO data has expected structure", {
   expect_equal(sum(is.na(mm_long$dt$TIMESTAMP)), 0L)
   expect_null(mm_long$dt_qc)
   expect_null(mm_long$dt_ref)
-  n_dup <- nrow(mm_long$dt[duplicated(mm_long$dt[, .(site, TIMESTAMP, var_name)]), ])
+  n_dup <- nrow(mm_long$dt[
+    duplicated(mm_long$dt[, .(site, TIMESTAMP, var_name)]),
+  ])
   expect_equal(n_dup, 0L)
 })
 
@@ -275,7 +292,9 @@ test_that("wide_to_long renames non-standard time column to TIMESTAMP", {
   mm_long <- suppressWarnings(metamet_reshape(mm, "long"))
   expect_true("TIMESTAMP" %in% names(mm_long$dt))
   expect_false(v_time_name %in% names(mm_long$dt))
-  n_dup <- nrow(mm_long$dt[duplicated(mm_long$dt[, .(site, TIMESTAMP, var_name)]), ])
+  n_dup <- nrow(mm_long$dt[
+    duplicated(mm_long$dt[, .(site, TIMESTAMP, var_name)]),
+  ])
   expect_equal(n_dup, 0L)
 })
 
@@ -295,6 +314,8 @@ test_that("multi-site combined fixture has valid long-format structure", {
 test_that("multi-site combined fixture has no duplicate keys", {
   mm <- readRDS(pkg_extdata("mm_amo_ebu_whm_2023.rds"))
   dt_known <- mm$dt[!is.na(site)]
-  n_dup <- nrow(dt_known[duplicated(dt_known[, .(site, TIMESTAMP, var_name)]), ])
+  n_dup <- nrow(dt_known[
+    duplicated(dt_known[, .(site, TIMESTAMP, var_name)]),
+  ])
   expect_equal(n_dup, 0L)
 })

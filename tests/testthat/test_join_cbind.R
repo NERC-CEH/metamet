@@ -44,7 +44,7 @@ test_that("join works on long-format objects (submitchanges scenario)", {
   mm_qry <- subset_by_date(
     mm_long,
     start_date = "2023-06-01 00:30:00",
-    end_date   = "2023-06-02 00:00:00"
+    end_date = "2023-06-02 00:00:00"
   )
 
   mm_joined <- join(mm_long, mm_qry)
@@ -67,7 +67,7 @@ test_that("join then reshape to wide does not crash (submitchanges full path)", 
   mm_qry <- subset_by_date(
     mm_long,
     start_date = "2023-06-01 00:30:00",
-    end_date   = "2023-06-02 00:00:00"
+    end_date = "2023-06-02 00:00:00"
   )
   mm_joined <- join(mm_long, mm_qry)
 

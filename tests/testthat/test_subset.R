@@ -78,7 +78,7 @@ test_that("subset_by_date works on long-format single-site data", {
   mm_s <- subset_by_date(
     mm_long,
     start_date = "2023-06-01 00:30:00",
-    end_date   = "2023-06-02 00:00:00"
+    end_date = "2023-06-02 00:00:00"
   )
 
   expect_s3_class(mm_s, "metamet")
@@ -95,7 +95,7 @@ test_that("subset_by_date works on long-format multi-site data", {
   attr(mm, "format") <- "long"
 
   start <- as.POSIXct("2023-06-01 00:30:00")
-  end   <- as.POSIXct("2023-06-02 00:00:00")
+  end <- as.POSIXct("2023-06-02 00:00:00")
 
   mm_s <- subset_by_date(mm, start_date = start, end_date = end)
 

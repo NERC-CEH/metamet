@@ -157,9 +157,6 @@ metamet_long_to_wide <- function(mm) {
   }
 
   # dcast always produces a TIMESTAMP column; normalise dt_meta to match.
-  # Clear any stale secondary index (can be left invalid by power_full_join)
-  # before the i-expression so data.table does not try to use it.
-  data.table::setindex(mm$dt_meta, NULL)
   mm$dt_meta[type == "time", name_dt := "TIMESTAMP"]
 
   mm
@@ -238,4 +235,25 @@ rbind_metamet <- function(mm, l_dt, l_dt_meta, l_dt_site) {
   mm$dt_meta <- data.table::rbindlist(l_dt_meta, fill = TRUE)
   mm$dt_site <- data.table::rbindlist(l_dt_site, fill = TRUE)
   mm
+}
+
+# ---- Format coercion helpers -------------------------------------------
+
+# Reshape to long if not already long. Objects with no format attribute are
+# treated as wide (same assumption as metamet_reshape).
+.ensure_long <- function(mm) {
+  if (!identical(attr(mm, "format"), "long")) {
+    metamet_reshape(mm, "long")
+  } else {
+    mm
+  }
+}
+
+# Reshape to wide if not already wide.
+.ensure_wide <- function(mm) {
+  if (!identical(attr(mm, "format"), "wide")) {
+    metamet_reshape(mm, "wide")
+  } else {
+    mm
+  }
 }

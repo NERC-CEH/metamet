@@ -78,5 +78,6 @@ join <- function(mm1, mm2) {
     conflict = powerjoin::coalesce_yx
   )
 
+  data.table::setindex(mm2$dt_meta, NULL)
   return(mm2)
 }

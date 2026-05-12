@@ -642,6 +642,9 @@ server <- function(input, output, session) {
     # update validator on imputed rows (qc != 0 means imputed or flagged)
     mm_qry$dt[!is.na(qc) & qc != 0L, validator := username]
 
+    # drop app-internal temporaries before joining back to the full dataset
+    mm_qry$dt[, c("row_name", "datect_num") := NULL]
+
     # overwrite existing data with changes in query
     mm <- join(uploaded()$mm, mm_qry)
 
@@ -659,9 +662,7 @@ server <- function(input, output, session) {
         fs::path_ext(fname)
       )
     )
-    # write CEDA formatted data to file — CEDA requires wide format
-    mm_wide <- metamet_reshape(mm, "wide")
-    df_ceda <- format_for_ceda(mm_wide)
+    df_ceda <- format_for_ceda(mm)
     saveRDS(
       df_ceda,
       file = paste0(

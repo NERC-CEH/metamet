@@ -1,6 +1,6 @@
 #' Format the data for submission to CEDA
 #'
-#' @param mm A metamet object.
+#' @param mm A metamet object (wide or long format).
 #' @param v_names A character vector of column names
 #'   that should be included in the new data frame.
 #'
@@ -28,6 +28,8 @@ format_for_ceda <- function(
     "WTD"
   )
 ) {
+  mm <- .ensure_wide(mm)
+
   v_time <- unique(mm$dt_meta[type == "time", name_dt])
 
   # Only keep v_names columns that actually exist in dt

@@ -300,5 +300,10 @@ impute <- function(
       ggsave(p, filename = fname)
     }
   }
+  drop_cols <- intersect(c("is_selected", "pred"), names(dt))
+  if (length(drop_cols)) {
+    dt[, (drop_cols) := NULL]
+  }
+
   return(mm)
 }

@@ -11,3 +11,4 @@ tests/testthat/*.png
 .ignore/
 .claude/
 tests/testthat/Rplots.pdf
+inst/extdata/mm_amo_ebu_whm_2023_qc_by_*

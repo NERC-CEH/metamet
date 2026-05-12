@@ -9,7 +9,7 @@ impute(
   mm,
   method = NULL,
   qc_tokeep = 0,
-  selection = TRUE,
+  row_selected = TRUE,
   k = 40,
   fit = TRUE,
   n_min = 10,
@@ -46,9 +46,6 @@ column in \code{dt_meta}. Supported methods:
 \item{qc_tokeep}{Integer QC code(s) indicating "good" or "raw" data to retain unchanged.
 Default \code{0}. Data with QC codes not in \code{qc_tokeep} are candidates for imputation.}
 
-\item{selection}{Logical. If \code{TRUE} (default), applies selection filtering
-from metadata. If \code{FALSE}, imputes all values matching \code{qc_tokeep} criteria.}
-
 \item{k}{Integer. Smoothing basis dimension for GAM in "time" method (default: 40).
 Automatically reduced if data is sparse. Controls temporal smoothness.}
 
@@ -73,6 +70,9 @@ Used by "nightzero" method to calculate sunrise/sunset times.}
 \item{plot_graph}{Logical. If \code{TRUE} (default), generates diagnostic plots
 showing observations, reference data (if available), and QC flags. Saves PNG files
 to the \code{output/} directory with naming convention \code{plot_<variable>_<method>.png}.}
+
+\item{is_selected}{Logical. If \code{TRUE} (default), applies imputation to all missing values
+If called from the shiny app, this will be a vector showing which points were selected by the user.}
 }
 \value{
 The input \code{metamet} object \code{mm}, invisibly returned with updated
@@ -88,7 +88,7 @@ All imputed values are flagged in the quality control (QC) table.
 **Imputation Process:**
 The function iterates over each variable in \code{v_y}. For each variable:
 1. Determines the imputation method (from parameter or metadata).
-2. Identifies which rows to impute based on QC codes and \code{selection} flag.
+2. Identifies which rows to impute based on QC codes and \code{is_selected} flag.
 3. Applies the selected imputation method.
 4. Updates the QC table to flag imputed values.
 5. Optionally generates a diagnostic plot.

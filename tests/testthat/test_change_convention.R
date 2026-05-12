@@ -22,3 +22,22 @@ test_that("changing naming convention works", {
   expect_s3_class(mm1_icos$dt[, TIMESTAMP], "POSIXct")
   expect_s3_class(mm1_era5$dt[, time], "POSIXct")
 })
+
+test_that("change_naming_convention works on long-format objects", {
+  mm_long <- suppressWarnings(metamet_reshape(mm1, "long"))
+  original_var_names <- unique(mm_long$dt$var_name)
+
+  mm_icos <- suppressWarnings(change_naming_convention(mm_long, "name_icos"))
+
+  expect_equal(attr(mm_icos, "format"), "long")
+  # var_name values should have changed
+  expect_false(identical(
+    sort(unique(mm_icos$dt$var_name)),
+    sort(original_var_names)
+  ))
+  # dt_meta name_dt should match the new var_name values
+  expect_setequal(
+    unique(mm_icos$dt$var_name),
+    mm_icos$dt_meta[name_dt %in% unique(mm_icos$dt$var_name), name_dt]
+  )
+})

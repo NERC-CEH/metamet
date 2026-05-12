@@ -69,6 +69,7 @@ new_metamet <- function(
 
   # Specify the class and return the metamet object
   class(new_metamet) <- c("metamet", class(new_metamet))
+  attr(new_metamet, "format") <- "wide"
   return(new_metamet)
 }
 

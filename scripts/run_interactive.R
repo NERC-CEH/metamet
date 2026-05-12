@@ -28,14 +28,16 @@ use_package("openairmaps", "Imports")
 
 document()
 pkgload::load_all()
+test_local(testthat::test_path())
 devtools::test()
 build(vignettes = FALSE)
 check(vignettes = FALSE)
 install(".")
-pkgload::load_all()
 detach("package:metamet", unload = TRUE)
+build_articles()
 build_site()
 
+pkgload::load_all()
 run_shiny()
 
 s3_methods_generic("metamet")

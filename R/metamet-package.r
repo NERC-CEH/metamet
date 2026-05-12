@@ -23,7 +23,7 @@
 #'
 #' @importFrom stats lm na.exclude predict setNames
 #' @importFrom utils head
-#' @importFrom ggplot2 ggplot ggsave aes facet_wrap
+#' @importFrom ggplot2 ggplot ggsave aes facet_wrap facet_grid
 #' @importFrom ggplot2 geom_point geom_line geom_abline
 #' @importFrom ggplot2 labs xlab ylab scale_color_manual
 #' @importFrom ggplot2 scale_color_manual ggtitle theme_bw theme

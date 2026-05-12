@@ -255,13 +255,15 @@ server <- function(input, output, session) {
     req(nrow(fileinfo) > 0)
     fname <- as.character(fileinfo$datapath)
     mm <- readRDS(fname)
-    time_name <- mm$dt_meta[type == "time", name_dt]
-    v_names <- mm$dt_meta[type != "time" & type != "site", name_dt]
-    date_of_first_new_record <- mm$dt[, min(get(time_name), na.rm = TRUE)]
-    date_of_last_new_record <- mm$dt[, max(get(time_name), na.rm = TRUE)]
+    if (!identical(attr(mm, "format"), "long")) {
+      mm <- metamet_reshape(mm, "long")
+    }
+    v_names <- unique(mm$dt_meta[type != "time" & type != "site", name_icos])
+    date_of_first_new_record <- mm$dt[, min(TIMESTAMP, na.rm = TRUE)]
+    date_of_last_new_record <- mm$dt[, max(TIMESTAMP, na.rm = TRUE)]
+    setkeyv(mm$dt, c("name_icos", "site", "TIMESTAMP"))
     list(
       mm = mm,
-      time_name = time_name,
       v_names = v_names,
       date_of_first_new_record = date_of_first_new_record,
       date_of_last_new_record = date_of_last_new_record,
@@ -343,6 +345,7 @@ server <- function(input, output, session) {
 
   # Create a date input for the user to select start date
   output$start_date <- renderUI({
+    print(as.Date(uploaded()$date_of_first_new_record, tz = "UTC"))
     dateInput(
       "sdate",
       value = as.Date(uploaded()$date_of_first_new_record, tz = "UTC"),
@@ -354,6 +357,7 @@ server <- function(input, output, session) {
 
   # Create a date input for the user to select end date
   output$end_date <- renderUI({
+    print(as.Date(uploaded()$date_of_last_new_record, tz = "UTC"))
     dateInput(
       "edate",
       value = as.Date(uploaded()$date_of_last_new_record, tz = "UTC"),
@@ -441,9 +445,9 @@ server <- function(input, output, session) {
       start_date = df_daterange()$start_date,
       end_date = df_daterange()$end_date
     )
-
-    mm_qry$dt$checked <<- as.factor(rownames(mm_qry$dt))
-    mm_qry$dt$datect_num <<- as.numeric(mm_qry$dt[, get(uploaded()$time_name)])
+    setkeyv(mm_qry$dt, c("name_icos", "site", "TIMESTAMP"))
+    mm_qry$dt[, row_name := as.factor(rownames(mm_qry$dt))]
+    mm_qry$dt$datect_num <<- as.numeric(mm_qry$dt$TIMESTAMP)
 
     # Add a tab to the plotting panel for each variable that has been selected by the user.
     output$mytabs <- renderUI({
@@ -534,7 +538,7 @@ server <- function(input, output, session) {
         x = input$select_covariate,
         k = input$intslider,
         plot_graph = FALSE,
-        selection = mm_qry$dt$checked %in% selected_state()
+        row_selected = selected_state()
       )
 
       # Re-plotting plot after imputation is confirmed to illustrate changes
@@ -543,7 +547,7 @@ server <- function(input, output, session) {
       enable("impute")
       enable("finished_check")
 
-      # Creating a reactive plot that will be plotted depending on the tab selected in plotTabs
+      # Creating a reactive plot for the variable selected in plotTabs
       plot_selected <- reactive({
         req(input$plotTabs)
         metamet:::ggiraph_plot(input$plotTabs)
@@ -635,16 +639,15 @@ server <- function(input, output, session) {
     shinyjs::disable("edit_table_cols")
 
     # update lev2 with mm_qry
-    ##* WIP: this labels every row with current user whenever file is saved
-    ##* Should only do this if finished checking all variables.
-    mm_qry$dt_qc$validator <- username
+    # update validator on imputed rows (qc != 0 means imputed or flagged)
+    mm_qry$dt[!is.na(qc) & qc != 0L, validator := username]
+
+    # drop app-internal temporaries before joining back to the full dataset
+    mm_qry$dt[, c("row_name", "datect_num") := NULL]
 
     # overwrite existing data with changes in query
     mm <- join(uploaded()$mm, mm_qry)
 
-    # write output to new file in same location as input
-    ##* WIP: this does not work - input$file$datapath does not return the
-    ##* original path but a temp copy. Needs shinyFiles to do this.
     fname <- uploaded()$fname
     print(uploaded()$fname)
     saveRDS(
@@ -659,7 +662,6 @@ server <- function(input, output, session) {
         fs::path_ext(fname)
       )
     )
-    # write CEDA formatted data to file
     df_ceda <- format_for_ceda(mm)
     saveRDS(
       df_ceda,

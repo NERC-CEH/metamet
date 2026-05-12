@@ -9,15 +9,12 @@
 #' @details DETAILS
 #' @export
 ggiraph_plot <- function(input_variable) {
-  time_name <- mm_qry$dt_meta[type == "time", name_dt]
-  df <- data.frame(
-    DATECT = mm_qry$dt[, get(time_name)],
-    y = mm_qry$dt[, ..input_variable][[1]],
-    qc = mm_qry$dt_qc[, ..input_variable][[1]],
-    checked = mm_qry$dt$checked
+  dt_plot <- merge(
+    mm_qry$dt,
+    data.table::as.data.table(df_method)[, .(qc, method_longname)],
+    by = "qc",
+    all.x = TRUE
   )
-
-  df <- left_join(df, df_method, by = "qc")
 
   col_pal <- c(
     '#5b5b5b',
@@ -32,16 +29,34 @@ ggiraph_plot <- function(input_variable) {
   )
   names(col_pal) <- levels(df_method$method_longname)
 
-  p <- ggplot(df, aes(DATECT, y)) +
+  p1_ggplot <- ggplot(
+    dt_plot[name_icos == input_variable],
+    aes(TIMESTAMP, value)
+  ) +
     geom_point_interactive(
       aes(
-        data_id = checked,
-        tooltip = glue::glue("Timestamp: {DATECT}\nMeasure: {y}"),
-        colour = factor(method_longname)
+        data_id = row_name,
+        tooltip = glue::glue(
+          "Timestamp: {TIMESTAMP}\nRowname: {row_name}"
+        ),
+        shape = factor(method_longname),
+        colour = factor(var_name)
       ),
       size = 3
     ) +
-    scale_color_manual(values = col_pal, limits = force) +
+
+    facet_wrap_interactive(
+      ncol = 2,
+      interactive_on = "text",
+      vars(site),
+      labeller = labeller_interactive(aes(
+        tooltip = paste("The site is", site),
+        data_id = site
+      ))
+    ) +
+
+    geom_line(aes(y = ref), colour = "black") +
+    # scale_color_manual(values = col_pal, limits = force) +
     xlab("Date") +
     ylab(paste("Your variable:", input_variable)) +
     ggtitle(paste(input_variable, "time series")) +
@@ -49,7 +64,7 @@ ggiraph_plot <- function(input_variable) {
       plot.title = element_text(hjust = 0.5),
       legend.title = element_blank()
     )
-  p1_girafe <- girafe(code = print(p), width_svg = 10, height_svg = 5)
+  p1_girafe <- girafe(code = print(p1_ggplot), width_svg = 10, height_svg = 5)
   p1_girafe <- girafe_options(
     p1_girafe,
     opts_selection(
@@ -60,4 +75,5 @@ ggiraph_plot <- function(input_variable) {
     opts_hover(css = "fill:#FF3333;stroke:black;cursor:pointer;"),
     opts_zoom(max = 5)
   )
+  return(p1_girafe)
 }

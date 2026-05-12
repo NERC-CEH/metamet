@@ -39,41 +39,29 @@
 #' @export
 change_naming_convention <- function(mm_in, name_convention = "name_era5") {
   mm <- copy(mm_in)
-  names(mm$dt_meta)
   v_cols_id <- c("horizontal_id", "vertical_id", "replicate_id")
   v_cols <- c(name_convention, "horizontal_id", "vertical_id", "replicate_id")
 
-  # replace any "NA" string id values with NA missing value
   mm$dt_meta[, eval(v_cols_id) := lapply(.SD, as.integer), .SDcols = v_cols_id]
-  # set to new convention names
   mm$dt_meta[, new_names := get(name_convention)]
-  # and add id variables to distinguish replicates (e.g. x_1_1_1)
   mm$dt_meta[
     !is.na(replicate_id),
     new_names := do.call(paste, c(.SD, sep = "_")),
     .SDcols = v_cols
   ]
 
-  setnames(
-    mm$dt,
-    mm$dt_meta[, name_dt],
-    mm$dt_meta[, new_names]
-  )
-
-  if (!is.null(mm$dt_ref)) {
-    setnames(
-      mm$dt_ref,
-      mm$dt_meta[, name_dt],
-      mm$dt_meta[, new_names]
-    )
-  }
-
-  if (!is.null(mm$dt_qc)) {
-    setnames(
-      mm$dt_qc,
-      mm$dt_meta[, name_dt],
-      mm$dt_meta[, new_names]
-    )
+  if (identical(attr(mm, "format"), "long")) {
+    # Long format: update var_name values rather than column names
+    name_map <- mm$dt_meta[, .(name_dt, new_names)]
+    mm$dt[name_map, var_name := new_names, on = c(var_name = "name_dt")]
+  } else {
+    setnames(mm$dt, mm$dt_meta[, name_dt], mm$dt_meta[, new_names])
+    if (!is.null(mm$dt_ref)) {
+      setnames(mm$dt_ref, mm$dt_meta[, name_dt], mm$dt_meta[, new_names])
+    }
+    if (!is.null(mm$dt_qc)) {
+      setnames(mm$dt_qc, mm$dt_meta[, name_dt], mm$dt_meta[, new_names])
+    }
   }
 
   mm$dt_meta[, name_dt := new_names]

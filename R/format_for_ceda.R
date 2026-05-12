@@ -1,6 +1,6 @@
 #' Format the data for submission to CEDA
 #'
-#' @param mm A metamet object.
+#' @param mm A metamet object (wide or long format).
 #' @param v_names A character vector of column names
 #'   that should be included in the new data frame.
 #'
@@ -28,15 +28,24 @@ format_for_ceda <- function(
     "WTD"
   )
 ) {
-  # Get the qc names by adding "_qc" to the v_names
-  v_names_qc <- paste0(v_names, "_qc")
+  mm <- .ensure_wide(mm)
 
-  # Select the columns from dt_qc with the names in v_names_qc
-  mm$dt_qc <- setNames(mm$dt_qc[, ..v_names], v_names_qc)
+  v_time <- unique(mm$dt_meta[type == "time", name_dt])
 
-  # Create a new data frame by binding the selected columns from dt and dt_qc
-  dt <- cbind(mm$dt[, .(DATECT)], mm$dt[, ..v_names], mm$dt_qc)
+  # Only keep v_names columns that actually exist in dt
+  v_names_present <- intersect(v_names, names(mm$dt))
+  by_cols <- c("site", v_time)
 
-  # Return the new data frame
+  dt <- mm$dt[, c(by_cols, v_names_present), with = FALSE]
+
+  if (!is.null(mm$dt_qc)) {
+    # Only keep qc columns for variables in v_names; dt_qc may have fewer rows
+    # than dt (only timestamps with non-NA QC codes), so join rather than cbind
+    v_qc_present <- intersect(v_names_present, names(mm$dt_qc))
+    dt_qc_sel <- mm$dt_qc[, c(by_cols, v_qc_present), with = FALSE]
+    data.table::setnames(dt_qc_sel, v_qc_present, paste0(v_qc_present, "_qc"))
+    dt <- merge(dt, dt_qc_sel, by = by_cols, all.x = TRUE)
+  }
+
   return(dt)
 }

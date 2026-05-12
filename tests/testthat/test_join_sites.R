@@ -20,14 +20,13 @@ test_that("joining metamet from different sites works", {
   dim(mm_whm$dt)
   dim(mm_ebu$dt)
 
-  mm_whm <- suppressWarnings(change_naming_convention(
-    mm_whm,
-    name_convention = "name_icos"
-  ))
+  mm_amo <- change_naming_convention(mm_amo, "name_icos")
+  mm_ebu <- change_naming_convention(mm_ebu, "name_icos")
+  mm_whm <- change_naming_convention(mm_whm, "name_icos")
 
-  mm_amo <- reshape_wide_to_long(mm_amo)
-  mm_ebu <- reshape_wide_to_long(mm_ebu)
-  mm_whm <- reshape_wide_to_long(mm_whm)
+  mm_amo <- metamet_reshape(mm_amo, "long")
+  mm_ebu <- metamet_reshape(mm_ebu, "long")
+  mm_whm <- metamet_reshape(mm_whm, "long")
 
   dim(mm_amo$dt)
   dim(mm_ebu$dt)
@@ -41,6 +40,7 @@ test_that("joining metamet from different sites works", {
   )
   dim(mm$dt)
   names(mm$dt)
+  # saveRDS(mm, file = pkg_extdata("mm_amo_ebu_whm_2023.rds"))
 
   p <- ggplot(
     mm$dt[name_icos == "TS", ],

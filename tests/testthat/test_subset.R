@@ -70,3 +70,41 @@ test_that("subsetting by date works", {
   # should not be any duplicate times
   expect_equal(nrow(mm_s$dt[duplicated(mm_s$dt[, ..time_name]), ]), 0)
 })
+
+test_that("subset_by_date works on long-format single-site data", {
+  mm <- readRDS(pkg_extdata("UK-AMO/UK-AMO_BM_mm_2023.rds"))
+  mm_long <- suppressWarnings(metamet_reshape(mm, "long"))
+
+  mm_s <- subset_by_date(
+    mm_long,
+    start_date = "2023-06-01 00:30:00",
+    end_date = "2023-06-02 00:00:00"
+  )
+
+  expect_s3_class(mm_s, "metamet")
+  expect_equal(attr(mm_s, "format"), "long")
+  expect_true("TIMESTAMP" %in% names(mm_s$dt))
+  expect_true(all(mm_s$dt$TIMESTAMP >= as.POSIXct("2023-06-01 00:30:00")))
+  expect_true(all(mm_s$dt$TIMESTAMP <= as.POSIXct("2023-06-02 00:00:00")))
+  expect_null(mm_s$dt_qc)
+  expect_null(mm_s$dt_ref)
+})
+
+test_that("subset_by_date works on long-format multi-site data", {
+  mm <- readRDS(pkg_extdata("mm_amo_ebu_whm_2023.rds"))
+  attr(mm, "format") <- "long"
+
+  start <- as.POSIXct("2023-06-01 00:30:00")
+  end <- as.POSIXct("2023-06-02 00:00:00")
+
+  mm_s <- subset_by_date(mm, start_date = start, end_date = end)
+
+  expect_s3_class(mm_s, "metamet")
+  expect_equal(attr(mm_s, "format"), "long")
+  expect_true(nrow(mm_s$dt) > 0)
+  expect_true(nrow(mm_s$dt) < nrow(mm$dt))
+  expect_true(all(mm_s$dt$TIMESTAMP >= start))
+  expect_true(all(mm_s$dt$TIMESTAMP <= end))
+  expect_null(mm_s$dt_qc)
+  expect_null(mm_s$dt_ref)
+})

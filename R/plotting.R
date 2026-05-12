@@ -9,13 +9,29 @@
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
 #' @export
-ggiraph_plot <- function(input_variable) {
+ggiraph_plot <- function(input_variable, scale_ref = FALSE) {
   dt_plot <- merge(
     mm_qry$dt,
     data.table::as.data.table(df_method)[, .(qc, method_longname)],
     by = "qc",
     all.x = TRUE
   )
+
+  if (scale_ref) {
+    dt_plot[
+      name_icos == input_variable,
+      ref := {
+        valid <- !is.na(value) & !is.na(ref)
+        if (sum(valid) >= 2L && var(ref[valid]) > 0) {
+          m <- lm(value[valid] ~ ref[valid])
+          coef(m)[[1L]] + coef(m)[[2L]] * ref
+        } else {
+          ref
+        }
+      },
+      by = site
+    ]
+  }
 
   col_pal <- c(
     '#5b5b5b',

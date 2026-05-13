@@ -2,7 +2,7 @@
 # also testing handling time variables with different names in different files
 
 test_that("reading metamet from files from Whim works", {
-  fname_dt <- pkg_extdata("UK-WHM/whim_met_2002_2023.csv")
+  fname_dt <- pkg_extdata("UK-WHM/historical/eidc/whim_met_2002_2023.csv")
   fname_era5 <- pkg_extdata("UK-WHM/dt_era5.csv")
   dt <- fread(fname_dt)
 

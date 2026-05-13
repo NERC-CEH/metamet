@@ -2,7 +2,7 @@
 # also testing handling time variables with different names in different files
 
 test_that("reading metamet from files from BUC works", {
-  fname_dt <- pkg_extdata("UK-BUC/BushCabin_CR1000X_BUMON_30.dat")
+  fname_dt <- pkg_extdata("UK-BUC/current/BushCabin_CR1000X_BUMON_30.dat")
   fname_era5 <- pkg_extdata("UK-AMO/dt_era5.csv")
   dt_meta <- pkg_extdata("dt_meta.csv")
 

@@ -27,26 +27,28 @@
 ##'
 ##' @export
 read_ceda_csv <- function(fname, drop_flags = TRUE) {
-  lines <- readLines(fname, warn = FALSE, encoding = "latin1")
+  v_lines <- readLines(fname, warn = FALSE, encoding = "latin1")
 
   # ---- Find the column-index row -------------------------------------------
   # It is the first row whose non-empty comma-separated fields are exactly the
   # consecutive integers 1, 2, 3, ... (distinguishes it from flag_values rows
   # which use non-sequential codes).
-  col_index_row <- NA_integer_
-  for (i in seq_along(lines)) {
-    parts <- trimws(strsplit(lines[[i]], ",")[[1L]])
-    parts <- parts[nzchar(parts)]
-    vals <- suppressWarnings(as.integer(parts))
+  i_col_index_row <- NA_integer_
+  for (i in seq_along(v_lines)) {
+    v_parts <- trimws(strsplit(v_lines[[i]], ",")[[1L]])
+    v_parts <- v_parts[nzchar(v_parts)]
+    v_vals <- suppressWarnings(as.integer(v_parts))
     if (
-      !anyNA(vals) && length(vals) >= 2L && identical(vals, seq_along(vals))
+      !anyNA(v_vals) &&
+        length(v_vals) >= 2L &&
+        identical(v_vals, seq_along(v_vals))
     ) {
-      col_index_row <- i
-      n_cols <- max(vals)
+      i_col_index_row <- i
+      n_cols <- max(v_vals)
       break
     }
   }
-  if (is.na(col_index_row)) {
+  if (is.na(i_col_index_row)) {
     stop(
       "Cannot find column-index row in '",
       basename(fname),
@@ -59,45 +61,45 @@ read_ceda_csv <- function(fname, drop_flags = TRUE) {
   # ---- Parse header rows for column names ----------------------------------
   # Only short_name / long_name rows are needed; simple strsplit is sufficient
   # because those fields never contain commas in practice.
-  col_short <- list()
-  col_long <- list()
+  l_col_short <- list()
+  l_col_long <- list()
 
-  for (line in lines[seq_len(col_index_row - 1L)]) {
-    parts <- trimws(strsplit(line, ",")[[1L]])
-    if (length(parts) < 3L) {
+  for (line in v_lines[seq_len(i_col_index_row - 1L)]) {
+    v_parts <- trimws(strsplit(line, ",")[[1L]])
+    if (length(v_parts) < 3L) {
       next
     }
 
-    field <- tolower(parts[[1L]])
-    col_id <- parts[[2L]]
+    field <- tolower(v_parts[[1L]])
+    col_id <- v_parts[[2L]]
     if (toupper(col_id) == "G") {
       next
     }
-    col_num <- suppressWarnings(as.integer(col_id))
-    if (is.na(col_num)) {
+    i_col <- suppressWarnings(as.integer(col_id))
+    if (is.na(i_col)) {
       next
     }
 
-    value <- gsub('^"+|"+$', "", parts[[3L]])
-    key <- as.character(col_num)
+    value <- gsub('^"+|"+$', "", v_parts[[3L]])
+    key <- as.character(i_col)
 
-    if (field == "short_name" && is.null(col_short[[key]])) {
-      col_short[[key]] <- value
-    } else if (field == "long_name" && is.null(col_long[[key]])) {
-      col_long[[key]] <- value
+    if (field == "short_name" && is.null(l_col_short[[key]])) {
+      l_col_short[[key]] <- value
+    } else if (field == "long_name" && is.null(l_col_long[[key]])) {
+      l_col_long[[key]] <- value
     }
   }
 
   # ---- Build column name vector --------------------------------------------
-  col_names <- vapply(
+  v_col_names <- vapply(
     seq_len(n_cols),
     function(i) {
       key <- as.character(i)
-      sn <- col_short[[key]]
+      sn <- l_col_short[[key]]
       if (length(sn) == 1L && nzchar(sn)) {
         return(sn)
       }
-      ln <- col_long[[key]]
+      ln <- l_col_long[[key]]
       if (length(ln) == 1L && nzchar(ln)) {
         return(ln)
       }
@@ -106,13 +108,13 @@ read_ceda_csv <- function(fname, drop_flags = TRUE) {
     character(1L)
   )
 
-  col_names[[1L]] <- "TIMESTAMP"
-  col_names <- make.unique(col_names, sep = ".")
+  v_col_names[[1L]] <- "TIMESTAMP"
+  v_col_names <- make.unique(v_col_names, sep = ".")
 
   # ---- Read data -----------------------------------------------------------
   dt <- data.table::fread(
     fname,
-    skip = col_index_row,
+    skip = i_col_index_row,
     header = FALSE,
     na.strings = c("", "NA", "-9999"),
     fill = TRUE,
@@ -120,28 +122,28 @@ read_ceda_csv <- function(fname, drop_flags = TRUE) {
   )
 
   # Trim to the expected number of columns and assign names
-  keep <- seq_len(min(ncol(dt), n_cols))
-  dt <- dt[, keep, with = FALSE]
-  data.table::setnames(dt, col_names[keep])
+  v_keep <- seq_len(min(ncol(dt), n_cols))
+  dt <- dt[, v_keep, with = FALSE]
+  data.table::setnames(dt, v_col_names[v_keep])
 
   # ---- Drop flag columns ---------------------------------------------------
   if (drop_flags) {
-    flag_cols <- grep("^(Flag|FLAG)\\b", names(dt), value = TRUE)
-    if (length(flag_cols)) dt[, (flag_cols) := NULL]
+    v_flag_cols <- grep("^(Flag|FLAG)\\b", names(dt), value = TRUE)
+    if (length(v_flag_cols)) dt[, (v_flag_cols) := NULL]
   }
 
   # ---- Drop redundant packed-datetime columns (YYYYMMDDHHMM) ---------------
   # These are numeric columns whose values fall in the plausible YYYYMMDDHHMM
   # range (198001010000 – 209912312359) — unambiguously not a measurement.
   for (col in setdiff(names(dt), "TIMESTAMP")) {
-    vals <- dt[[col]]
-    if (!is.numeric(vals)) {
+    v_vals <- dt[[col]]
+    if (!is.numeric(v_vals)) {
       next
     }
-    non_na <- vals[!is.na(vals)]
+    v_non_na <- v_vals[!is.na(v_vals)]
     if (
-      length(non_na) > 0L &&
-        all(non_na >= 198001010000 & non_na <= 209912312359)
+      length(v_non_na) > 0L &&
+        all(v_non_na >= 198001010000 & v_non_na <= 209912312359)
     ) {
       dt[, (col) := NULL]
     }
@@ -153,8 +155,8 @@ read_ceda_csv <- function(fname, drop_flags = TRUE) {
   # y=20, H=24). Try explicit strptime formats individually instead.
   dt[,
     TIMESTAMP := {
-      ts <- TIMESTAMP
-      result <- as.POSIXct(rep(NA_real_, .N), tz = "UTC")
+      v_ts <- TIMESTAMP
+      v_result <- as.POSIXct(rep(NA_real_, .N), tz = "UTC")
       for (fmt in c(
         "%d/%m/%y %H:%M",
         "%d/%m/%Y %H:%M",
@@ -163,15 +165,15 @@ read_ceda_csv <- function(fname, drop_flags = TRUE) {
         "%Y-%m-%d %H:%M",
         "%Y-%m-%d %H:%M:%S"
       )) {
-        fill <- is.na(result) & !is.na(ts)
-        if (!any(fill)) {
+        v_fill <- is.na(v_result) & !is.na(v_ts)
+        if (!any(v_fill)) {
           break
         }
-        parsed <- as.POSIXct(strptime(ts[fill], fmt, tz = "UTC"))
-        ok <- !is.na(parsed)
-        result[which(fill)[ok]] <- parsed[ok]
+        v_parsed <- as.POSIXct(strptime(v_ts[v_fill], fmt, tz = "UTC"))
+        v_ok <- !is.na(v_parsed)
+        v_result[which(v_fill)[v_ok]] <- v_parsed[v_ok]
       }
-      result
+      v_result
     }
   ]
 
@@ -179,12 +181,12 @@ read_ceda_csv <- function(fname, drop_flags = TRUE) {
   dt <- dt[!is.na(TIMESTAMP)]
 
   # ---- Coerce remaining character columns to numeric -----------------------
-  char_cols <- names(dt)[vapply(dt, is.character, logical(1L))]
-  char_cols <- setdiff(char_cols, "TIMESTAMP")
-  if (length(char_cols)) {
+  v_char_cols <- names(dt)[vapply(dt, is.character, logical(1L))]
+  v_char_cols <- setdiff(v_char_cols, "TIMESTAMP")
+  if (length(v_char_cols)) {
     dt[,
-      (char_cols) := lapply(.SD, function(x) suppressWarnings(as.numeric(x))),
-      .SDcols = char_cols
+      (v_char_cols) := lapply(.SD, function(x) suppressWarnings(as.numeric(x))),
+      .SDcols = v_char_cols
     ]
   }
 

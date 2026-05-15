@@ -67,11 +67,11 @@ time_average_dt <- function(
 
   # rename time variable with openair convention
   setnames(dt, eval(time_name), "date")
-  # and ws & wd if present, for proper vector averaging
-  if (length(wd_name) > 0) {
+  # and ws & wd if present (exactly one column), for proper vector averaging
+  if (length(wd_name) == 1L) {
     dt[, wd := get(wd_name)]
   }
-  if (length(ws_name) > 0) {
+  if (length(ws_name) == 1L) {
     dt[, ws := get(ws_name)]
   }
 
@@ -145,10 +145,10 @@ time_average_dt <- function(
   # restore original time name
   setnames(dt, "date", eval(time_name))
   # and delete extra names
-  if (length(wd_name) > 0) {
+  if (length(wd_name) == 1L) {
     dt[, wd := NULL]
   }
-  if (length(ws_name) > 0) {
+  if (length(ws_name) == 1L) {
     dt[, ws := NULL]
   }
   return(dt)

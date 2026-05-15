@@ -1,13 +1,14 @@
 # Shiny module: metadata maker
-# Five-step wizard that guides the user from a raw data file to a saved
+# Six-step wizard that guides the user from a raw data file to a saved
 # metamet RDS ready for QC in the main app workflow.
 #
 # Steps:
 #   1. Load data file (plain CSV / Campbell TOA5 / Old Campbell / CEDA)
 #   2. Site information (site ID, lat/lon, validity dates)
 #   3. Map data columns to ICOS variable names
-#   4. Set units, QC ranges, and imputation method per variable
-#   5. Review summary and download as metamet .rds
+#   4. Set units, QC ranges, and imputation method per variable (skippable)
+#   5. ERA5 reference data (optional)
+#   6. Review summary and download as metamet .rds
 
 `%||%` <- function(x, y) if (!is.null(x)) x else y
 
@@ -70,6 +71,29 @@ mod_metadata_maker_ui <- function(id) {
           status = "primary",
           solidHeader = TRUE,
           width = 12,
+          radioButtons(
+            ns("site_source"),
+            "Site details source:",
+            choices = c(
+              "Enter manually" = "manual",
+              "Load from CSV file" = "file"
+            ),
+            selected = "manual",
+            inline = TRUE
+          ),
+          conditionalPanel(
+            condition = sprintf("input['%s'] == 'file'", ns("site_source")),
+            shinyFilesButton(
+              ns("site_csv"),
+              label = "Select dt_site CSV",
+              title = "Select a dt_site CSV file",
+              multiple = FALSE
+            ),
+            br(),
+            br(),
+            uiOutput(ns("site_select_ui"))
+          ),
+          hr(),
           fluidRow(
             column(
               4,
@@ -148,18 +172,39 @@ mod_metadata_maker_ui <- function(id) {
           status = "primary",
           solidHeader = TRUE,
           width = 12,
-          helpText(
-            "Select the ICOS standard variable each data column represents.",
-            "Set to '— Skip —' to exclude a column."
+          radioButtons(
+            ns("meta_source"),
+            "Variable metadata source:",
+            choices = c(
+              "Map manually" = "manual",
+              "Load dt_meta from CSV file" = "file"
+            ),
+            selected = "manual",
+            inline = TRUE
           ),
-          uiOutput(ns("mapping_ui")),
+          conditionalPanel(
+            condition = sprintf("input['%s'] == 'file'", ns("meta_source")),
+            shinyFilesButton(
+              ns("meta_csv"),
+              label = "Select dt_meta CSV",
+              title = "Select a dt_meta CSV file",
+              multiple = FALSE
+            ),
+            br(),
+            br(),
+            uiOutput(ns("meta_load_ui"))
+          ),
+          conditionalPanel(
+            condition = sprintf("input['%s'] == 'manual'", ns("meta_source")),
+            helpText(
+              "Select the ICOS standard variable each data column represents.",
+              "Set to '— Skip —' to exclude a column."
+            ),
+            uiOutput(ns("mapping_ui"))
+          ),
           br(),
           actionButton(ns("back_3"), "Back"),
-          actionButton(
-            ns("next_3"),
-            "Continue to variable details",
-            class = "btn-primary"
-          )
+          actionButton(ns("next_3"), "Continue", class = "btn-primary")
         )
       )
     ),
@@ -181,18 +226,58 @@ mod_metadata_maker_ui <- function(id) {
           actionButton(ns("back_4"), "Back"),
           actionButton(
             ns("next_4"),
-            "Review and save",
+            "Continue",
             class = "btn-primary"
           )
         )
       )
     ),
-    # ---- Step 5: review and save --------------------------------------------
+    # ---- Step 5: ERA5 reference data ----------------------------------------
     shinyjs::hidden(
       div(
         id = ns("step5"),
         box(
-          title = "Step 5: Save metamet file",
+          title = "Step 5: ERA5 reference data (optional)",
+          status = "primary",
+          solidHeader = TRUE,
+          width = 12,
+          radioButtons(
+            ns("era5_source"),
+            NULL,
+            choices = c(
+              "Add ERA5 reference data" = "yes",
+              "Skip (ERA5 not available)" = "no"
+            ),
+            selected = "no"
+          ),
+          conditionalPanel(
+            condition = sprintf("input['%s'] == 'yes'", ns("era5_source")),
+            shinyFilesButton(
+              ns("era5_file"),
+              label = "Select ERA5 CSV",
+              title = "Select an ERA5 CSV file",
+              multiple = FALSE
+            ),
+            br(),
+            br(),
+            uiOutput(ns("era5_status_ui"))
+          ),
+          br(),
+          actionButton(ns("back_5"), "Back"),
+          actionButton(
+            ns("next_5"),
+            "Continue to review",
+            class = "btn-primary"
+          )
+        )
+      )
+    ),
+    # ---- Step 6: review and save --------------------------------------------
+    shinyjs::hidden(
+      div(
+        id = ns("step6"),
+        box(
+          title = "Step 6: Save metamet file",
           status = "success",
           solidHeader = TRUE,
           width = 12,
@@ -201,7 +286,8 @@ mod_metadata_maker_ui <- function(id) {
           downloadButton(ns("save_rds"), "Download as metamet .rds"),
           br(),
           br(),
-          actionButton(ns("back_5"), "Back")
+          actionButton(ns("back_6"), "Back"),
+          actionButton(ns("restart"), "Start anew", class = "btn-warning")
         )
       )
     )
@@ -238,7 +324,10 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
           type,
           range_min,
           range_max,
-          imputation_method
+          imputation_method,
+          name_era5,
+          long_name_era5,
+          units_era5
         )
       ]
       unique(dt, by = "name_icos")
@@ -264,7 +353,11 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
       v_mapped_cols = NULL,
       v_mapping = NULL,
       dt_meta = NULL,
-      dt_site = NULL
+      dt_site = NULL,
+      dt_site_from_file = NULL,
+      dt_meta_from_file = NULL,
+      skipped_step4 = FALSE,
+      era5_path = NULL
     )
 
     # ---- helpers -------------------------------------------------------------
@@ -273,7 +366,7 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
     }
 
     go_to <- function(n) {
-      for (i in 1:5) {
+      for (i in 1:6) {
         v_step_id <- ns(paste0("step", i))
         if (i == n) {
           shinyjs::show(id = v_step_id, asis = TRUE)
@@ -281,6 +374,18 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
           shinyjs::hide(id = v_step_id, asis = TRUE)
         }
       }
+    }
+
+    prefill_site <- function(row) {
+      updateTextInput(session, "site_id", value = row$site[1L] %||% "")
+      updateTextInput(
+        session,
+        "site_long_name",
+        value = row$long_name[1L] %||% ""
+      )
+      updateNumericInput(session, "lat", value = row$lat[1L] %||% NA)
+      updateNumericInput(session, "lon", value = row$lon[1L] %||% NA)
+      updateNumericInput(session, "elev", value = row$elev[1L] %||% 0)
     }
 
     # ---- file chooser setup -------------------------------------------------
@@ -299,6 +404,33 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
       roots = v_roots,
       session = session,
       filetypes = c("dld"),
+      defaultRoot = default_root,
+      defaultPath = ""
+    )
+    shinyFileChoose(
+      input,
+      "site_csv",
+      roots = v_roots,
+      session = session,
+      filetypes = c("csv"),
+      defaultRoot = default_root,
+      defaultPath = ""
+    )
+    shinyFileChoose(
+      input,
+      "meta_csv",
+      roots = v_roots,
+      session = session,
+      filetypes = c("csv"),
+      defaultRoot = default_root,
+      defaultPath = ""
+    )
+    shinyFileChoose(
+      input,
+      "era5_file",
+      roots = v_roots,
+      session = session,
+      filetypes = c("csv"),
       defaultRoot = default_root,
       defaultPath = ""
     )
@@ -423,7 +555,15 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
 
     output$preview_table <- renderTable({
       req(rv$dt_raw)
-      head(rv$dt_raw, 6L)
+      dt <- head(rv$dt_raw, 6L)
+      # integer64 columns (e.g. compact timestamps) display as 0 in renderTable;
+      # convert to character so the raw values are visible
+      v_i64 <- names(dt)[vapply(dt, bit64::is.integer64, logical(1L))]
+      if (length(v_i64)) {
+        dt <- data.table::copy(dt)
+        dt[, (v_i64) := lapply(.SD, as.character), .SDcols = v_i64]
+      }
+      dt
     })
 
     # "Continue" button — only appears once data is loaded
@@ -450,6 +590,7 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
         v_result <- as.POSIXct(rep(NA_real_, nrow(rv$dt_raw)), tz = "UTC")
 
         for (fmt in c(
+          "%Y%m%d%H%M%S",
           "%d/%m/%y %H:%M",
           "%d/%m/%Y %H:%M",
           "%d/%m/%y %H:%M:%S",
@@ -504,33 +645,203 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
     # ---- step 2: site info --------------------------------------------------
     observeEvent(input$back_2, go_to(1L))
 
+    # Load dt_site from CSV and pre-fill inputs
+    observeEvent(input$site_csv, {
+      info <- parseFilePaths(v_roots, input$site_csv)
+      req(nrow(info) > 0)
+      path <- as.character(info$datapath)
+
+      dt <- tryCatch(
+        data.table::fread(path, na.strings = c("", "NA"), showProgress = FALSE),
+        error = function(e) {
+          showNotification(
+            paste("Error reading site file:", conditionMessage(e)),
+            type = "error",
+            duration = 8
+          )
+          NULL
+        }
+      )
+      req(dt)
+
+      v_required <- c("site", "long_name", "lat", "lon", "elev")
+      v_missing <- setdiff(v_required, names(dt))
+      if (length(v_missing)) {
+        showNotification(
+          paste(
+            "dt_site CSV is missing columns:",
+            paste(v_missing, collapse = ", ")
+          ),
+          type = "error",
+          duration = 8
+        )
+        return()
+      }
+
+      rv$dt_site_from_file <- dt
+
+      if (data.table::uniqueN(dt$site) == 1L) {
+        prefill_site(dt[1L])
+      }
+    })
+
+    # If the file has multiple sites, show a selector
+    output$site_select_ui <- renderUI({
+      req(rv$dt_site_from_file)
+      v_sites <- unique(rv$dt_site_from_file$site)
+      if (length(v_sites) <= 1L) {
+        return(NULL)
+      }
+      selectInput(
+        ns("site_select_from_file"),
+        "Select site:",
+        choices = v_sites,
+        selected = v_sites[1L]
+      )
+    })
+
+    observeEvent(input$site_select_from_file, {
+      req(rv$dt_site_from_file, input$site_select_from_file)
+      row <- rv$dt_site_from_file[site == input$site_select_from_file]
+      req(nrow(row) > 0)
+      prefill_site(row)
+    })
+
     observeEvent(input$next_2, {
       if (!nzchar(trimws(input$site_id %||% ""))) {
         showNotification("Please enter a site ID.", type = "warning")
         return()
       }
+      rv$dt_site <- data.table::data.table(
+        site = input$site_id,
+        long_name = input$site_long_name %||% "",
+        lon = input$lon %||% NA_real_,
+        lat = input$lat %||% NA_real_,
+        elev = input$elev %||% NA_real_
+      )
       go_to(3L)
     })
 
     # ---- step 3: variable mapping -------------------------------------------
     observeEvent(input$back_3, go_to(2L))
 
+    # Load dt_meta from CSV (file path)
+    observeEvent(input$meta_csv, {
+      info <- parseFilePaths(v_roots, input$meta_csv)
+      req(nrow(info) > 0)
+      path <- as.character(info$datapath)
+
+      dt <- tryCatch(
+        data.table::fread(
+          path,
+          na.strings = c("", "NA", "#N/A"),
+          showProgress = FALSE
+        ),
+        error = function(e) {
+          showNotification(
+            paste("Error reading dt_meta file:", conditionMessage(e)),
+            type = "error",
+            duration = 8
+          )
+          NULL
+        }
+      )
+      req(dt)
+
+      v_required <- c("site", "name_dt", "type", "name_icos", "units_local")
+      v_missing <- setdiff(v_required, names(dt))
+      if (length(v_missing)) {
+        showNotification(
+          paste(
+            "dt_meta CSV is missing columns:",
+            paste(v_missing, collapse = ", ")
+          ),
+          type = "error",
+          duration = 8
+        )
+        return()
+      }
+
+      site_val <- trimws(input$site_id %||% "")
+      if (nzchar(site_val) && "site" %in% names(dt)) {
+        dt <- dt[site == site_val]
+      }
+
+      rv$dt_meta_from_file <- dt
+    })
+
+    # Match summary for file-loaded dt_meta
+    output$meta_load_ui <- renderUI({
+      req(rv$dt_meta_from_file, rv$dt_raw)
+
+      dt_vars <- rv$dt_meta_from_file[
+        !is.na(type) & type != "time" & type != "site"
+      ]
+      v_name_dt <- dt_vars$name_dt
+      v_raw_cols <- names(rv$dt_raw)
+
+      v_matched <- intersect(v_name_dt, v_raw_cols)
+      v_unmatched <- setdiff(v_name_dt, v_raw_cols)
+
+      tagList(
+        tags$p(
+          tags$b(paste0(nrow(rv$dt_meta_from_file), " rows loaded.")),
+          paste0(
+            " ",
+            length(v_matched),
+            " variable(s) matched to data columns."
+          )
+        ),
+        if (length(v_matched)) {
+          tags$p(
+            tags$b("Matched: "),
+            paste(v_matched, collapse = ", ")
+          )
+        },
+        if (length(v_unmatched)) {
+          tags$p(
+            style = "color: #b8860b;",
+            tags$b("Not found in data: "),
+            paste(v_unmatched, collapse = ", ")
+          )
+        }
+      )
+    })
+
+    # Mapping dropdowns (manual path)
     output$mapping_ui <- renderUI({
-      req(rv$v_data_cols)
+      req(rv$v_data_cols, rv$dt_raw)
       tagList(
         fluidRow(
-          column(4, tags$b("Data column")),
-          column(8, tags$b("ICOS variable"))
+          column(3, tags$b("Data column")),
+          column(3, tags$b("Sample values")),
+          column(6, tags$b("ICOS variable"))
         ),
         hr(),
         lapply(rv$v_data_cols, function(col_nm) {
+          v_vals <- rv$dt_raw[[col_nm]]
+          v_non_na <- v_vals[!is.na(v_vals)]
+          sample_str <- if (length(v_non_na) == 0L) {
+            "—"
+          } else if (is.numeric(v_non_na)) {
+            paste(signif(head(v_non_na, 3L), 3L), collapse = ", ")
+          } else {
+            paste(head(as.character(v_non_na), 3L), collapse = ", ")
+          }
           fluidRow(
             column(
-              4,
+              3,
               tags$span(col_nm, style = "font-family: monospace;")
             ),
             column(
-              8,
+              3,
+              tags$span(
+                sample_str,
+                style = "color: #666; font-size: 0.85em; font-family: monospace;"
+              )
+            ),
+            column(
+              6,
               selectInput(
                 ns(safe_id("map_", col_nm)),
                 label = NULL,
@@ -544,27 +855,49 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
     })
 
     observeEvent(input$next_3, {
-      req(rv$v_data_cols)
+      if (input$meta_source == "file") {
+        # File path: use loaded dt_meta, skip step 4
+        if (is.null(rv$dt_meta_from_file) || !nrow(rv$dt_meta_from_file)) {
+          showNotification(
+            "Please select a dt_meta CSV file first.",
+            type = "warning"
+          )
+          return()
+        }
+        rv$dt_meta <- rv$dt_meta_from_file
+        rv$v_mapped_cols <- rv$dt_meta_from_file[
+          !is.na(type) & type != "time" & type != "site",
+          name_dt
+        ]
+        rv$skipped_step4 <- TRUE
+        go_to(5L)
+      } else {
+        # Manual path: build mapping then go to step 4
+        req(rv$v_data_cols)
 
-      v_icos_selected <- vapply(
-        rv$v_data_cols,
-        function(col_nm) {
-          input[[safe_id("map_", col_nm)]] %||% ""
-        },
-        character(1L)
-      )
-      names(v_icos_selected) <- rv$v_data_cols
+        v_icos_selected <- vapply(
+          rv$v_data_cols,
+          function(col_nm) {
+            input[[safe_id("map_", col_nm)]] %||% ""
+          },
+          character(1L)
+        )
+        names(v_icos_selected) <- rv$v_data_cols
 
-      if (!any(v_icos_selected != "")) {
-        showNotification("Please map at least one variable.", type = "warning")
-        return()
+        if (!any(v_icos_selected != "")) {
+          showNotification(
+            "Please map at least one variable.",
+            type = "warning"
+          )
+          return()
+        }
+
+        v_keep <- v_icos_selected != ""
+        rv$v_mapped_cols <- rv$v_data_cols[v_keep]
+        rv$v_mapping <- v_icos_selected[v_keep]
+        rv$skipped_step4 <- FALSE
+        go_to(4L)
       }
-
-      v_keep <- v_icos_selected != ""
-      rv$v_mapped_cols <- rv$v_data_cols[v_keep]
-      rv$v_mapping <- v_icos_selected[v_keep]
-
-      go_to(4L)
     })
 
     # ---- step 4: variable details -------------------------------------------
@@ -684,7 +1017,7 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
         range_max = NA_real_,
         diff_ref_max = NA_real_,
         imputation_method = NA_character_,
-        name_era5 = NA_character_,
+        name_era5 = "time",
         long_name_era5 = NA_character_,
         units_era5 = NA_character_,
         name_icos = "TIMESTAMP",
@@ -712,7 +1045,7 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
         range_max = NA_real_,
         diff_ref_max = NA_real_,
         imputation_method = NA_character_,
-        name_era5 = NA_character_,
+        name_era5 = "site",
         long_name_era5 = NA_character_,
         units_era5 = NA_character_,
         name_icos = "site",
@@ -765,9 +1098,23 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
           },
           diff_ref_max = NA_real_,
           imputation_method = method,
-          name_era5 = NA_character_,
-          long_name_era5 = NA_character_,
-          units_era5 = NA_character_,
+          name_era5 = if (nrow(ref_row) && !is.na(ref_row$name_era5[1L])) {
+            ref_row$name_era5[1L]
+          } else {
+            NA_character_
+          },
+          long_name_era5 = if (
+            nrow(ref_row) && !is.na(ref_row$long_name_era5[1L])
+          ) {
+            ref_row$long_name_era5[1L]
+          } else {
+            NA_character_
+          },
+          units_era5 = if (nrow(ref_row) && !is.na(ref_row$units_era5[1L])) {
+            ref_row$units_era5[1L]
+          } else {
+            NA_character_
+          },
           name_icos = icos_nm,
           long_name_icos = if (nrow(ref_row)) {
             ref_row$long_name_icos[1L]
@@ -786,25 +1133,53 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
         c(list(dt_ts_row, dt_site_row), l_var_rows)
       )
 
-      rv$dt_site <- data.table::data.table(
-        site = input$site_id,
-        long_name = input$site_long_name %||% "",
-        lon = input$lon %||% NA_real_,
-        lat = input$lat %||% NA_real_,
-        elev = input$elev %||% NA_real_
-      )
-
       go_to(5L)
     })
 
-    # ---- step 5: review and save --------------------------------------------
-    observeEvent(input$back_5, go_to(4L))
+    # ---- step 5: ERA5 -------------------------------------------------------
+    observeEvent(input$back_5, {
+      if (isTRUE(rv$skipped_step4)) go_to(3L) else go_to(4L)
+    })
+
+    observeEvent(input$era5_file, {
+      info <- parseFilePaths(v_roots, input$era5_file)
+      req(nrow(info) > 0)
+      rv$era5_path <- as.character(info$datapath)
+    })
+
+    output$era5_status_ui <- renderUI({
+      req(rv$era5_path)
+      tags$p(
+        style = "color: #2e7d32;",
+        paste("Selected:", basename(rv$era5_path))
+      )
+    })
+
+    observeEvent(input$next_5, go_to(6L))
+
+    # ---- step 6: review and save --------------------------------------------
+    observeEvent(input$back_6, go_to(5L))
+
+    observeEvent(input$restart, {
+      rv$format <- NULL
+      rv$dt_raw <- NULL
+      rv$l_raw_tables <- NULL
+      rv$multiple_tables <- FALSE
+      rv$v_data_cols <- NULL
+      rv$v_mapped_cols <- NULL
+      rv$v_mapping <- NULL
+      rv$dt_meta <- NULL
+      rv$dt_site <- NULL
+      rv$dt_site_from_file <- NULL
+      rv$dt_meta_from_file <- NULL
+      rv$skipped_step4 <- FALSE
+      rv$era5_path <- NULL
+      go_to(1L)
+    })
 
     output$summary_ui <- renderUI({
       req(rv$dt_meta, rv$dt_site, rv$dt_raw)
-      n_vars <- nrow(
-        rv$dt_meta[type != "time" & type != "site"]
-      )
+      n_vars <- nrow(rv$dt_meta[type != "time" & type != "site"])
       v_icos_names <- rv$dt_meta[type != "time" & type != "site", name_icos]
       ts_range <- tryCatch(
         {
@@ -824,7 +1199,15 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
         ),
         tags$p(tags$b("Variables mapped: "), n_vars),
         tags$p(tags$b("Data date range: "), ts_range),
-        tags$p(tags$b("Variables: "), paste(v_icos_names, collapse = ", "))
+        tags$p(tags$b("Variables: "), paste(v_icos_names, collapse = ", ")),
+        if (isTRUE(input$era5_source == "yes") && !is.null(rv$era5_path)) {
+          tags$p(
+            tags$b("ERA5 file: "),
+            basename(rv$era5_path)
+          )
+        } else {
+          tags$p(tags$b("ERA5: "), "not attached")
+        }
       )
     })
 
@@ -852,6 +1235,21 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
             )
             m <- metamet:::restrict(m)
             m <- metamet:::convert_time_char_to_posix(m)
+
+            if (isTRUE(input$era5_source == "yes") && !is.null(rv$era5_path)) {
+              m <- tryCatch(
+                metamet::add_era5(m, fname_era5 = rv$era5_path),
+                error = function(e) {
+                  showNotification(
+                    paste("ERA5 attach failed:", conditionMessage(e)),
+                    type = "warning",
+                    duration = 8
+                  )
+                  m
+                }
+              )
+            }
+
             m
           },
           error = function(e) {

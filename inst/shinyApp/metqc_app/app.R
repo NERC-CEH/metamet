@@ -28,6 +28,11 @@ ui <- dashboardPage(
   dashboardSidebar(
     sidebarMenu(
       id = 'tabs',
+      menuItem(
+        "Metamet Maker",
+        tabName = "metadata_maker",
+        icon = icon("table")
+      ),
       menuItem("Choose file", tabName = "upload", icon = icon("upload")),
       # with shinyfiles lib
       shinyFilesButton(
@@ -42,11 +47,6 @@ ui <- dashboardPage(
         icon = icon('database')
       ),
       menuItem("Download", tabName = "download", icon = icon('download')),
-      menuItem(
-        "Metadata Maker",
-        tabName = "metadata_maker",
-        icon = icon("table")
-      ),
       menuItem(
         "Information",
         tabName = "information",

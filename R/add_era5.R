@@ -44,6 +44,7 @@ add_era5 <- function(
   last_date = NULL,
   extra_rows = 2
 ) {
+  mm <- .ensure_wide(mm)
   # get era5 data to use as reference
   mm$dt_ref <- fread(fname_era5)
   # changing time resolution is a pain if we have a mix of averaged and summed
@@ -112,6 +113,19 @@ add_era5 <- function(
       extra_rows = extra_rows
     )
   }
+  # Normalise both timestamp vectors to integer seconds in UTC so the equi-join
+  # in metamet_wide_to_long() succeeds even if openair::timeAverage introduced
+  # sub-second floating-point drift.
+  mm$dt_ref[[time_name]] <- as.POSIXct(
+    round(as.numeric(mm$dt_ref[[time_name]])),
+    origin = "1970-01-01",
+    tz = "UTC"
+  )
+  mm$dt[[time_name]] <- as.POSIXct(
+    round(as.numeric(mm$dt[[time_name]])),
+    origin = "1970-01-01",
+    tz = "UTC"
+  )
   setcolorder(mm$dt_ref, neworder = names(mm$dt))
 
   dt_gaps <- detect_gaps(
@@ -125,7 +139,9 @@ add_era5 <- function(
     time_name = time_name
   )
   if (nrow(dt_gaps) > 0) {
-    stop("Gaps found in obs data, dt")
+    message(
+      "Gaps in obs timestamp series (dt) — ERA5 will be aligned to obs via merge."
+    )
   }
   if (nrow(dt_ref_gaps) > 0) {
     stop("Gaps found in ref data, dt_ref")

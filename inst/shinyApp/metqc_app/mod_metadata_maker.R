@@ -586,48 +586,66 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
       if (isTRUE(rv$format == "csv")) {
         req(input$ts_col)
         ts_col <- input$ts_col
-        v_ts_raw <- as.character(rv$dt_raw[[ts_col]])
-        v_result <- as.POSIXct(rep(NA_real_, nrow(rv$dt_raw)), tz = "UTC")
+        ts_col_val <- rv$dt_raw[[ts_col]]
 
-        for (fmt in c(
-          "%Y%m%d%H%M%S",
-          "%d/%m/%y %H:%M",
-          "%d/%m/%Y %H:%M",
-          "%d/%m/%y %H:%M:%S",
-          "%d/%m/%Y %H:%M:%S",
-          "%Y-%m-%d %H:%M",
-          "%Y-%m-%d %H:%M:%S"
-        )) {
-          v_fill <- is.na(v_result) & !is.na(v_ts_raw)
-          if (!any(v_fill)) {
-            break
+        if (inherits(ts_col_val, c("POSIXct", "POSIXlt", "Date"))) {
+          # fread already parsed the column to a date-time type; coerce directly.
+          v_result <- as.POSIXct(ts_col_val, tz = "UTC")
+        } else {
+          v_ts_raw <- as.character(ts_col_val)
+          # Normalise ISO 8601 form: replace T separator with space, strip trailing Z.
+          # This makes "2023-08-01T13:00:00Z" -> "2023-08-01 13:00:00" so that
+          # strptime works reliably across platforms without needing extra format entries.
+          v_ts_norm <- sub("Z$", "", gsub("T", " ", v_ts_raw, fixed = TRUE))
+          v_result <- as.POSIXct(rep(NA_real_, nrow(rv$dt_raw)), tz = "UTC")
+
+          for (fmt in c(
+            "%Y%m%d%H%M%S",
+            "%d/%m/%y %H:%M",
+            "%d/%m/%Y %H:%M",
+            "%d/%m/%y %H:%M:%S",
+            "%d/%m/%Y %H:%M:%S",
+            "%Y-%m-%d %H:%M",
+            "%Y-%m-%d %H:%M:%S"
+          )) {
+            v_fill <- is.na(v_result) & !is.na(v_ts_raw)
+            if (!any(v_fill)) {
+              break
+            }
+            v_parsed <- as.POSIXct(strptime(v_ts_norm[v_fill], fmt, tz = "UTC"))
+            v_ok <- !is.na(v_parsed)
+            v_result[which(v_fill)[v_ok]] <- v_parsed[v_ok]
           }
-          v_parsed <- as.POSIXct(strptime(v_ts_raw[v_fill], fmt, tz = "UTC"))
-          v_ok <- !is.na(v_parsed)
-          v_result[which(v_fill)[v_ok]] <- v_parsed[v_ok]
-        }
 
-        # Fallback to user-supplied format string
-        ts_fmt_input <- trimws(input$ts_format %||% "")
-        if (anyNA(v_result) && nzchar(ts_fmt_input)) {
-          v_fill2 <- is.na(v_result)
-          v_parsed2 <- as.POSIXct(
-            strptime(v_ts_raw[v_fill2], ts_fmt_input, tz = "UTC")
+          # Fallback to user-supplied format string; normalise T and Z in format too
+          ts_fmt_input <- sub(
+            "Z$",
+            "",
+            gsub("T", " ", trimws(input$ts_format %||% ""), fixed = TRUE)
           )
-          v_ok2 <- !is.na(v_parsed2)
-          v_result[which(v_fill2)[v_ok2]] <- v_parsed2[v_ok2]
-        }
+          v_unparseable <- is.na(v_result) & !is.na(v_ts_raw)
+          if (any(v_unparseable) && nzchar(ts_fmt_input)) {
+            v_parsed2 <- as.POSIXct(
+              strptime(v_ts_norm[v_unparseable], ts_fmt_input, tz = "UTC")
+            )
+            v_ok2 <- !is.na(v_parsed2)
+            v_result[which(v_unparseable)[v_ok2]] <- v_parsed2[v_ok2]
+          }
 
-        if (anyNA(v_result)) {
-          showNotification(
-            paste0(
-              sum(is.na(v_result)),
-              " timestamps could not be parsed. Try specifying the format manually."
-            ),
-            type = "warning",
-            duration = 8
-          )
-          return()
+          # Only fail on timestamps that were present in the raw data but could not
+          # be parsed; rows where the raw timestamp was NA are genuine data gaps.
+          v_failed <- is.na(v_result) & !is.na(v_ts_raw)
+          if (any(v_failed)) {
+            showNotification(
+              paste0(
+                sum(v_failed),
+                " timestamps could not be parsed. Try specifying the format manually."
+              ),
+              type = "warning",
+              duration = 8
+            )
+            return()
+          }
         }
 
         dt_new <- data.table::copy(rv$dt_raw)

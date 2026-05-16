@@ -33,18 +33,18 @@ ggiraph_plot <- function(input_variable, scale_ref = FALSE) {
     ]
   }
 
-  col_pal <- c(
-    '#5b5b5b',
-    '#377EB8',
-    '#4DAF4A',
-    '#984EA3',
-    '#00ff7f',
-    '#FFFF33',
-    '#A65628',
-    '#F781BF',
-    '#FF7F00'
+  col_pal_base <- c(
+    "#E69F00",
+    "#56B4E9",
+    "#009E73",
+    "#F0E442",
+    "#0072B2",
+    "#D55E00",
+    "#CC79A7",
+    "#999999"
   )
-  names(col_pal) <- levels(df_method$method_longname)
+  n_vars <- data.table::uniqueN(dt_plot[name_icos == input_variable, var_name])
+  col_pal <- colorRampPalette(col_pal_base)(max(n_vars, 1L))
 
   p1_ggplot <- ggplot(
     dt_plot[name_icos == input_variable],
@@ -77,7 +77,7 @@ ggiraph_plot <- function(input_variable, scale_ref = FALSE) {
       colour = "black"
     ) +
     scale_linetype_manual(name = NULL, values = "solid") +
-    # scale_color_manual(values = col_pal, limits = force) +
+    scale_color_manual(values = col_pal, limits = force) +
     xlab("Date") +
     ylab(paste("Your variable:", input_variable)) +
     ggtitle(paste(input_variable, "time series")) +

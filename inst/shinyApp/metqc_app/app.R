@@ -508,18 +508,20 @@ server <- function(input, output, session) {
   })
 
   # compare variables modal
+  # Registered at server top level (not inside the observeEvent) so it re-renders
+  # whenever input$x_var / input$y_var change after the modal is open.
+  output$compare_vars_plot <- renderPlot({
+    req(input$x_var, input$y_var)
+    x_data <- mm_qry$dt[name_icos == input$x_var, .(TIMESTAMP, site, x = value)]
+    y_data <- mm_qry$dt[name_icos == input$y_var, .(TIMESTAMP, site, y = value)]
+    plot_data <- merge(x_data, y_data, by = c("TIMESTAMP", "site"))
+    ggplot(plot_data, aes(x = x, y = y)) +
+      geom_point() +
+      labs(x = input$x_var, y = input$y_var) +
+      theme_bw()
+  })
+
   observeEvent(input$compare_vars, {
-    plot_data <- reactive({
-      data.frame(x = mm_qry$dt[, input$x_var], y = mm_qry$dt[, input$y_var])
-    })
-
-    output$compare_vars_plot <- renderPlot({
-      ggplot(data = plot_data(), aes(x = x, y = y)) +
-        geom_point() +
-        labs(x = input$x_var, y = input$y_var) +
-        theme_bw()
-    })
-
     showModal(
       modalDialog(
         fluidPage(

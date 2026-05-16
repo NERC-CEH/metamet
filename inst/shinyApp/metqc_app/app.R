@@ -6,6 +6,8 @@ library(shinyvalidate)
 library(shinyFiles)
 library(ggiraph)
 
+source("mod_metadata_maker.R", local = TRUE)
+
 # Set the gap-filling methods and codes----
 gf_choices <- setNames(df_method$method, df_method$method_longname)
 
@@ -26,6 +28,11 @@ ui <- dashboardPage(
   dashboardSidebar(
     sidebarMenu(
       id = 'tabs',
+      menuItem(
+        "Metamet Maker",
+        tabName = "metadata_maker",
+        icon = icon("table")
+      ),
       menuItem("Choose file", tabName = "upload", icon = icon("upload")),
       # with shinyfiles lib
       shinyFilesButton(
@@ -173,6 +180,10 @@ ui <- dashboardPage(
         verbatimTextOutput("status")
       ),
       tabItem(
+        tabName = "metadata_maker",
+        mod_metadata_maker_ui("mm_maker")
+      ),
+      tabItem(
         tabName = 'download',
         fluidRow(
           box(
@@ -231,13 +242,26 @@ server <- function(input, output, session) {
   }
 
   roots <- get_drives()
+  v_extdata <- system.file("extdata", package = "metamet")
+  if (nzchar(v_extdata) && dir.exists(v_extdata)) {
+    roots <- c("Package data" = v_extdata, roots)
+  }
+  default_root <- names(roots)[1L]
 
   shinyFileChoose(
     input,
     "file",
     roots = roots,
     session = session,
-    filetypes = c("rds")
+    filetypes = c("rds"),
+    defaultRoot = default_root,
+    defaultPath = ""
+  )
+
+  mod_metadata_maker_server(
+    "mm_maker",
+    v_roots = roots,
+    default_root = default_root
   )
 
   # Non-reactive code

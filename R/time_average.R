@@ -34,7 +34,7 @@ time_average <- function(
 ) {
   # we need to make a copy to avoid modifying the original object by reference
   # i.e. we (probably) want to retain the unaveraged mm object
-  mm <- copy(mm_in)
+  mm <- .ensure_wide(copy(mm_in))
 
   # get the name and format of the time, precip, ws & wd variables
   time_name <- mm$dt_meta[type == "time", name_dt]

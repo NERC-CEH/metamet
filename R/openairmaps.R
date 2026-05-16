@@ -30,6 +30,7 @@ polar_map <- function(mm, var_name) {
     context = "the metamet polar map function"
   )
 
+  mm <- .ensure_wide(mm)
   dt <- copy(mm$dt)
   # get the name and format of the time, precip, ws & wd variables
   time_name <- mm$dt_meta[type == "time", name_dt]

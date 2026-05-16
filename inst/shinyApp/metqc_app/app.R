@@ -149,6 +149,14 @@ ui <- dashboardPage(
                 label = "Rescale reference to observations",
                 value = FALSE
               ),
+              sliderInput(
+                "point_size",
+                label = "Point size:",
+                min = 0.5,
+                max = 8,
+                value = 3,
+                step = 0.5
+              ),
               shinycssloaders::withSpinner(uiOutput("mytabs")),
               selectInput(
                 "select_imputation",
@@ -500,7 +508,11 @@ server <- function(input, output, session) {
     observe(
       lapply(paste(uploaded()$v_names), function(i) {
         output[[paste0(i, "_interactive_plot")]] <-
-          renderGirafe(metamet:::ggiraph_plot(i, scale_ref = input$scale_ref))
+          renderGirafe(metamet:::ggiraph_plot(
+            i,
+            scale_ref = input$scale_ref,
+            point_size = input$point_size
+          ))
       })
     )
 
@@ -581,7 +593,11 @@ server <- function(input, output, session) {
       # Creating a reactive plot for the variable selected in plotTabs
       plot_selected <- reactive({
         req(input$plotTabs)
-        metamet:::ggiraph_plot(input$plotTabs, scale_ref = input$scale_ref)
+        metamet:::ggiraph_plot(
+          input$plotTabs,
+          scale_ref = input$scale_ref,
+          point_size = input$point_size
+        )
       })
       # Re-render
       output[[paste0(

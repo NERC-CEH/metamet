@@ -9,7 +9,7 @@
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
 #' @export
-ggiraph_plot <- function(input_variable, scale_ref = FALSE) {
+ggiraph_plot <- function(input_variable, scale_ref = FALSE, point_size = 3) {
   dt_plot <- merge(
     mm_qry$dt,
     data.table::as.data.table(df_method)[, .(qc, method_longname)],
@@ -59,7 +59,7 @@ ggiraph_plot <- function(input_variable, scale_ref = FALSE) {
         shape = factor(method_longname),
         colour = factor(var_name)
       ),
-      size = 3
+      size = point_size
     ) +
 
     facet_wrap_interactive(

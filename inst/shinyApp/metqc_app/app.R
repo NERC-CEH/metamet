@@ -489,6 +489,7 @@ server <- function(input, output, session) {
     # Add a tab to the plotting panel for each variable that has been selected by the user.
     output$mytabs <- renderUI({
       my_tabs <- lapply(paste(uploaded()$v_names), function(i) {
+        replicates <- unique(mm_qry$dt[name_icos == i, var_name])
         tabPanel(
           i,
           value = i,
@@ -499,6 +500,15 @@ server <- function(input, output, session) {
             ifelse(v_names_checklist[[i]] == TRUE, '#bcbcbc', 'transparent'),
             ';}'
           ))),
+          if (length(replicates) > 1L) {
+            checkboxGroupInput(
+              paste0(i, "_replicates"),
+              label = "Replicates to show:",
+              choices = replicates,
+              selected = replicates,
+              inline = TRUE
+            )
+          },
           girafeOutput(paste0(i, "_interactive_plot")),
         )
       })
@@ -511,7 +521,8 @@ server <- function(input, output, session) {
           renderGirafe(metamet:::ggiraph_plot(
             i,
             scale_ref = input$scale_ref,
-            point_size = input$point_size
+            point_size = input$point_size,
+            vars_to_show = input[[paste0(i, "_replicates")]]
           ))
       })
     )
@@ -596,7 +607,8 @@ server <- function(input, output, session) {
         metamet:::ggiraph_plot(
           input$plotTabs,
           scale_ref = input$scale_ref,
-          point_size = input$point_size
+          point_size = input$point_size,
+          vars_to_show = input[[paste0(input$plotTabs, "_replicates")]]
         )
       })
       # Re-render

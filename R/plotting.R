@@ -9,7 +9,12 @@
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
 #' @export
-ggiraph_plot <- function(input_variable, scale_ref = FALSE, point_size = 3) {
+ggiraph_plot <- function(
+  input_variable,
+  scale_ref = FALSE,
+  point_size = 3,
+  vars_to_show = NULL
+) {
   dt_plot <- merge(
     mm_qry$dt,
     data.table::as.data.table(df_method)[, .(qc, method_longname)],
@@ -31,6 +36,10 @@ ggiraph_plot <- function(input_variable, scale_ref = FALSE, point_size = 3) {
       },
       by = site
     ]
+  }
+
+  if (!is.null(vars_to_show) && length(vars_to_show) > 0L) {
+    dt_plot <- dt_plot[var_name %in% vars_to_show]
   }
 
   col_pal_base <- c(

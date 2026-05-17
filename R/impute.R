@@ -176,19 +176,6 @@ impute <- function(
     qc <- df_method$qc[match(method, df_method$method)]
     print(paste("using method", qc, method))
 
-    # how many non-missing data are there?
-    n_data <- sum(!is.na(dt[name_icos == y, value]))
-    # with very few/no data, just replace with era5 data rather than trying to fit a regression
-    if (n_data <= n_min && method == "era5") {
-      print(paste("Too few data to fit regression; using ERA5 data directly"))
-      fit <- FALSE
-    }
-    # these methods don't work with very few/no data
-    if (n_data <= n_min && (method == "time" || method == "regn")) {
-      print(paste("Not enough data to impute", y))
-      next
-    }
-
     # qc_tokeep typically set to 0, so this selects any other value (missing or imputed)
     # is_selected optionally adds those selected in the metqc app ggiraph plots
     # by default, this selects all points marked as missing because the only
@@ -206,78 +193,98 @@ impute <- function(
       dt[, is_selected := y == name_icos & is_selected & value < 0]
     }
     if (method == "nightzero") {
-      dt$date <- dt[, ..date_field] # needs to be called "date" for openair functions
-      dt <- openair::cutData(
-        dt,
+      # Pass only a date column to cutData so that dt is never reassigned
+      # (reassignment breaks the by-reference link between dt and mm$dt).
+      dt_daylight <- openair::cutData(
+        data.frame(date = dt[[time_name]]),
         type = "daylight",
         latitude = lat,
         longitude = lon
       )
+      dt[, daylight := dt_daylight$daylight]
       # only previously selected values which are in night-time stay selected
       dt[,
         is_selected := y == name_icos & is_selected & daylight == "nighttime"
       ]
-      dt$daylight <- NULL
-      # if date is not the original variable name, delete it - we don't want an extra column
-      if (time_name != "date") dt$date <- NULL
+      dt[, daylight := NULL]
     }
 
     # calculate replacement values depending on the method
-    # if a constant zero
     if (method == "nightzero" | method == "noneg" | method == "zero") {
       dt[is_selected & y == name_icos, value := 0]
-    } else if (method == "time") {
-      if (k > n_data / 4) {
-        k <- as.integer(n_data / 4)
-      }
-      v_date <- dt[name_icos == y, TIMESTAMP]
-      datect_num <- as.numeric(v_date) ## !dt_qry$
-      hour <- as.POSIXlt(v_date)$hour
+      dt[y == name_icos & is_selected == TRUE, qc := ..qc]
+    } else {
+      # model-fitting methods: fit a separate model per replicate (var_name)
+      v_var_names_selected <- unique(dt[
+        name_icos == y & is_selected == TRUE,
+        var_name
+      ])
 
-      # cannot include hour if daily avg, as no spread in hours
-      m <- mgcv::gam(
-        dt[y == name_icos, value] ~
-          s(datect_num, k = k, bs = "cr"),
-        # s(yday, k = k_yday, bs = "cr") +
-        # s(hour, k = -1, bs = "cc"),
-        na.action = na.exclude #, data = dt
-      )
-      dt[
-        y == name_icos,
-        pred := predict(m, newdata = data.frame(datect_num, hour))
-      ]
-      # this is a test that the number of predictions produced is correct
-      # xx = sum(!is.na(dt[y == name_icos, pred]))
-      # yy = sum(is.na(dt[y != name_icos, pred]))
-      # nrow(dt); xx + yy
+      for (vn in v_var_names_selected) {
+        n_data_vn <- sum(!is.na(dt[name_icos == y & var_name == vn, value]))
+        fit_vn <- fit
+        k_vn <- k
 
-      dt[is_selected & y == name_icos, value := pred]
-    } else if (method == "regn" || method == "era5") {
-      if (method == "era5") {
-        v_x <- dt[y == name_icos, ref] # use ERA5 data
-      } else {
-        # v_x <- dt[, get(x)] # use x variable in the obs data
-        stop("regn method does not currently work with long-format data")
+        if (n_data_vn <= n_min && method == "era5") {
+          print(paste(
+            "Too few data to fit regression; using ERA5 data directly for",
+            vn
+          ))
+          fit_vn <- FALSE
+        }
+        if (n_data_vn <= n_min && (method == "time" || method == "regn")) {
+          print(paste("Not enough data to impute", vn))
+          next
+        }
+
+        if (method == "time") {
+          if (k_vn > n_data_vn / 4) {
+            k_vn <- as.integer(n_data_vn / 4)
+          }
+          v_date <- dt[name_icos == y & var_name == vn, TIMESTAMP]
+          datect_num <- as.numeric(v_date)
+          hour <- as.POSIXlt(v_date)$hour
+          m <- mgcv::gam(
+            dt[name_icos == y & var_name == vn, value] ~
+              s(datect_num, k = k_vn, bs = "cr"),
+            na.action = na.exclude
+          )
+          dt[
+            name_icos == y & var_name == vn,
+            pred := predict(m, newdata = data.frame(datect_num, hour))
+          ]
+          dt[is_selected & name_icos == y & var_name == vn, value := pred]
+          dt[, pred := NULL]
+        } else if (method == "regn" || method == "era5") {
+          if (method == "era5") {
+            v_x <- dt[name_icos == y & var_name == vn, ref]
+          } else {
+            stop("regn method does not currently work with long-format data")
+          }
+          if (fit_vn) {
+            dtt <- data.table(
+              y = dt[name_icos == y & var_name == vn, value],
+              x = v_x,
+              is_selected = dt[name_icos == y & var_name == vn, is_selected]
+            )
+            dtt[is_selected == TRUE, y := NA]
+            m <- lm(y ~ x, data = dtt, na.action = na.exclude)
+            v_pred <- predict(m, newdata = dtt)
+            dt[
+              name_icos == y & var_name == vn & is_selected == TRUE,
+              value := v_pred[dtt$is_selected]
+            ]
+          } else {
+            dt[
+              name_icos == y & var_name == vn & is_selected == TRUE,
+              value := ref
+            ]
+          }
+        }
+
+        dt[name_icos == y & var_name == vn & is_selected == TRUE, qc := ..qc]
       }
-      if (fit) {
-        dtt <- data.table(
-          y = dt[y == name_icos, value],
-          x = v_x,
-          is_selected = dt[y == name_icos, is_selected]
-        )
-        # exclude selected rows i.e. do not fit to those we are replacing
-        dtt[is_selected == TRUE, y := NA]
-        m <- lm(y ~ x, data = dtt, na.action = na.exclude)
-        v_pred <- predict(m, newdata = dtt)
-      } else {
-        # or just replace y with x
-        v_pred <- v_x
-      }
-      dt[y == name_icos & is_selected == TRUE, value := v_pred[dtt$is_selected]]
     }
-
-    # add code for each replaced value in the qc dt
-    dt[y == name_icos & is_selected == TRUE, qc := ..qc]
 
     if (plot_graph) {
       dt_plot <- merge(

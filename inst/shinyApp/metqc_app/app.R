@@ -806,7 +806,6 @@ server <- function(input, output, session) {
       }
     }
 
-
     # Identify which rows were invalidated (qc != 0)
     imputed_rows <- mm_qry$dt[
       !is.na(qc) & qc != 0L & !is.na(qc_orig) & qc_orig != qc

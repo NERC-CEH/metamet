@@ -705,7 +705,11 @@ server <- function(input, output, session) {
 
     textAreaInput(
       "qc_comment",
-      label = paste0("Reason for invalidation / imputation for ", var, " (required)"),
+      label = paste0(
+        "Reason for invalidation / imputation for ",
+        var,
+        " (required)"
+      ),
       value = existing,
       placeholder = paste("Explain why data for", var, "was changed..."),
       width = "100%",

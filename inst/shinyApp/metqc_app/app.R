@@ -786,8 +786,10 @@ server <- function(input, output, session) {
     for (v in uploaded()$v_names) {
       rows_var <- mm_qry$dt[
         name_icos == v &
-          !is.na(qc) & qc != 0L &
-          !is.na(qc_orig) & qc_orig != qc
+          !is.na(qc) &
+          qc != 0L &
+          !is.na(qc_orig) &
+          qc_orig != qc
       ]
 
       # If no imputed rows then no comment is needed

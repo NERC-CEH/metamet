@@ -626,8 +626,10 @@ server <- function(input, output, session) {
       # check missing comments AFTER imputation
       rows_var <- mm_qry$dt[
         name_icos == current_var &
-          !is.na(qc) & qc != 0L &
-          !is.na(qc_orig) & qc_orig != qc
+          !is.na(qc) &
+          qc != 0L &
+          !is.na(qc_orig) &
+          qc_orig != qc
       ]
 
       if (nrow(rows_var) == 0) {

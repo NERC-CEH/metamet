@@ -724,7 +724,9 @@ server <- function(input, output, session) {
     req(uploaded())
     vals <- unlist(lapply(v_missing_comments, function(x) isTRUE(x)))
     vars_missing <- names(vals)[vals]
-    if (length(vars_missing) == 0) return(NULL)
+    if (length(vars_missing) == 0) {
+      return(NULL)
+    }
     div(
       style = "background-color:#ffcccc; padding:10px; border-radius:5px; margin-bottom:10px;",
       strong("You still need to comment: "),

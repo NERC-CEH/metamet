@@ -157,12 +157,14 @@ ui <- dashboardPage(
                 value = 3,
                 step = 0.5
               ),
+              uiOutput("missing_comment_banner"),
               shinycssloaders::withSpinner(uiOutput("mytabs")),
               selectInput(
                 "select_imputation",
                 label = h5("Gap-Filling Method"),
                 choices = gf_choices
               ),
+              uiOutput("qc_comment_box"),
               actionButton("impute", label = "Impute selection"),
               actionButton(
                 "finished_check",
@@ -369,6 +371,8 @@ server <- function(input, output, session) {
   disable('compare_vars')
 
   v_names_checklist <- reactiveValues()
+  v_missing_comments <- reactiveValues()
+  qc_comments <- reactiveValues()
 
   # Create a reactive element with the earliest start date
   first_start_date <- reactive({
@@ -486,6 +490,10 @@ server <- function(input, output, session) {
     mm_qry$dt[, row_name := as.factor(rownames(mm_qry$dt))]
     mm_qry$dt$datect_num <<- as.numeric(mm_qry$dt$TIMESTAMP)
 
+    if (!"qc_orig" %in% names(mm_qry$dt)) {
+      mm_qry$dt[, qc_orig := qc]
+    }
+
     # Add a tab to the plotting panel for each variable that has been selected by the user.
     output$mytabs <- renderUI({
       my_tabs <- lapply(paste(uploaded()$v_names), function(i) {
@@ -494,11 +502,15 @@ server <- function(input, output, session) {
           i,
           value = i,
           tags$style(HTML(paste0(
-            '.tabbable > .nav > li > a[data-value=',
-            i,
-            '] {border: transparent;background-color:',
-            ifelse(v_names_checklist[[i]] == TRUE, '#bcbcbc', 'transparent'),
-            ';}'
+            '.tabbable > .nav > li > a[data-value=', i, '] {',
+            if (v_names_checklist[[i]] == TRUE) {
+              'background-color:#bcbcbc;'   # finished checking
+            } else if (isTRUE(v_missing_comments[[i]])) {
+              'background-color:#ff9999;'   # missing comments → red
+            } else {
+              'background-color:transparent;'
+            },
+            '}'
           ))),
           if (length(replicates) > 1L) {
             checkboxGroupInput(
@@ -584,6 +596,22 @@ server <- function(input, output, session) {
     if (is.null(selected_state())) {
       shinyjs::alert("Please select a point to impute.")
     } else {
+      current_var <- input$plotTabs
+      comment <- qc_comments[[current_var]]
+
+      if (is.null(comment) || comment == "") {
+        shinyjs::alert(paste("Please enter a comment for", current_var))
+        return()
+      }
+
+      # store the comment
+      row_ids <- selected_state()
+      if (!"qc_comment" %in% names(mm_qry$dt)) {
+        mm_qry$dt[, qc_comment := NA_character_]
+      }
+
+      mm_qry$dt[row_name %in% row_ids, qc_comment := comment]
+
       mm_qry <<- metamet::impute(
         v_y = input$plotTabs,
         mm = mm_qry,
@@ -594,6 +622,21 @@ server <- function(input, output, session) {
         plot_graph = FALSE,
         row_selected = selected_state()
       )
+
+      # check missing comments AFTER imputation
+      rows_var <- mm_qry$dt[
+        name_icos == current_var &
+          !is.na(qc) & qc != 0L &
+          !is.na(qc_orig) & qc_orig != qc
+      ]
+
+      if (nrow(rows_var) == 0) {
+        v_missing_comments[[current_var]] <- FALSE
+      } else if (any(is.na(rows_var$qc_comment) | rows_var$qc_comment == "")) {
+        v_missing_comments[[current_var]] <- TRUE
+      } else {
+        v_missing_comments[[current_var]] <- FALSE
+      }
 
       # Re-plotting plot after imputation is confirmed to illustrate changes
       shinyjs::show("plotted_data")
@@ -619,6 +662,12 @@ server <- function(input, output, session) {
     }
   })
 
+  # store qc comment for each variable
+  observeEvent(input$qc_comment, {
+    req(input$plotTabs)
+    qc_comments[[input$plotTabs]] <- input$qc_comment
+  })
+
   # Reset button functionality----
   observeEvent(input$reset, {
     showModal(modalDialog(
@@ -639,6 +688,38 @@ server <- function(input, output, session) {
   observeEvent(input$finished_check, {
     # Insert validation flag for date range here
     v_names_checklist[[input$plotTabs]] <- TRUE
+  })
+
+  # dynamic qc_comment box to address each variable that has been imputed
+  output$qc_comment_box <- renderUI({
+    req(input$plotTabs)
+    var <- input$plotTabs
+
+    # Load existing comment if present
+    existing <- qc_comments[[var]]
+    if (is.null(existing)) existing <- ""
+
+    textAreaInput(
+      "qc_comment",
+      label = paste0("Reason for invalidation / imputation for ", var, " (required)"),
+      value = existing,
+      placeholder = paste("Explain why data for", var, "was changed..."),
+      width = "100%",
+      rows = 3
+    )
+  })
+
+  # find variables that still need comments and gives warning
+  output$missing_comment_banner <- renderUI({
+    req(uploaded())
+    vals <- unlist(lapply(v_missing_comments, function(x) isTRUE(x)))
+    vars_missing <- names(vals)[vals]
+    if (length(vars_missing) == 0) return(NULL)
+    div(
+      style = "background-color:#ffcccc; padding:10px; border-radius:5px; margin-bottom:10px;",
+      strong("You still need to comment: "),
+      paste(vars_missing, collapse = ", ")
+    )
   })
 
   output$download_data <- downloadHandler(
@@ -697,15 +778,69 @@ server <- function(input, output, session) {
     shinyjs::disable("submitchanges")
     shinyjs::disable("edit_table_cols")
 
+    # missing comment warning for variables that were imputed
+    for (v in uploaded()$v_names) {
+      rows_var <- mm_qry$dt[
+        name_icos == v &
+          !is.na(qc) & qc != 0L &
+          !is.na(qc_orig) & qc_orig != qc
+      ]
+
+      # If no imputed rows then no comment is needed
+      if (nrow(rows_var) == 0) {
+        v_missing_comments[[v]] <- FALSE
+        next
+      }
+
+      # If imputed rows exist then require comments
+      if (any(is.na(rows_var$qc_comment) | rows_var$qc_comment == "")) {
+        v_missing_comments[[v]] <- TRUE
+      } else {
+        v_missing_comments[[v]] <- FALSE
+      }
+    }
+
+
+    # Identify which rows were invalidated (qc != 0)
+    imputed_rows <- mm_qry$dt[
+      !is.na(qc) & qc != 0L &
+        !is.na(qc_orig) & qc_orig != qc
+    ]
+
+    # check if the qc_comment column exists, if not block submission
+    if (!"qc_comment" %in% names(mm_qry$dt)) {
+      shinyjs::alert(
+        "You cannot submit changes because no comments were recorded for invalidated data."
+      )
+      shinyjs::enable("submitchanges")
+      shinyjs::enable("edit_table_cols")
+      runjs('document.getElementById("submitchanges").textContent="Submit";')
+      return()
+    }
+
+    # If any imputed row has an empty or missing comment → block submission
+    if (any(is.na(imputed_rows$qc_comment) | imputed_rows$qc_comment == "")) {
+      shinyjs::alert(
+        "Please provide a comment for every imputed or invalidated data point before submitting."
+      )
+      shinyjs::enable("submitchanges")
+      shinyjs::enable("edit_table_cols")
+      runjs('document.getElementById("submitchanges").textContent="Submit";')
+      return()
+    }
+
     # update lev2 with mm_qry
     # update validator on imputed rows (qc != 0 means imputed or flagged)
     mm_qry$dt[!is.na(qc) & qc != 0L, validator := username]
 
-    # drop app-internal temporaries before joining back to the full dataset
-    mm_qry$dt[, c("row_name", "datect_num") := NULL]
+    # Make a copy for saving, so the app keeps row_name for plotting
+    mm_qry_save <- data.table::copy(mm_qry)
 
-    # overwrite existing data with changes in query
-    mm <- join(uploaded()$mm, mm_qry)
+    # Remove internal columns ONLY from the saved copy
+    mm_qry_save$dt[, c("row_name", "datect_num") := NULL]
+
+    # Overwrite existing data with changes in query
+    mm <- join(uploaded()$mm, mm_qry_save)
 
     fname <- uploaded()$fname
     print(uploaded()$fname)

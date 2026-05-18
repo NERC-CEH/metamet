@@ -502,7 +502,9 @@ server <- function(input, output, session) {
           i,
           value = i,
           tags$style(HTML(paste0(
-            '.tabbable > .nav > li > a[data-value=', i, '] {',
+            '.tabbable > .nav > li > a[data-value=',
+            i,
+            '] {',
             if (v_names_checklist[[i]] == TRUE) {
               'background-color:#bcbcbc;' # finished checking
             } else if (isTRUE(v_missing_comments[[i]])) {

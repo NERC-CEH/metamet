@@ -506,7 +506,7 @@ server <- function(input, output, session) {
             if (v_names_checklist[[i]] == TRUE) {
               'background-color:#bcbcbc;'   # finished checking
             } else if (isTRUE(v_missing_comments[[i]])) {
-              'background-color:#ff9999;'   # missing comments → red
+              'background-color:#ff9999;' # missing comments → red
             } else {
               'background-color:transparent;'
             },

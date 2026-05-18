@@ -504,7 +504,7 @@ server <- function(input, output, session) {
           tags$style(HTML(paste0(
             '.tabbable > .nav > li > a[data-value=', i, '] {',
             if (v_names_checklist[[i]] == TRUE) {
-              'background-color:#bcbcbc;'   # finished checking
+              'background-color:#bcbcbc;' # finished checking
             } else if (isTRUE(v_missing_comments[[i]])) {
               'background-color:#ff9999;' # missing comments → red
             } else {

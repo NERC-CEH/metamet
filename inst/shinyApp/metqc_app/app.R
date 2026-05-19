@@ -5,6 +5,7 @@ library(shinyjs)
 library(shinyvalidate)
 library(shinyFiles)
 library(ggiraph)
+library(data.table)
 
 source("mod_metadata_maker.R", local = TRUE)
 

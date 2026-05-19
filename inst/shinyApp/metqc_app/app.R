@@ -511,11 +511,13 @@ server <- function(input, output, session) {
           i,
           value = i,
           tags$style(HTML(paste0(
-            '.tabbable > .nav > li > a[data-value=', i, '] {',
+            '.tabbable > .nav > li > a[data-value=',
+            i,
+            '] {',
             if (v_names_checklist[[i]] == TRUE) {
-              'background-color:#bcbcbc;'   # finished checking
+              'background-color:#bcbcbc;' # finished checking
             } else if (isTRUE(v_missing_comments[[i]])) {
-              'background-color:#ff9999;'   # missing comments → red
+              'background-color:#ff9999;' # missing comments → red
             } else {
               'background-color:transparent;'
             },
@@ -638,8 +640,10 @@ server <- function(input, output, session) {
       # check missing comments AFTER imputation
       rows_var <- mm_qry$dt[
         name_icos == current_var &
-          !is.na(qc) & qc != 0L &
-          !is.na(qc_orig) & qc_orig != qc
+          !is.na(qc) &
+          qc != 0L &
+          !is.na(qc_orig) &
+          qc_orig != qc
       ]
 
       if (nrow(rows_var) == 0) {
@@ -703,11 +707,17 @@ server <- function(input, output, session) {
 
     # Load existing comment if present
     existing <- qc_comments[[var]]
-    if (is.null(existing)) existing <- ""
+    if (is.null(existing)) {
+      existing <- ""
+    }
 
     textAreaInput(
       "qc_comment",
-      label = paste0("Reason for invalidation / imputation for ", var, " (required)"),
+      label = paste0(
+        "Reason for invalidation / imputation for ",
+        var,
+        " (required)"
+      ),
       value = existing,
       placeholder = paste("Explain why data for", var, "was changed..."),
       width = "100%",
@@ -720,7 +730,9 @@ server <- function(input, output, session) {
     req(uploaded())
     vals <- unlist(lapply(v_missing_comments, function(x) isTRUE(x)))
     vars_missing <- names(vals)[vals]
-    if (length(vars_missing) == 0) return(NULL)
+    if (length(vars_missing) == 0) {
+      return(NULL)
+    }
     div(
       style = "background-color:#ffcccc; padding:10px; border-radius:5px; margin-bottom:10px;",
       strong("You still need to comment: "),
@@ -788,8 +800,10 @@ server <- function(input, output, session) {
     for (v in uploaded()$v_names) {
       rows_var <- mm_qry$dt[
         name_icos == v &
-          !is.na(qc) & qc != 0L &
-          !is.na(qc_orig) & qc_orig != qc
+          !is.na(qc) &
+          qc != 0L &
+          !is.na(qc_orig) &
+          qc_orig != qc
       ]
 
       # If no imputed rows then no comment is needed
@@ -806,11 +820,9 @@ server <- function(input, output, session) {
       }
     }
 
-
     # Identify which rows were invalidated (qc != 0)
     imputed_rows <- mm_qry$dt[
-      !is.na(qc) & qc != 0L &
-        !is.na(qc_orig) & qc_orig != qc
+      !is.na(qc) & qc != 0L & !is.na(qc_orig) & qc_orig != qc
     ]
 
     # check if the qc_comment column exists, if not block submission

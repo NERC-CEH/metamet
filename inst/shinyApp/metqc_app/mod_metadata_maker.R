@@ -286,6 +286,9 @@ mod_metadata_maker_ui <- function(id) {
           downloadButton(ns("save_rds"), "Download as metamet .rds"),
           br(),
           br(),
+          downloadButton(ns("download_dt_meta"), "Download dt_meta CSV"),
+          br(),
+          br(),
           actionButton(ns("back_6"), "Back"),
           actionButton(ns("restart"), "Start anew", class = "btn-warning")
         )
@@ -1288,6 +1291,17 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
         mm <- tryCatch(metamet::apply_qc(mm), error = function(e) mm)
 
         saveRDS(mm, file)
+      }
+    )
+
+    output$download_dt_meta <- downloadHandler(
+      filename = function() {
+        site_safe <- gsub("[^A-Za-z0-9_-]", "_", input$site_id %||% "site")
+        paste0(site_safe, "_dt_meta.csv")
+      },
+      content = function(file) {
+        req(rv$dt_meta)
+        data.table::fwrite(rv$dt_meta, file)
       }
     )
   })

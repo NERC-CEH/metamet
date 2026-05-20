@@ -1,11 +1,8 @@
 library(metamet)
-library(dplyr)
 library(shinydashboard)
-library(shinyjs)
 library(shinyvalidate)
 library(shinyFiles)
 library(ggiraph)
-library(data.table)
 
 source("mod_metadata_maker.R", local = TRUE)
 
@@ -68,7 +65,7 @@ ui <- dashboardPage(
     )
   ),
   dashboardBody(
-    useShinyjs(),
+    shinyjs::useShinyjs(),
     tabItems(
       tabItem(
         tabName = "dashboard",
@@ -299,7 +296,7 @@ server <- function(input, output, session) {
     v_names <- unique(mm$dt_meta[type != "time" & type != "site", name_icos])
     date_of_first_new_record <- mm$dt[, min(TIMESTAMP, na.rm = TRUE)]
     date_of_last_new_record <- mm$dt[, max(TIMESTAMP, na.rm = TRUE)]
-    setkeyv(mm$dt, c("name_icos", "site", "TIMESTAMP"))
+    data.table::setkeyv(mm$dt, c("name_icos", "site", "TIMESTAMP"))
     list(
       mm = mm,
       v_names = v_names,
@@ -471,7 +468,7 @@ server <- function(input, output, session) {
 
   # Data retrieval functionality-----
   observeEvent(input$retrieve_data, {
-    for (i in 1:length(uploaded()$v_names)) {
+    for (i in seq_along(uploaded()$v_names)) {
       v_names_checklist[[uploaded()$v_names[i]]] <- FALSE
     }
 
@@ -483,7 +480,7 @@ server <- function(input, output, session) {
       start_date = df_daterange()$start_date,
       end_date = df_daterange()$end_date
     )
-    setkeyv(mm_qry$dt, c("name_icos", "site", "TIMESTAMP"))
+    data.table::setkeyv(mm_qry$dt, c("name_icos", "site", "TIMESTAMP"))
     mm_qry$dt[, row_name := as.factor(rownames(mm_qry$dt))]
     mm_qry$dt$datect_num <<- as.numeric(mm_qry$dt$TIMESTAMP)
 

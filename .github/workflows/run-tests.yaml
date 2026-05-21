@@ -35,7 +35,8 @@ jobs:
             any::shinyjs
 
       - name: Install package
-        run: R CMD INSTALL .
+        run: devtools::install()
+        shell: Rscript {0}
 
       - name: Run tests
         run: |

@@ -34,8 +34,10 @@ jobs:
             any::shinycssloaders
             any::shinyjs
 
+      - name: Install package
+        run: R CMD INSTALL .
+
       - name: Run tests
         run: |
-          pkgload::load_all()
           testthat::test_local(testthat::test_path(), stop_on_failure = TRUE)
         shell: Rscript {0}

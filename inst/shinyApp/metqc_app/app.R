@@ -1,5 +1,6 @@
 library(metamet)
 library(shinydashboard)
+library(shinyjs)
 library(shinyvalidate)
 library(shinyFiles)
 library(ggiraph)

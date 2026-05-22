@@ -24,8 +24,8 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: |
+            any::rcmdcheck
             any::testthat
-            any::devtools
             any::shiny
             any::shinydashboard
             any::shinyvalidate
@@ -34,11 +34,7 @@ jobs:
             any::shinycssloaders
             any::shinyjs
 
-      - name: Install package
-        run: devtools::install()
-        shell: Rscript {0}
-
-      - name: Run tests
+      - name: Check package (build, install, test)
         run: |
-          testthat::test_local(testthat::test_path(), stop_on_failure = TRUE)
+          rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error")
         shell: Rscript {0}

@@ -537,10 +537,10 @@ server <- function(input, output, session) {
     x_data <- mm_qry$dt[name_icos == input$x_var, .(TIMESTAMP, site, x = value)]
     y_data <- mm_qry$dt[name_icos == input$y_var, .(TIMESTAMP, site, y = value)]
     plot_data <- merge(x_data, y_data, by = c("TIMESTAMP", "site"))
-    ggplot(plot_data, aes(x = x, y = y)) +
-      geom_point() +
-      labs(x = input$x_var, y = input$y_var) +
-      theme_bw()
+    ggplot2::ggplot(plot_data, ggplot2::aes(x = x, y = y)) +
+      ggplot2::geom_point() +
+      ggplot2::labs(x = input$x_var, y = input$y_var) +
+      ggplot2::theme_bw()
   })
 
   observeEvent(input$compare_vars, {
@@ -674,7 +674,7 @@ server <- function(input, output, session) {
         tmpdir <- tempdir()
         setwd(tempdir())
         fs <- c('ceda-data.csv')
-        df_ceda <- format_for_ceda(mm)
+        df_ceda <- metamet:::format_for_ceda(mm)
         data.table::fwrite(df_ceda, 'ceda-data.csv')
         zip(zipfile = file, files = fs)
         runjs(
@@ -720,7 +720,7 @@ server <- function(input, output, session) {
         fs::path_ext(fname)
       )
     )
-    df_ceda <- format_for_ceda(mm)
+    df_ceda <- metamet:::format_for_ceda(mm)
     saveRDS(
       df_ceda,
       file = paste0(

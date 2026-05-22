@@ -3,10 +3,10 @@
 
 test_that("joining metamet objects works", {
   fname_dt1 <- pkg_extdata(
-    "UK-AMO/UK-AMO_BM_20260126_L04_F01.dat"
+    "UK-AMO/UK-AMo_BM_20260126_L04_F01.dat"
   )
   fname_dt2 <- pkg_extdata(
-    "UK-AMO/UK-AMO_BM_20260126_L04_F02.dat"
+    "UK-AMO/UK-AMo_BM_20260126_L04_F02.dat"
   )
 
   mm1 <- metamet(

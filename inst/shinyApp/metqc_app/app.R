@@ -1,5 +1,4 @@
 library(metamet)
-library(dplyr)
 library(shinydashboard)
 library(shinyjs)
 library(shinyvalidate)
@@ -67,7 +66,7 @@ ui <- dashboardPage(
     )
   ),
   dashboardBody(
-    useShinyjs(),
+    shinyjs::useShinyjs(),
     tabItems(
       tabItem(
         tabName = "dashboard",
@@ -298,7 +297,7 @@ server <- function(input, output, session) {
     v_names <- unique(mm$dt_meta[type != "time" & type != "site", name_icos])
     date_of_first_new_record <- mm$dt[, min(TIMESTAMP, na.rm = TRUE)]
     date_of_last_new_record <- mm$dt[, max(TIMESTAMP, na.rm = TRUE)]
-    setkeyv(mm$dt, c("name_icos", "site", "TIMESTAMP"))
+    data.table::setkeyv(mm$dt, c("name_icos", "site", "TIMESTAMP"))
     list(
       mm = mm,
       v_names = v_names,
@@ -470,7 +469,7 @@ server <- function(input, output, session) {
 
   # Data retrieval functionality-----
   observeEvent(input$retrieve_data, {
-    for (i in 1:length(uploaded()$v_names)) {
+    for (i in seq_along(uploaded()$v_names)) {
       v_names_checklist[[uploaded()$v_names[i]]] <- FALSE
     }
 
@@ -482,7 +481,7 @@ server <- function(input, output, session) {
       start_date = df_daterange()$start_date,
       end_date = df_daterange()$end_date
     )
-    setkeyv(mm_qry$dt, c("name_icos", "site", "TIMESTAMP"))
+    data.table::setkeyv(mm_qry$dt, c("name_icos", "site", "TIMESTAMP"))
     mm_qry$dt[, row_name := as.factor(rownames(mm_qry$dt))]
     mm_qry$dt$datect_num <<- as.numeric(mm_qry$dt$TIMESTAMP)
 
@@ -538,10 +537,10 @@ server <- function(input, output, session) {
     x_data <- mm_qry$dt[name_icos == input$x_var, .(TIMESTAMP, site, x = value)]
     y_data <- mm_qry$dt[name_icos == input$y_var, .(TIMESTAMP, site, y = value)]
     plot_data <- merge(x_data, y_data, by = c("TIMESTAMP", "site"))
-    ggplot(plot_data, aes(x = x, y = y)) +
-      geom_point() +
-      labs(x = input$x_var, y = input$y_var) +
-      theme_bw()
+    ggplot2::ggplot(plot_data, ggplot2::aes(x = x, y = y)) +
+      ggplot2::geom_point() +
+      ggplot2::labs(x = input$x_var, y = input$y_var) +
+      ggplot2::theme_bw()
   })
 
   observeEvent(input$compare_vars, {
@@ -675,7 +674,7 @@ server <- function(input, output, session) {
         tmpdir <- tempdir()
         setwd(tempdir())
         fs <- c('ceda-data.csv')
-        df_ceda <- format_for_ceda(mm)
+        df_ceda <- metamet:::format_for_ceda(mm)
         data.table::fwrite(df_ceda, 'ceda-data.csv')
         zip(zipfile = file, files = fs)
         runjs(
@@ -721,7 +720,7 @@ server <- function(input, output, session) {
         fs::path_ext(fname)
       )
     )
-    df_ceda <- format_for_ceda(mm)
+    df_ceda <- metamet:::format_for_ceda(mm)
     saveRDS(
       df_ceda,
       file = paste0(

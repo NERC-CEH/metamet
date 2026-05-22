@@ -74,7 +74,7 @@ ggiraph_plot <- function(
     facet_wrap_interactive(
       ncol = 2,
       interactive_on = "text",
-      vars(site),
+      ggplot2::vars(site),
       labeller = labeller_interactive(aes(
         tooltip = paste("The site is", site),
         data_id = site

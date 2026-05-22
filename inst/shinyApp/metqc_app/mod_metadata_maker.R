@@ -867,7 +867,8 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
                 ns(safe_id("map_", col_nm)),
                 label = NULL,
                 choices = v_icos_choices,
-                selected = ""
+                selected = "",
+                selectize = FALSE
               )
             )
           )

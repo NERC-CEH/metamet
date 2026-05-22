@@ -26,7 +26,9 @@ Suggests:
     ggiraph,
     shinyFiles,
     openairmaps,
-    leaflet
+    leaflet,
+    carrier (>= 0.3.0),
+    mirai (>= 2.5.1)
 Depends: 
     R (>= 4.1.0)
 Imports:

@@ -1,20 +1,23 @@
 pkg_extdata <- function(...) {
-  # Try using system.file first (works for installed packages)
-  extdata_path <- system.file(
-    "extdata",
-    package = "metamet",
-    mustWork = TRUE
+  # Use rprojroot to find the package root during development
+  pkg_root <- tryCatch(
+    rprojroot::find_root(rprojroot::is_r_package),
+    error = function(e) NULL
   )
 
-  # Fallback to relative path for development/testing
-  if (extdata_path == "") {
-    extdata_path <- fs::path_package("metamet", "extdata")
+  if (!is.null(pkg_root)) {
+    path <- fs::path(pkg_root, "inst", "extdata", ...)
+    # Normalize the path to handle any encoding issues
+    path <- normalizePath(path, winslash = "/", mustWork = FALSE)
+    if (!file.exists(path)) {
+      cli::cli_abort(
+        "Can't find package file at: {path}",
+        call = NULL
+      )
+    }
+    return(path)
   }
 
-  # Ensure the path exists
-  if (!dir.exists(extdata_path)) {
-    cli::cli_abort("Can't find package file.")
-  }
-
-  fs::path(extdata_path, ...)
+  # Fall back to system.file for installed packages
+  system.file("extdata", ..., package = "metamet", mustWork = TRUE)
 }

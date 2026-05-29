@@ -297,6 +297,15 @@ server <- function(input, output, session) {
     if (!identical(attr(mm, "format"), "long")) {
       mm <- metamet_reshape(mm, "long")
     }
+    # restore qc_comment if present
+    if (!is.null(mm$dt_qc_comment)) {
+      mm$dt <- merge(
+        mm$dt,
+        mm$dt_qc_comment,
+        by = c("site", "TIMESTAMP", "name_icos"),
+        all.x = TRUE
+      )
+    }
     v_names <- unique(mm$dt_meta[type != "time" & type != "site", name_icos])
     date_of_first_new_record <- mm$dt[, min(TIMESTAMP, na.rm = TRUE)]
     date_of_last_new_record <- mm$dt[, max(TIMESTAMP, na.rm = TRUE)]
@@ -597,12 +606,16 @@ server <- function(input, output, session) {
       shinyjs::alert("Please select a point to impute.")
     } else {
       current_var <- input$plotTabs
-      comment <- qc_comments[[current_var]]
+      # get comment from the UI
+      comment <- input$qc_comment
 
       if (is.null(comment) || comment == "") {
         shinyjs::alert(paste("Please enter a comment for", current_var))
         return()
       }
+
+      # store it only now (not on every keystroke)
+      qc_comments[[current_var]] <- comment
 
       # store the comment
       row_ids <- selected_state()
@@ -660,12 +673,6 @@ server <- function(input, output, session) {
         "_interactive_plot"
       )]] <- renderGirafe(plot_selected())
     }
-  })
-
-  # store qc comment for each variable
-  observeEvent(input$qc_comment, {
-    req(input$plotTabs)
-    qc_comments[[input$plotTabs]] <- input$qc_comment
   })
 
   # Reset button functionality----

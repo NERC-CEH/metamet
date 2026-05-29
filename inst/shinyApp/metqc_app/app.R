@@ -297,15 +297,6 @@ server <- function(input, output, session) {
     if (!identical(attr(mm, "format"), "long")) {
       mm <- metamet_reshape(mm, "long")
     }
-    # restore qc_comment if present
-    if (!is.null(mm$dt_qc_comment)) {
-      mm$dt <- merge(
-        mm$dt,
-        mm$dt_qc_comment,
-        by = c("site", "TIMESTAMP", "name_icos"),
-        all.x = TRUE
-      )
-    }
     v_names <- unique(mm$dt_meta[type != "time" & type != "site", name_icos])
     date_of_first_new_record <- mm$dt[, min(TIMESTAMP, na.rm = TRUE)]
     date_of_last_new_record <- mm$dt[, max(TIMESTAMP, na.rm = TRUE)]
@@ -606,22 +597,19 @@ server <- function(input, output, session) {
       shinyjs::alert("Please select a point to impute.")
     } else {
       current_var <- input$plotTabs
-
-      # get comment from the UI
-      comment <- input$qc_comment
+      comment <- qc_comments[[current_var]]
 
       if (is.null(comment) || comment == "") {
         shinyjs::alert(paste("Please enter a comment for", current_var))
         return()
       }
-      # store it only now (not on every keystroke)
-      qc_comments[[current_var]] <- comment
 
       # store the comment
       row_ids <- selected_state()
       if (!"qc_comment" %in% names(mm_qry$dt)) {
         mm_qry$dt[, qc_comment := NA_character_]
       }
+
       mm_qry$dt[row_name %in% row_ids, qc_comment := comment]
 
       mm_qry <<- metamet::impute(
@@ -672,6 +660,12 @@ server <- function(input, output, session) {
         "_interactive_plot"
       )]] <- renderGirafe(plot_selected())
     }
+  })
+
+  # store qc comment for each variable
+  observeEvent(input$qc_comment, {
+    req(input$plotTabs)
+    qc_comments[[input$plotTabs]] <- input$qc_comment
   })
 
   # Reset button functionality----
@@ -842,19 +836,11 @@ server <- function(input, output, session) {
     # Make a copy for saving, so the app keeps row_name for plotting
     mm_qry_save <- data.table::copy(mm_qry)
 
-    # Extract qc_comment BEFORE removing it to preserve it for reshape
-    qc_comment_table <- mm_qry_save$dt[
-      !is.na(qc_comment),
-      .(site, TIMESTAMP, name_icos, qc_comment)
-    ]
     # Remove internal columns ONLY from the saved copy
-    mm_qry_save$dt[, c("row_name", "datect_num", "qc_comment") := NULL]
+    mm_qry_save$dt[, c("row_name", "datect_num") := NULL]
 
     # Overwrite existing data with changes in query
     mm <- join(uploaded()$mm, mm_qry_save)
-
-    # Attach qc_comment table to mm for persistence
-    mm$dt_qc_comment <- qc_comment_table
 
     fname <- uploaded()$fname
     print(uploaded()$fname)

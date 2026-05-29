@@ -514,8 +514,6 @@ server <- function(input, output, session) {
             '.tabbable > .nav > li > a[data-value=', i, '] {',
             if (v_names_checklist[[i]] == TRUE) {
               'background-color:#bcbcbc;'   # finished checking
-            } else if (isTRUE(v_missing_comments[[i]])) {
-              'background-color:#ff9999;'   # missing comments → red
             } else {
               'background-color:transparent;'
             },
@@ -609,11 +607,6 @@ server <- function(input, output, session) {
       # get comment from the UI
       comment <- input$qc_comment
 
-      if (is.null(comment) || comment == "") {
-        shinyjs::alert(paste("Please enter a comment for", current_var))
-        return()
-      }
-
       # store it only now (not on every keystroke)
       qc_comments[[current_var]] <- comment
 
@@ -623,7 +616,10 @@ server <- function(input, output, session) {
         mm_qry$dt[, qc_comment := NA_character_]
       }
 
-      mm_qry$dt[row_name %in% row_ids, qc_comment := comment]
+      # only write comment to data if provided (makes it optional)
+      if (!is.null(comment) && comment != "") {
+        mm_qry$dt[row_name %in% row_ids, qc_comment := comment]
+      }
 
       mm_qry <<- metamet::impute(
         v_y = input$plotTabs,
@@ -635,21 +631,6 @@ server <- function(input, output, session) {
         plot_graph = FALSE,
         row_selected = selected_state()
       )
-
-      # check missing comments AFTER imputation
-      rows_var <- mm_qry$dt[
-        name_icos == current_var &
-          !is.na(qc) & qc != 0L &
-          !is.na(qc_orig) & qc_orig != qc
-      ]
-
-      if (nrow(rows_var) == 0) {
-        v_missing_comments[[current_var]] <- FALSE
-      } else if (any(is.na(rows_var$qc_comment) | rows_var$qc_comment == "")) {
-        v_missing_comments[[current_var]] <- TRUE
-      } else {
-        v_missing_comments[[current_var]] <- FALSE
-      }
 
       # Re-plotting plot after imputation is confirmed to illustrate changes
       shinyjs::show("plotted_data")
@@ -708,24 +689,11 @@ server <- function(input, output, session) {
 
     textAreaInput(
       "qc_comment",
-      label = paste0("Reason for invalidation / imputation for ", var, " (required)"),
+      label = paste0("Reason for imputation for ", var, " (optional)"),
       value = existing,
       placeholder = paste("Explain why data for", var, "was changed..."),
       width = "100%",
       rows = 3
-    )
-  })
-
-  # find variables that still need comments and gives warning
-  output$missing_comment_banner <- renderUI({
-    req(uploaded())
-    vals <- unlist(lapply(v_missing_comments, function(x) isTRUE(x)))
-    vars_missing <- names(vals)[vals]
-    if (length(vars_missing) == 0) return(NULL)
-    div(
-      style = "background-color:#ffcccc; padding:10px; border-radius:5px; margin-bottom:10px;",
-      strong("You still need to comment: "),
-      paste(vars_missing, collapse = ", ")
     )
   })
 
@@ -810,31 +778,8 @@ server <- function(input, output, session) {
 
     # Identify which rows were invalidated (qc != 0)
     imputed_rows <- mm_qry$dt[
-      !is.na(qc) & qc != 0L &
-        !is.na(qc_orig) & qc_orig != qc
+      !is.na(qc) & qc != 0L & !is.na(qc_orig) & qc_orig != qc
     ]
-
-    # check if the qc_comment column exists, if not block submission
-    if (!"qc_comment" %in% names(mm_qry$dt)) {
-      shinyjs::alert(
-        "You cannot submit changes because no comments were recorded for invalidated data."
-      )
-      shinyjs::enable("submitchanges")
-      shinyjs::enable("edit_table_cols")
-      runjs('document.getElementById("submitchanges").textContent="Submit";')
-      return()
-    }
-
-    # If any imputed row has an empty or missing comment → block submission
-    if (any(is.na(imputed_rows$qc_comment) | imputed_rows$qc_comment == "")) {
-      shinyjs::alert(
-        "Please provide a comment for every imputed or invalidated data point before submitting."
-      )
-      shinyjs::enable("submitchanges")
-      shinyjs::enable("edit_table_cols")
-      runjs('document.getElementById("submitchanges").textContent="Submit";')
-      return()
-    }
 
     # update lev2 with mm_qry
     # update validator on imputed rows (qc != 0 means imputed or flagged)

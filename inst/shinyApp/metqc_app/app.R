@@ -513,7 +513,7 @@ server <- function(input, output, session) {
           tags$style(HTML(paste0(
             '.tabbable > .nav > li > a[data-value=', i, '] {',
             if (v_names_checklist[[i]] == TRUE) {
-              'background-color:#bcbcbc;'   # finished checking
+              'background-color:#bcbcbc;' # finished checking
             } else {
               'background-color:transparent;'
             },

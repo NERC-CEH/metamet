@@ -9,8 +9,7 @@
   "validator",
   "ref",
   "type",
-  "name_icos",
-  "qc_comment"
+  "name_icos"
 )
 
 # ---- Assertions -------------------------------------------------------
@@ -23,7 +22,8 @@
 
 .assert_is_metamet_long <- function(dt) {
   .assert_is_dt(dt)
-  missing <- setdiff(.met_long_cols, names(dt))
+  required <- .met_long_cols
+  missing <- setdiff(required, names(dt))
   if (length(missing)) {
     stop(
       "mm$dt is not a valid long-format metamet table; missing: ",
@@ -175,19 +175,24 @@ metamet_long_to_wide <- function(mm) {
     NULL
   }
 
-  dt_comment_long <- dt_long[
-    !is.na(qc_comment),
-    .(site, TIMESTAMP, var_name, qc_comment)
-  ]
+  # if qc_comment is present, it may contain non-NA values for some variables and NA - optional
+  if ("qc_comment" %in% names(dt_long)) {
+    dt_comment_long <- dt_long[
+      !is.na(qc_comment),
+      .(site, TIMESTAMP, var_name, qc_comment)
+    ]
 
-  mm$dt_qc_comment <- if (nrow(dt_comment_long)) {
-    data.table::dcast(
-      dt_comment_long,
-      site + TIMESTAMP ~ var_name,
-      value.var = "qc_comment"
-    )
+    mm$dt_qc_comment <- if (nrow(dt_comment_long)) {
+      data.table::dcast(
+        dt_comment_long,
+        site + TIMESTAMP ~ var_name,
+        value.var = "qc_comment"
+      )
+    } else {
+      NULL
+    }
   } else {
-    NULL
+    mm$dt_qc_comment <- NULL
   }
 
   # dcast always produces a TIMESTAMP column; normalise dt_meta to match.
@@ -277,17 +282,21 @@ rbind_metamet <- function(mm, l_dt, l_dt_meta, l_dt_site) {
 # treated as wide (same assumption as metamet_reshape).
 .ensure_long <- function(mm) {
   if (!identical(attr(mm, "format"), "long")) {
-    metamet_reshape(mm, "long")
-  } else {
-    mm
+    mm <- metamet_reshape(mm, "long")
   }
+
+  # ensure qc_comment exists in long format
+  if (!"qc_comment" %in% names(mm$dt)) {
+    mm$dt[, qc_comment := NA_character_]
+  }
+
+  mm
 }
 
 # Reshape to wide if not already wide.
 .ensure_wide <- function(mm) {
   if (!identical(attr(mm, "format"), "wide")) {
-    metamet_reshape(mm, "wide")
-  } else {
-    mm
+    mm <- metamet_reshape(mm, "wide")
   }
+  mm
 }

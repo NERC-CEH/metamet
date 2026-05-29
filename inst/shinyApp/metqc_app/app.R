@@ -511,9 +511,11 @@ server <- function(input, output, session) {
           i,
           value = i,
           tags$style(HTML(paste0(
-            '.tabbable > .nav > li > a[data-value=', i, '] {',
+            '.tabbable > .nav > li > a[data-value=',
+            i,
+            '] {',
             if (v_names_checklist[[i]] == TRUE) {
-              'background-color:#bcbcbc;'   # finished checking
+              'background-color:#bcbcbc;' # finished checking
             } else {
               'background-color:transparent;'
             },
@@ -685,7 +687,9 @@ server <- function(input, output, session) {
 
     # Load existing comment if present
     existing <- qc_comments[[var]]
-    if (is.null(existing)) existing <- ""
+    if (is.null(existing)) {
+      existing <- ""
+    }
 
     textAreaInput(
       "qc_comment",

@@ -1,0 +1,8 @@
+version = 1
+
+[format]
+indent = 2
+line_width = 80
+use_native_pipe = true
+[lint]
+enabled = true

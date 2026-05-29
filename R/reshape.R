@@ -9,7 +9,8 @@
   "validator",
   "ref",
   "type",
-  "name_icos"
+  "name_icos",
+  "qc_comment"
 )
 
 # ---- Assertions -------------------------------------------------------
@@ -99,6 +100,24 @@ metamet_wide_to_long <- function(mm) {
     mm$dt[, `:=`(qc = NA_real_, validator = NA_character_)]
   }
 
+  if (!is.null(mm$dt_qc_comment)) {
+    .assert_is_dt(mm$dt_qc_comment)
+    dt_comment <- data.table::melt(
+      mm$dt_qc_comment,
+      id.vars = c("site", time_name),
+      variable.name = "var_name",
+      value.name = "qc_comment"
+    )
+    if (time_name != "TIMESTAMP") {
+      data.table::setnames(dt_comment, time_name, "TIMESTAMP")
+    }
+    data.table::setkeyv(dt_comment, .met_keys)
+    mm$dt[dt_comment, qc_comment := qc_comment]
+    mm$dt_qc_comment <- NULL
+  } else {
+    mm$dt[, qc_comment := NA_character_]
+  }
+
   if (!is.null(mm$dt_ref)) {
     .assert_is_dt(mm$dt_ref)
     dt_ref <- data.table::melt(
@@ -151,6 +170,21 @@ metamet_long_to_wide <- function(mm) {
       dt_ref_long,
       site + TIMESTAMP ~ var_name,
       value.var = "ref"
+    )
+  } else {
+    NULL
+  }
+
+  dt_comment_long <- dt_long[
+    !is.na(qc_comment),
+    .(site, TIMESTAMP, var_name, qc_comment)
+  ]
+
+  mm$dt_qc_comment <- if (nrow(dt_comment_long)) {
+    data.table::dcast(
+      dt_comment_long,
+      site + TIMESTAMP ~ var_name,
+      value.var = "qc_comment"
     )
   } else {
     NULL

@@ -685,7 +685,9 @@ server <- function(input, output, session) {
 
     # Load existing comment if present
     existing <- qc_comments[[var]]
-    if (is.null(existing)) existing <- ""
+    if (is.null(existing)) {
+      existing <- ""
+    }
 
     textAreaInput(
       "qc_comment",

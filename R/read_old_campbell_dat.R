@@ -77,21 +77,28 @@ read_old_campbell_dat <- function(
 
   # ---- Determine starting year ---------------------------------------------
   if (is.null(year)) {
-    v_date_ch <- regmatches(
-      basename(fname_dat),
-      regexpr("\\d{4}_\\d{2}_\\d{2}", basename(fname_dat))
-    )
-    if (!length(v_date_ch)) {
-      stop(
-        "Cannot infer year from '",
-        basename(fname_dat),
-        "'; supply `year` explicitly.",
-        call. = FALSE
-      )
+    base <- tools::file_path_sans_ext(basename(fname_dat))
+    # Try YYYY_MM_DD first
+    m4 <- regmatches(base, regexpr("\\d{4}_\\d{2}_\\d{2}", base))
+    if (length(m4) && nzchar(m4)) {
+      v_date_int <- as.integer(strsplit(m4, "_")[[1L]])
+      year_from_fname <- v_date_int[1L]
+      month_from_fname <- v_date_int[2L]
+    } else {
+      # Fall back to YYMMDD (six digits following an underscore)
+      m6 <- regmatches(base, regexpr("(?<=_)\\d{6}", base, perl = TRUE))
+      if (!length(m6) || !nzchar(m6)) {
+        stop(
+          "Cannot infer year from '",
+          basename(fname_dat),
+          "'; supply `year` explicitly.",
+          call. = FALSE
+        )
+      }
+      yy <- as.integer(substr(m6, 1L, 2L))
+      year_from_fname <- if (yy >= 18L) 2000L + yy else 1900L + yy
+      month_from_fname <- as.integer(substr(m6, 3L, 4L))
     }
-    v_date_int <- as.integer(strsplit(v_date_ch, "_")[[1L]])
-    year_from_fname <- v_date_int[1L]
-    month_from_fname <- v_date_int[2L]
     # Second field of first data row is day-of-year
     first_day <- suppressWarnings(
       as.integer(sub("^[^,]+,([^,]+),.*", "\\1", v_lines[1L]))
@@ -244,7 +251,9 @@ read_old_campbell_dat <- function(
       nm <- v_parts[2L]
       if (grepl("^\\d+$", nm)) {
         nm <- "table_id"
-      } else if (nm == "_RTM") {
+      } else if (nm == "_RTM" || grepl("_RTM$", nm)) {
+        # Match both bare "_RTM" and longer variants such as "Day_RTM" or
+        # "Hour_Minute_RTM" used by some .dld files.
         n_rtm_count <- n_rtm_count + 1L
         nm <- if (n_rtm_count == 1L) "day_of_year" else "time_hhmm"
       }

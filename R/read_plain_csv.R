@@ -14,10 +14,12 @@
 ##' @param ... Additional arguments forwarded to \code{data.table::fread},
 ##'   e.g. \code{sep}, \code{na.strings}.
 ##'
-##' @return A \code{data.table} with a \code{TIMESTAMP} column (still in its
-##'   original character or numeric class — conversion to POSIXct happens
-##'   inside \code{\link{metamet}} via \code{time_char_format} in
-##'   \code{dt_meta}).
+##' @return A \code{data.table} with column names exactly as written in the
+##'   file header. No renaming is performed; the caller's \code{dt_meta} must
+##'   use \code{name_dt} values that match the actual column names.
+##'   Downstream metamet functions (\code{metamet_wide_to_long},
+##'   \code{convert_time_char_to_posix}) normalise the time column to
+##'   \code{TIMESTAMP} automatically based on \code{dt_meta}.
 ##'
 ##' @seealso \code{\link{read_ceda_csv}}, \code{\link{read_obs_autodetect}}
 ##'
@@ -30,11 +32,5 @@
 ##'
 ##' @export
 read_plain_csv <- function(fname, ...) {
-  dt <- data.table::fread(fname, ...)
-  # Normalise timestamp column name to TIMESTAMP (case-insensitive match)
-  ts_col <- names(dt)[tolower(names(dt)) == "timestamp"]
-  if (length(ts_col) == 1L && ts_col != "TIMESTAMP") {
-    data.table::setnames(dt, ts_col, "TIMESTAMP")
-  }
-  dt
+  data.table::fread(fname, ...)
 }

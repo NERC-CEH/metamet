@@ -28,26 +28,18 @@ ui <- dashboardPage(
     sidebarMenu(
       id = 'tabs',
       menuItem(
-        "Metamet Maker",
-        tabName = "metadata_maker",
-        icon = icon("table")
-      ),
-      menuItem("Choose file", tabName = "upload", icon = icon("upload")),
-      # with shinyfiles lib
-      shinyFilesButton(
-        id = "file",
-        label = "Open metamet .rds file",
-        title = "Select a file",
-        multiple = FALSE
+        "Import Data",
+        tabName = "import_data",
+        icon = icon("folder-open")
       ),
       menuItem(
-        "Choose date range",
+        "Select date range & QC",
         tabName = "dashboard",
         icon = icon('database')
       ),
-      menuItem("Download", tabName = "download", icon = icon('download')),
+      menuItem("Export", tabName = "download", icon = icon('download')),
       menuItem(
-        "Information",
+        "About",
         tabName = "information",
         icon = icon('info'),
         menuSubItem('Gap-fill methods', tabName = 'gapfill_guide'),
@@ -180,15 +172,28 @@ ui <- dashboardPage(
           )
         ),
       ),
+      # radio button for choosing between metamet maker and existing metamet files
+      tabItem(
+        tabName = "import_data",
+        fluidRow(
+          box(
+            title = "Import Data",
+            status = "success",
+            solidHeader = TRUE,
+            width = 12,
 
-      # upload file tab
-      tabItem(
-        tabName = "upload",
-        verbatimTextOutput("status")
-      ),
-      tabItem(
-        tabName = "metadata_maker",
-        mod_metadata_maker_ui("mm_maker")
+            radioButtons(
+              "import_mode",
+              "Choose how to import data:",
+              choices = c(
+                "Convert file to metamet object" = "maker",
+                "Upload existing metamet file" = "upload"
+              )
+            ),
+
+            uiOutput("import_ui")
+          )
+        )
       ),
       tabItem(
         tabName = 'download',
@@ -315,7 +320,24 @@ server <- function(input, output, session) {
     req(uploaded())
     paste("Loaded file:", basename(uploaded()$fname))
   })
+  # import files and metamet maker
+  output$import_ui <- renderUI({
+    req(input$import_mode)
 
+    if (input$import_mode == "maker") {
+      mod_metadata_maker_ui("mm_maker")
+    } else if (input$import_mode == "upload") {
+      tagList(
+        shinyFilesButton(
+          id = "file",
+          label = "Open metamet .rds file",
+          title = "Select a file",
+          multiple = FALSE
+        ),
+        verbatimTextOutput("status")
+      )
+    }
+  })
   # confirms upload was succesful and then switches to calendar selection
   observeEvent(uploaded(), {
     showNotification(

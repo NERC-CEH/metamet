@@ -18,8 +18,23 @@ import_campbell_data <- function(fname) {
   )
   names(dt) <- header
 
-  if (class(dt$TIMESTAMP)[1] != "POSIXct") {
-    stop(paste("Non-POSIX timestamp in", fname))
+  # If fread could not auto-detect POSIXct (e.g. due to a few corrupted rows
+  # causing the column to be read as character), convert explicitly and drop
+  # the rows that cannot be parsed rather than stopping.
+  if (!inherits(dt$TIMESTAMP, "POSIXct")) {
+    n_before <- nrow(dt)
+    dt[, TIMESTAMP := as.POSIXct(TIMESTAMP,
+      format = "%Y-%m-%d %H:%M:%S", tz = "UTC"
+    )]
+    dt <- dt[!is.na(TIMESTAMP)]
+    n_dropped <- n_before - nrow(dt)
+    if (n_dropped > 0L) {
+      warning(
+        n_dropped, " row(s) with unparseable timestamps dropped in ",
+        basename(fname),
+        call. = FALSE
+      )
+    }
   }
 
   # remove duplicate rows - sometimes occur in the Campbell files

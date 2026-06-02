@@ -14,7 +14,7 @@ import_campbell_data <- function(fname) {
     file = fname,
     skip = 4,
     header = FALSE,
-    na.strings = c("NAN"),
+    na.strings = c("NAN", ""),
     sep = ",",
     fill = TRUE
   )

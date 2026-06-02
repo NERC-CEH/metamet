@@ -759,11 +759,7 @@ server <- function(input, output, session) {
     # missing comment warning for variables that were imputed
     for (v in uploaded()$v_names) {
       rows_var <- mm_qry$dt[
-        name_icos == v
-        & !is.na(qc)
-        & qc != 0L
-        & !is.na(qc_orig)
-        & qc_orig != qc
+        name_icos == v & !is.na(qc) & qc != 0L & !is.na(qc_orig) & qc_orig != qc
       ]
 
       # If no imputed rows then no comment is needed
@@ -782,10 +778,7 @@ server <- function(input, output, session) {
 
     # Identify which rows were invalidated (qc != 0)
     imputed_rows <- mm_qry$dt[
-      !is.na(qc)
-        & qc != 0L
-        & !is.na(qc_orig)
-        & qc_orig != qc
+      !is.na(qc) & qc != 0L & !is.na(qc_orig) & qc_orig != qc
     ]
 
     # update lev2 with mm_qry

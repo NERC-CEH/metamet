@@ -274,7 +274,7 @@ server <- function(input, output, session) {
   # Non-reactive code
   # Format the start and end dates----
   df_proc <- data.frame(
-    start_date = "1995/01/01 00:00",
+    start_date = "1900/01/01 00:00",
     end_date = "2026/12/31 00:00"
   )
   df_proc$start_date <- as.POSIXct(

@@ -3,7 +3,7 @@
 
 test_that("metamet reading from files works", {
   fname_dt <- pkg_extdata(
-    "UK-AMO/UK-AMO_BM_20260126_L03_F02.dat"
+    "UK-AMO/UK-AMo_BM_20260126_L03_F02.dat"
   )
 
   mm_t1 <- metamet(

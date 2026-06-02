@@ -1,7 +1,7 @@
 test_that("applying imputing works for more files", {
-  fname_dt_32 <- pkg_extdata("UK-AMO/UK-AMO_BM_20250822_L03_F02.dat")
-  fname_dt_41 <- pkg_extdata("UK-AMO/UK-AMO_BM_20250822_L04_F01.dat")
-  fname_dt_42 <- pkg_extdata("UK-AMO/UK-AMO_BM_20250822_L04_F02.dat")
+  fname_dt_32 <- pkg_extdata("UK-AMO/UK-AMo_BM_20250822_L03_F02.dat")
+  fname_dt_41 <- pkg_extdata("UK-AMO/UK-AMo_BM_20250822_L04_F01.dat")
+  fname_dt_42 <- pkg_extdata("UK-AMO/UK-AMo_BM_20250822_L04_F02.dat")
   fname_era5 <- pkg_extdata("dt_era5.csv")
 
   mm_32 <- metamet(

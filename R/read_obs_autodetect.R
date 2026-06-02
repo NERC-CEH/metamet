@@ -2,6 +2,18 @@
 #  path = "C:/Users/plevy/Documents/metamet/inst/extdata/UK-AMO/UK-AMo_BM_20260126_L03_F02.dat"
 #  path = "C:/Users/plevy/Documents/metamet/inst/extdata/UK-AMO/UK-AMO_BM_dt_2026.csv"
 
+#' @title read_obs_autodetect
+#' @description Read a single observation file, auto-detecting whether it is a
+#'   Campbell TOA5 `.dat` file or a plain CSV.  Dispatches to
+#'   \code{\link{import_campbell_data}} for TOA5 and \code{data.table::fread}
+#'   otherwise.
+#' @param path Path to the file.
+#' @param campbell_args Named list of extra arguments passed to
+#'   \code{import_campbell_data}.
+#' @param fread_args Named list of extra arguments passed to
+#'   \code{data.table::fread}.
+#' @return A \code{data.table}.
+#' @export
 read_obs_autodetect <- function(
   path,
   campbell_args = list(),

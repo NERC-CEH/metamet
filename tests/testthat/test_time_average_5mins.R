@@ -3,7 +3,7 @@
 
 test_that("metamet time averaging 1-min data to 5-mins works", {
   fname_dt <- pkg_extdata(
-    "UK-AMO/UK-AMO_BM_20250822_L03_F02.dat"
+    "UK-AMO/UK-AMo_BM_20250822_L03_F02.dat"
   )
   fname_era5 <- pkg_extdata("dt_era5.csv")
 

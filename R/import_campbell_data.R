@@ -8,13 +8,15 @@ import_campbell_data <- function(fname) {
     what = character(),
     sep = ","
   )
-  # read in data
+  # read in data; fill=TRUE ensures blank lines (0 fields) are read as all-NA
+  # rows rather than causing fread to stop early.
   dt <- fread(
     file = fname,
     skip = 4,
     header = FALSE,
     na.strings = c("NAN"),
-    sep = ","
+    sep = ",",
+    fill = TRUE
   )
   names(dt) <- header
 

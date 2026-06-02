@@ -39,6 +39,21 @@ import_campbell_data <- function(fname) {
     }
   }
 
+  # Drop rows with implausible years (e.g. "23-04-01" parsed as year 23 from
+  # a partially-corrupted line where "2023-04-01" lost its leading "20").
+  # Year 1900 is a conservative lower bound; any TOA5 data predating it is
+  # certainly a parsing artefact.
+  n_before <- nrow(dt)
+  dt <- dt[!is.na(TIMESTAMP) & data.table::year(TIMESTAMP) >= 1900L]
+  n_bad_year <- n_before - nrow(dt)
+  if (n_bad_year > 0L) {
+    warning(
+      n_bad_year, " row(s) with implausible year (<1900) dropped in ",
+      basename(fname),
+      call. = FALSE
+    )
+  }
+
   # remove duplicate rows - sometimes occur in the Campbell files
   dt <- dt[!duplicated(dt$TIMESTAMP), ]
   # if variable RECORD exists, remove it

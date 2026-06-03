@@ -24,6 +24,10 @@
 apply_qc <- function(mm0) {
   mm <- .ensure_long(data.table::copy(mm0))
 
+  if (!"comment" %in% names(mm$dt)) {
+    mm$dt[, comment := NA_character_]
+  }
+
   # Attach per-variable range limits from dt_meta via var_name
   ranges <- unique(mm$dt_meta[, .(name_dt, range_min, range_max)])
   mm$dt[

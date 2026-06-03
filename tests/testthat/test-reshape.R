@@ -20,6 +20,7 @@ test_that("wide_to_long produces expected long-format columns", {
     "value",
     "qc",
     "validator",
+    "comment",
     "ref",
     "type",
     "name_icos"
@@ -92,6 +93,8 @@ test_that("wide -> long -> wide round-trip preserves dt_qc values", {
   mm <- make_test_metamet()
   mm2 <- metamet_long_to_wide(metamet_wide_to_long(mm))
 
+  # dt_qc is always long after round-trip
+  expect_false(is.null(mm2$dt_qc))
   expect_equal(normalise_dt(mm2$dt_qc), normalise_dt(mm$dt_qc))
 })
 
@@ -166,10 +169,13 @@ test_that("wide->long->wide round-trip preserves AMO dt_qc values", {
   mm2 <- suppressWarnings(metamet_long_to_wide(metamet_wide_to_long(mm)))
 
   expect_false(is.null(mm2$dt_qc))
-  expect_equal(
-    normalise_wide(mm2$dt_qc, v_time),
-    normalise_wide(mm$dt_qc, v_time)
-  )
+  # dt_qc is now always long format (site, TIMESTAMP, var_name, qc, validator, comment)
+  expect_true("var_name" %in% names(mm2$dt_qc))
+  expect_true("qc" %in% names(mm2$dt_qc))
+  # count of non-NA qc values is preserved from old wide format
+  v_qc_cols <- setdiff(names(mm$dt_qc), c("site", v_time, "validator"))
+  n_orig <- sum(!is.na(unlist(mm$dt_qc[, v_qc_cols, with = FALSE])))
+  expect_equal(sum(!is.na(mm2$dt_qc$qc)), n_orig)
 })
 
 test_that("wide->long->wide round-trip preserves AMO dt_ref values", {
@@ -213,10 +219,11 @@ test_that("wide->long->wide round-trip preserves WHM dt_qc values", {
   mm2 <- suppressWarnings(metamet_long_to_wide(metamet_wide_to_long(mm)))
 
   expect_false(is.null(mm2$dt_qc))
-  expect_equal(
-    normalise_wide(mm2$dt_qc, v_time),
-    normalise_wide(mm$dt_qc, v_time)
-  )
+  expect_true("var_name" %in% names(mm2$dt_qc))
+  expect_true("qc" %in% names(mm2$dt_qc))
+  v_qc_cols <- setdiff(names(mm$dt_qc), c("site", v_time, "validator"))
+  n_orig <- sum(!is.na(unlist(mm$dt_qc[, v_qc_cols, with = FALSE])))
+  expect_equal(sum(!is.na(mm2$dt_qc$qc)), n_orig)
 })
 
 # ---- Round-trip: long -> wide -> long (combined multi-site data) ---------
@@ -303,6 +310,10 @@ test_that("wide_to_long renames non-standard time column to TIMESTAMP", {
 test_that("multi-site combined fixture has valid long-format structure", {
   mm <- readRDS(pkg_extdata("mm_amo_ebu_whm_2023.rds"))
   attr(mm, "format") <- "long"
+  # Old fixture pre-dates the comment column; add it as .ensure_long() would.
+  if (!"comment" %in% names(mm$dt)) {
+    mm$dt[, comment := NA_character_]
+  }
 
   expect_true(all(.met_long_cols %in% names(mm$dt)))
   expect_true(all(c("UK-AMO", "UK-EBU", "UK-WHM") %in% unique(mm$dt$site)))

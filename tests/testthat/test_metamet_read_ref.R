@@ -35,9 +35,10 @@ test_that("reading metamet from files with QC works", {
 
   expect_s3_class(mm, "metamet")
   expect_s3_class(mm$dt_qc, "data.table")
-  expect_equal(sum(is.na(mm$dt_qc[, ..time_name])), 0)
-  # qc loses the extra validator column when averaged, so should be same
-  expect_equal(ncol(mm$dt), ncol(mm$dt_qc) - 1)
+  # dt_qc is always long: site, TIMESTAMP, var_name, qc, validator, comment
+  expect_true("var_name" %in% names(mm$dt_qc))
+  expect_true("qc" %in% names(mm$dt_qc))
+  expect_equal(sum(is.na(mm$dt_qc$TIMESTAMP)), 0)
   # should not be any duplicate times
   expect_equal(nrow(mm$dt[duplicated(mm$dt[, ..time_name]), ]), 0)
 })

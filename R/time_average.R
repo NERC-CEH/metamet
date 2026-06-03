@@ -49,20 +49,50 @@ time_average <- function(
 
   # call the function to perform averaging as necessary
   if (!is.null(mm$dt_qc)) {
-    mm$dt_qc <- time_average_dt(
-      mm$dt_qc,
-      avg.time = avg.time,
-      statistic = "median", # use "median" for qc codes
-      first_date = min(mm$dt[, get(time_name)]),
-      last_date = max(mm$dt[, get(time_name)]),
-      time_name = time_name,
-      wd_name = wd_name,
-      ws_name = ws_name,
-      report_end_interval = report_end_interval,
-      extra_rows = extra_rows
-    )
-    # character variables are lost on averaging, but we want to keep them
-    mm$dt_qc[, validator := NA]
+    if ("var_name" %in% names(mm$dt_qc)) {
+      # Long-format dt_qc: pivot to wide, average, pivot back.
+      # Wind direction / speed do not appear as columns here, so pass NULL.
+      f <- stats::as.formula(
+        paste0("site + `", time_name, "` ~ var_name")
+      )
+      dt_qc_wide <- data.table::dcast(mm$dt_qc, f, value.var = "qc")
+      dt_qc_wide <- time_average_dt(
+        dt_qc_wide,
+        avg.time = avg.time,
+        statistic = "median",
+        first_date = min(mm$dt[, get(time_name)]),
+        last_date = max(mm$dt[, get(time_name)]),
+        time_name = time_name,
+        wd_name = NULL,
+        ws_name = NULL,
+        report_end_interval = report_end_interval,
+        extra_rows = extra_rows
+      )
+      mm$dt_qc <- data.table::melt(
+        dt_qc_wide,
+        id.vars = c("site", time_name),
+        variable.name = "var_name",
+        value.name = "qc",
+        variable.factor = FALSE
+      )
+      mm$dt_qc[, validator := NA_character_]
+      mm$dt_qc[, comment := NA_character_]
+    } else {
+      mm$dt_qc <- time_average_dt(
+        mm$dt_qc,
+        avg.time = avg.time,
+        statistic = "median",
+        first_date = min(mm$dt[, get(time_name)]),
+        last_date = max(mm$dt[, get(time_name)]),
+        time_name = time_name,
+        wd_name = wd_name,
+        ws_name = ws_name,
+        report_end_interval = report_end_interval,
+        extra_rows = extra_rows
+      )
+      # character variables are lost on averaging, but we want to keep them
+      mm$dt_qc[, validator := NA]
+    }
   }
 
   if (!is.null(mm$dt_ref)) {

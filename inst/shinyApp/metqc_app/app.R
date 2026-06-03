@@ -163,7 +163,7 @@ ui <- dashboardPage(
                 label = h5("Gap-Filling Method"),
                 choices = gf_choices
               ),
-              uiOutput("qc_comment_box"),
+              uiOutput("comment_box"),
               actionButton("impute", label = "Impute selection"),
               actionButton(
                 "finished_check",
@@ -371,7 +371,7 @@ server <- function(input, output, session) {
 
   v_names_checklist <- reactiveValues()
   v_missing_comments <- reactiveValues()
-  qc_comments <- reactiveValues()
+  comments <- reactiveValues()
 
   # Create a reactive element with the earliest start date
   first_start_date <- reactive({
@@ -597,10 +597,10 @@ server <- function(input, output, session) {
     } else {
       current_var <- input$plotTabs
       # get comment from the UI
-      input_comment <- input$qc_comment
+      input_comment <- input$comment
 
       # store it only now (not on every keystroke)
-      qc_comments[[current_var]] <- input_comment
+      comments[[current_var]] <- input_comment
 
       # store the comment
       row_ids <- selected_state()
@@ -670,19 +670,19 @@ server <- function(input, output, session) {
     v_names_checklist[[input$plotTabs]] <- TRUE
   })
 
-  # dynamic qc_comment box to address each variable that has been imputed
-  output$qc_comment_box <- renderUI({
+  # dynamic comment box for each variable that has been imputed
+  output$comment_box <- renderUI({
     req(input$plotTabs)
     var <- input$plotTabs
 
     # Load existing comment if present
-    existing <- qc_comments[[var]]
+    existing <- comments[[var]]
     if (is.null(existing)) {
       existing <- ""
     }
 
     textAreaInput(
-      "qc_comment",
+      "comment",
       label = paste0("Reason for imputation for ", var, " (optional)"),
       value = existing,
       placeholder = paste("Explain why data for", var, "was changed..."),

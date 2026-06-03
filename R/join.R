@@ -50,9 +50,11 @@ join <- function(mm1, mm2) {
       mm2$dt_qc <- powerjoin::power_full_join(
         mm1$dt_qc,
         mm2$dt_qc,
-        by = c("site", time_name),
+        by = c("site", time_name, "var_name"),
         conflict = powerjoin::coalesce_yx
       )
+    } else if (!is.null(mm1$dt_qc)) {
+      mm2$dt_qc <- mm1$dt_qc
     }
 
     if (!is.null(mm1$dt_ref) && !is.null(mm2$dt_ref)) {

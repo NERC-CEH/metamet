@@ -296,15 +296,6 @@ server <- function(input, output, session) {
     if (!identical(attr(mm, "format"), "long")) {
       mm <- metamet_reshape(mm, "long")
     }
-    # restore qc_comment if present
-    if (!is.null(mm$dt_qc_comment)) {
-      mm$dt <- merge(
-        mm$dt,
-        mm$dt_qc_comment,
-        by = c("site", "TIMESTAMP", "name_icos"),
-        all.x = TRUE
-      )
-    }
     v_names <- unique(mm$dt_meta[type != "time" & type != "site", name_icos])
     date_of_first_new_record <- mm$dt[, min(TIMESTAMP, na.rm = TRUE)]
     date_of_last_new_record <- mm$dt[, max(TIMESTAMP, na.rm = TRUE)]
@@ -606,20 +597,20 @@ server <- function(input, output, session) {
     } else {
       current_var <- input$plotTabs
       # get comment from the UI
-      comment <- input$qc_comment
+      input_comment <- input$qc_comment
 
       # store it only now (not on every keystroke)
-      qc_comments[[current_var]] <- comment
+      qc_comments[[current_var]] <- input_comment
 
       # store the comment
       row_ids <- selected_state()
-      if (!"qc_comment" %in% names(mm_qry$dt)) {
-        mm_qry$dt[, qc_comment := NA_character_]
+      if (!"comment" %in% names(mm_qry$dt)) {
+        mm_qry$dt[, comment := NA_character_]
       }
 
       # only write comment to data if provided (makes it optional)
-      if (!is.null(comment) && comment != "") {
-        mm_qry$dt[row_name %in% row_ids, qc_comment := comment]
+      if (!is.null(input_comment) && input_comment != "") {
+        mm_qry$dt[row_name %in% row_ids, comment := input_comment]
       }
 
       mm_qry <<- metamet::impute(
@@ -769,7 +760,7 @@ server <- function(input, output, session) {
       }
 
       # If imputed rows exist then require comments
-      if (any(is.na(rows_var$qc_comment) | rows_var$qc_comment == "")) {
+      if (any(is.na(rows_var$comment) | rows_var$comment == "")) {
         v_missing_comments[[v]] <- TRUE
       } else {
         v_missing_comments[[v]] <- FALSE

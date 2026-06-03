@@ -1,4 +1,5 @@
 library(here)
+library(data.table)
 library(sloop)
 library(devtools)
 library(usethis)
@@ -230,3 +231,14 @@ mm_amo$dt_ref[, which(duplicated(names(mm_amo$dt_ref))) := NULL]
 mmj <- join(mm_amo, mm)
 names(mm)
 names(mm_amo)
+
+mmn <- readRDS("C:/Users/plevy/Downloads/UK-EBU_20260515_metamet.rds")
+mmn$dt
+data.table::fwrite(
+  mmn$dt_meta,
+  file = "inst/extdata/UK-EBU/UK-EBU_BM_dt_meta.csv"
+)
+dt <- fread("inst/extdata/UK-EBU/UK-EBU_BM_dt_2023.csv")
+summary(mmn$dt)
+dim(dt)
+difftime(dt[1, TIMESTAMP], dt[nrow(dt), TIMESTAMP])

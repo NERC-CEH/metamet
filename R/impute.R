@@ -125,7 +125,8 @@ impute <- function(
   x = NULL,
   lat = 55.792,
   lon = -3.243,
-  plot_graph = TRUE
+  plot_graph = TRUE,
+  comment = NULL
 ) {
   if (!identical(attr(mm, "format"), "long")) {
     stop(
@@ -213,6 +214,9 @@ impute <- function(
     if (method == "nightzero" | method == "noneg" | method == "zero") {
       dt[is_selected & y == name_icos, value := 0]
       dt[y == name_icos & is_selected == TRUE, qc := ..qc]
+      if (!is.null(comment) && nzchar(comment)) {
+        dt[y == name_icos & is_selected == TRUE, comment := ..comment]
+      }
     } else {
       # model-fitting methods: fit a separate model per replicate (var_name)
       v_var_names_selected <- unique(dt[
@@ -283,6 +287,12 @@ impute <- function(
         }
 
         dt[name_icos == y & var_name == vn & is_selected == TRUE, qc := ..qc]
+        if (!is.null(comment) && nzchar(comment)) {
+          dt[
+            name_icos == y & var_name == vn & is_selected == TRUE,
+            comment := ..comment
+          ]
+        }
       }
     }
 

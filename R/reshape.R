@@ -7,6 +7,7 @@
   "value",
   "qc",
   "validator",
+  "comment",
   "ref",
   "type",
   "name_icos"
@@ -84,38 +85,42 @@ metamet_wide_to_long <- function(mm) {
 
   if (!is.null(mm$dt_qc)) {
     .assert_is_dt(mm$dt_qc)
-    dt_qc <- data.table::melt(
-      mm$dt_qc,
-      id.vars = c("site", time_name, "validator"),
-      variable.name = "var_name",
-      value.name = "qc"
-    )
-    if (time_name != "TIMESTAMP") {
+    dt_qc <- if (!"var_name" %in% names(mm$dt_qc)) {
+      # Backward compat: old wide format (one column per variable for qc codes)
+      id_cols <- intersect(c("site", time_name, "validator"), names(mm$dt_qc))
+      dt_qc_melt <- data.table::melt(
+        mm$dt_qc,
+        id.vars = id_cols,
+        variable.name = "var_name",
+        value.name = "qc"
+      )
+      if (!"validator" %in% names(dt_qc_melt)) {
+        dt_qc_melt[, validator := NA_character_]
+      }
+      dt_qc_melt[, comment := NA_character_]
+      dt_qc_melt
+    } else {
+      mm$dt_qc
+    }
+    if (time_name != "TIMESTAMP" && time_name %in% names(dt_qc)) {
       data.table::setnames(dt_qc, time_name, "TIMESTAMP")
     }
-    data.table::setkeyv(dt_qc, .met_keys)
-    mm$dt[dt_qc, `:=`(qc = qc, validator = validator)]
+    if (!"comment" %in% names(dt_qc)) {
+      dt_qc[, comment := NA_character_]
+    }
+    dt_qc[, var_name := as.character(var_name)]
+    mm$dt[
+      dt_qc,
+      `:=`(qc = qc, validator = validator, comment = comment),
+      on = .met_keys
+    ]
     mm$dt_qc <- NULL
   } else {
-    mm$dt[, `:=`(qc = NA_real_, validator = NA_character_)]
-  }
-
-  if (!is.null(mm$dt_qc_comment)) {
-    .assert_is_dt(mm$dt_qc_comment)
-    dt_comment <- data.table::melt(
-      mm$dt_qc_comment,
-      id.vars = c("site", time_name),
-      variable.name = "var_name",
-      value.name = "qc_comment"
-    )
-    if (time_name != "TIMESTAMP") {
-      data.table::setnames(dt_comment, time_name, "TIMESTAMP")
-    }
-    data.table::setkeyv(dt_comment, .met_keys)
-    mm$dt[dt_comment, qc_comment := qc_comment]
-    mm$dt_qc_comment <- NULL
-  } else {
-    mm$dt[, qc_comment := NA_character_]
+    mm$dt[, `:=`(
+      qc = NA_real_,
+      validator = NA_character_,
+      comment = NA_character_
+    )]
   }
 
   if (!is.null(mm$dt_ref)) {
@@ -143,6 +148,10 @@ metamet_wide_to_long <- function(mm) {
 
 #' @keywords internal
 metamet_long_to_wide <- function(mm) {
+  # Old long-format fixtures may lack the comment column; add it before asserting.
+  if (!"comment" %in% names(mm$dt)) {
+    mm$dt[, comment := NA_character_]
+  }
   .assert_is_metamet_long(mm$dt)
 
   dt_long <- data.table::copy(mm$dt)
@@ -153,16 +162,18 @@ metamet_long_to_wide <- function(mm) {
     value.var = "value"
   )
 
-  dt_qc_long <- dt_long[!is.na(qc), .(site, TIMESTAMP, var_name, validator, qc)]
-  mm$dt_qc <- if (nrow(dt_qc_long)) {
-    data.table::dcast(
-      dt_qc_long,
-      site + TIMESTAMP + validator ~ var_name,
-      value.var = "qc"
+  dt_qc_long <- dt_long[
+    !is.na(qc),
+    .(
+      site,
+      TIMESTAMP,
+      var_name = as.character(var_name),
+      qc,
+      validator,
+      comment
     )
-  } else {
-    NULL
-  }
+  ]
+  mm$dt_qc <- if (nrow(dt_qc_long)) dt_qc_long else NULL
 
   dt_ref_long <- dt_long[!is.na(ref), .(site, TIMESTAMP, var_name, ref)]
   mm$dt_ref <- if (nrow(dt_ref_long)) {
@@ -173,26 +184,6 @@ metamet_long_to_wide <- function(mm) {
     )
   } else {
     NULL
-  }
-
-  # if qc_comment is present, it may contain non-NA values for some variables and NA - optional
-  if ("qc_comment" %in% names(dt_long)) {
-    dt_comment_long <- dt_long[
-      !is.na(qc_comment),
-      .(site, TIMESTAMP, var_name, qc_comment)
-    ]
-
-    mm$dt_qc_comment <- if (nrow(dt_comment_long)) {
-      data.table::dcast(
-        dt_comment_long,
-        site + TIMESTAMP ~ var_name,
-        value.var = "qc_comment"
-      )
-    } else {
-      NULL
-    }
-  } else {
-    mm$dt_qc_comment <- NULL
   }
 
   # dcast always produces a TIMESTAMP column; normalise dt_meta to match.
@@ -285,9 +276,8 @@ rbind_metamet <- function(mm, l_dt, l_dt_meta, l_dt_site) {
     mm <- metamet_reshape(mm, "long")
   }
 
-  # ensure qc_comment exists in long format
-  if (!"qc_comment" %in% names(mm$dt)) {
-    mm$dt[, qc_comment := NA_character_]
+  if (!"comment" %in% names(mm$dt)) {
+    mm$dt[, comment := NA_character_]
   }
 
   mm

@@ -39,15 +39,19 @@ test_that("reading metamet from files with QC works", {
 
   expect_s3_class(mm_joined, "metamet")
   expect_s3_class(mm_joined$dt_qc, "data.table")
-  expect_equal(sum(is.na(mm_joined$dt_qc[, ..time_name])), 0)
-  expect_equal(nrow(mm1$dt) + nrow(mm2$dt), nrow(mm_joined$dt_qc))
-  # qc loses the extra validator column when averaged, so should be same
-  expect_equal(ncol(mm_joined$dt), ncol(mm_joined$dt_qc) - 1)
+  # dt_qc is always long: columns are site, TIMESTAMP, var_name, qc, validator, comment
+  expect_true("var_name" %in% names(mm_joined$dt_qc))
+  expect_true("qc" %in% names(mm_joined$dt_qc))
+  expect_true("comment" %in% names(mm_joined$dt_qc))
+  expect_equal(sum(is.na(mm_joined$dt_qc$TIMESTAMP)), 0)
   # should not be any duplicate times
   expect_equal(nrow(mm_joined$dt[duplicated(mm_joined$dt[, ..time_name]), ]), 0)
   # do we see the same precip qc codes in the original and joined data?
   expect_setequal(
-    unique(c(mm_hh_1$dt_qc$P_12_1_1, mm_hh_2$dt_qc$P_12_1_1)),
-    unique(mm_joined$dt_qc$P_12_1_1)
+    unique(c(
+      mm_hh_1$dt_qc[var_name == "P_12_1_1", qc],
+      mm_hh_2$dt_qc[var_name == "P_12_1_1", qc]
+    )),
+    unique(mm_joined$dt_qc[var_name == "P_12_1_1", qc])
   )
 })

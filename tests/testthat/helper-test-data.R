@@ -29,9 +29,10 @@ make_test_metamet <- function(include_qc = TRUE, include_ref = TRUE) {
     data.table::data.table(
       site = "A",
       TIMESTAMP = ts,
+      var_name = c("temp", "flux"),
+      qc = c(0, 1),
       validator = "auto",
-      temp = 0,
-      flux = 1
+      comment = NA_character_
     )
   } else {
     NULL

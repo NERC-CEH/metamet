@@ -64,7 +64,8 @@ test_that("subsetting by date works", {
   expect_s3_class(mm_s, "metamet")
   expect_s3_class(mm_s$dt_qc, "data.table")
   expect_equal(nrow(mm_s$dt), 48)
-  expect_equal(nrow(mm_s$dt_qc), 48)
+  # dt_qc is long (one row per var per timestamp); check unique timestamps = 48
+  expect_equal(data.table::uniqueN(mm_s$dt_qc[[time_name]]), 48)
   expect_equal(nrow(mm_s$dt_ref), 48)
 
   # should not be any duplicate times

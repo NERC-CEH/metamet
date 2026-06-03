@@ -242,29 +242,119 @@ metamet_reshape <- function(mm, format = c("wide", "long")) {
 
 # ---- Combining multiple metamet objects --------------------------------
 
-#' Combine lists of metamet data tables into a single metamet object
+#' Combine metamet objects or data-table lists into a single metamet object
 #'
-#' Row-binds lists of data tables into an existing `metamet` object. Typically
-#' used to merge data from multiple sites or time periods.
+#' Two calling conventions are supported:
 #'
-#' @param mm A `metamet` object to receive the combined tables.
-#' @param l_dt A list of data tables to row-bind into `mm$dt`.
-#' @param l_dt_meta A list of metadata tables to row-bind into `mm$dt_meta`.
-#' @param l_dt_site A list of site tables to row-bind into `mm$dt_site`.
+#' **List of `metamet` objects** (preferred):
+#' `rbind_metamet(list(mm1, mm2, mm3))`
+#' All objects must have the same `format` attribute (`"wide"` or `"long"`).
+#' For **long-format** objects the combination is a plain `rbindlist` — rows
+#' from different sites never share the same
+#' `(site, TIMESTAMP, var_name)` key, so no join logic is needed.
+#' For **wide-format** objects `Reduce(join, l_mm)` is used, which applies
+#' `power_full_join` with `coalesce_yx` for correct handling of overlapping
+#' timestamps within a site.
 #'
-#' @return The modified `metamet` object.
+#' **Legacy four-argument form** (kept for backward compatibility):
+#' `rbind_metamet(mm, l_dt, l_dt_meta, l_dt_site)`
+#' Row-binds lists of individual data tables into an existing `metamet` object.
+#'
+#' @param mm_or_list Either a list of `metamet` objects (new interface) or a
+#'   single `metamet` object to receive combined tables (legacy interface).
+#' @param l_dt (Legacy) A list of data tables to row-bind into `mm$dt`.
+#' @param l_dt_meta (Legacy) A list of metadata tables to row-bind into
+#'   `mm$dt_meta`.
+#' @param l_dt_site (Legacy) A list of site tables to row-bind into
+#'   `mm$dt_site`.
+#'
+#' @return A `metamet` object with combined data.
 #'
 #' @examples
 #' \dontrun{
-#' mm <- rbind_metamet(mm, list(dt1, dt2), list(meta1, meta2), list(site1, site2))
+#' # New interface — list of metamet objects:
+#' mm_all <- rbind_metamet(list(mm_amo_qc, mm_buc_qc, mm_ebu_qc, mm_whm_qc))
+#'
+#' # Legacy interface:
+#' mm <- rbind_metamet(
+#'   mm,
+#'   list(dt1, dt2), list(meta1, meta2), list(site1, site2)
+#' )
 #' }
 #'
 #' @export
-rbind_metamet <- function(mm, l_dt, l_dt_meta, l_dt_site) {
+rbind_metamet <- function(mm_or_list, l_dt, l_dt_meta, l_dt_site) {
+  # ---- New interface: list of metamet objects --------------------------------
+  if (
+    is.list(mm_or_list) &&
+      length(mm_or_list) > 0L &&
+      inherits(mm_or_list[[1L]], "metamet")
+  ) {
+    return(.rbind_metamet_list(mm_or_list))
+  }
+  # ---- Legacy interface: (mm, l_dt, l_dt_meta, l_dt_site) ------------------
+  mm <- mm_or_list
   mm$dt <- data.table::rbindlist(l_dt, fill = TRUE)
   mm$dt_meta <- data.table::rbindlist(l_dt_meta, fill = TRUE)
   mm$dt_site <- data.table::rbindlist(l_dt_site, fill = TRUE)
   mm
+}
+
+# ---- Internal worker -------------------------------------------------------
+
+.rbind_metamet_list <- function(l_mm) {
+  l_mm <- Filter(Negate(is.null), l_mm)
+  if (length(l_mm) == 0L) {
+    return(NULL)
+  }
+  if (length(l_mm) == 1L) {
+    return(l_mm[[1L]])
+  }
+
+  # Require consistent format across all objects
+  v_fmts <- vapply(
+    l_mm,
+    function(mm) {
+      fmt <- attr(mm, "format", exact = TRUE)
+      if (is.null(fmt)) "wide" else fmt
+    },
+    character(1L)
+  )
+
+  if (length(unique(v_fmts)) != 1L) {
+    stop(
+      "All metamet objects must have the same format ('wide' or 'long'); ",
+      "found: ",
+      paste(sort(unique(v_fmts)), collapse = ", "),
+      call. = FALSE
+    )
+  }
+  fmt <- v_fmts[1L]
+
+  .rbind_slot <- function(slot) {
+    l <- Filter(Negate(is.null), lapply(l_mm, `[[`, slot))
+    if (length(l) == 0L) {
+      return(NULL)
+    }
+    data.table::rbindlist(l, fill = TRUE, use.names = TRUE)
+  }
+
+  if (fmt == "long") {
+    # Long format: pure union via rbindlist — no key overlap possible across
+    # sites, so power_full_join overhead is unnecessary.
+    mm_out <- l_mm[[1L]]
+    mm_out$dt <- .rbind_slot("dt")
+    mm_out$dt_meta <- unique(.rbind_slot("dt_meta"), by = "name_dt")
+    mm_out$dt_site <- .rbind_slot("dt_site")
+    if (!is.null(l_mm[[1L]]$dt_qc)) {
+      mm_out$dt_qc <- .rbind_slot("dt_qc")
+    }
+    attr(mm_out, "format") <- "long"
+    return(mm_out)
+  }
+
+  # Wide format: use join() for coalesce semantics on overlapping timestamps
+  Reduce(join, l_mm)
 }
 
 # ---- Format coercion helpers -------------------------------------------

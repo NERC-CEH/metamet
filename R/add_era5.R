@@ -59,6 +59,10 @@ add_era5 <- function(
   mm <- rename_era5(mm)
 
   time_name <- mm$dt_meta[type == "time", name_dt]
+  # Drop any NA-timestamp rows and sort so that row[1]/row[2] give a valid
+  # interval regardless of how the caller built the object.
+  mm$dt <- mm$dt[!is.na(get(time_name))]
+  data.table::setorderv(mm$dt, time_name)
   # make sure time series is complete without gaps in time variable
   mm$dt_ref <- pad_data(mm$dt_ref, time_name = time_name)
 

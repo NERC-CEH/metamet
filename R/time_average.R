@@ -38,6 +38,11 @@ time_average <- function(
 
   # get the name and format of the time, precip, ws & wd variables
   time_name <- mm$dt_meta[type == "time", name_dt]
+
+  # Drop NA-timestamp rows and sort — openair::timeAverage fails with NAs in
+  # the date column (any(dst(...)) returns NA instead of TRUE/FALSE).
+  mm$dt <- mm$dt[!is.na(get(time_name))]
+  data.table::setorderv(mm$dt, time_name)
   precip_name <- mm$dt_meta[type == "precipitation", name_dt]
   wd_name <- mm$dt_meta[type == "wind direction", name_dt]
   ws_name <- mm$dt_meta[type == "wind speed" | type == "windspeed", name_dt]

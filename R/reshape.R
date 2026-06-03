@@ -304,19 +304,28 @@ rbind_metamet <- function(mm_or_list, l_dt, l_dt_meta, l_dt_site) {
 
 .rbind_metamet_list <- function(l_mm) {
   l_mm <- Filter(Negate(is.null), l_mm)
-  if (length(l_mm) == 0L) return(NULL)
-  if (length(l_mm) == 1L) return(l_mm[[1L]])
+  if (length(l_mm) == 0L) {
+    return(NULL)
+  }
+  if (length(l_mm) == 1L) {
+    return(l_mm[[1L]])
+  }
 
   # Require consistent format across all objects
-  v_fmts <- vapply(l_mm, function(mm) {
-    fmt <- attr(mm, "format", exact = TRUE)
-    if (is.null(fmt)) "wide" else fmt
-  }, character(1L))
+  v_fmts <- vapply(
+    l_mm,
+    function(mm) {
+      fmt <- attr(mm, "format", exact = TRUE)
+      if (is.null(fmt)) "wide" else fmt
+    },
+    character(1L)
+  )
 
   if (length(unique(v_fmts)) != 1L) {
     stop(
       "All metamet objects must have the same format ('wide' or 'long'); ",
-      "found: ", paste(sort(unique(v_fmts)), collapse = ", "),
+      "found: ",
+      paste(sort(unique(v_fmts)), collapse = ", "),
       call. = FALSE
     )
   }
@@ -324,7 +333,9 @@ rbind_metamet <- function(mm_or_list, l_dt, l_dt_meta, l_dt_site) {
 
   .rbind_slot <- function(slot) {
     l <- Filter(Negate(is.null), lapply(l_mm, `[[`, slot))
-    if (length(l) == 0L) return(NULL)
+    if (length(l) == 0L) {
+      return(NULL)
+    }
     data.table::rbindlist(l, fill = TRUE, use.names = TRUE)
   }
 

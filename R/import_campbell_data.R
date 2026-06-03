@@ -25,14 +25,19 @@ import_campbell_data <- function(fname) {
   # the rows that cannot be parsed rather than stopping.
   if (!inherits(dt$TIMESTAMP, "POSIXct")) {
     n_before <- nrow(dt)
-    dt[, TIMESTAMP := as.POSIXct(TIMESTAMP,
-      format = "%Y-%m-%d %H:%M:%S", tz = "UTC"
-    )]
+    dt[,
+      TIMESTAMP := as.POSIXct(
+        TIMESTAMP,
+        format = "%Y-%m-%d %H:%M:%S",
+        tz = "UTC"
+      )
+    ]
     dt <- dt[!is.na(TIMESTAMP)]
     n_dropped <- n_before - nrow(dt)
     if (n_dropped > 0L) {
       warning(
-        n_dropped, " row(s) with unparseable timestamps dropped in ",
+        n_dropped,
+        " row(s) with unparseable timestamps dropped in ",
         basename(fname),
         call. = FALSE
       )
@@ -48,7 +53,8 @@ import_campbell_data <- function(fname) {
   n_bad_year <- n_before - nrow(dt)
   if (n_bad_year > 0L) {
     warning(
-      n_bad_year, " row(s) with implausible year (<1900) dropped in ",
+      n_bad_year,
+      " row(s) with implausible year (<1900) dropped in ",
       basename(fname),
       call. = FALSE
     )

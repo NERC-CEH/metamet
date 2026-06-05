@@ -32,7 +32,11 @@ ui <- dashboardPage(
         tabName = "metadata_maker",
         icon = icon("table")
       ),
-      menuItem("Open existing Metamet object", tabName = "upload", icon = icon("upload")),
+      menuItem(
+        "Open existing Metamet object",
+        tabName = "upload",
+        icon = icon("upload")
+      ),
       menuItem(
         "Select date range and QA/QC",
         tabName = "dashboard",

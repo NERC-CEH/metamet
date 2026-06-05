@@ -28,18 +28,19 @@ ui <- dashboardPage(
     sidebarMenu(
       id = 'tabs',
       menuItem(
-        "Import Data",
-        tabName = "import_data",
-        icon = icon("folder-open")
+        "Create new Metamet object",
+        tabName = "metadata_maker",
+        icon = icon("table")
       ),
+      menuItem("Open existing Metamet object", tabName = "upload", icon = icon("upload")),
       menuItem(
-        "Select date range & QC",
+        "Select date range and QA/QC",
         tabName = "dashboard",
         icon = icon('database')
       ),
-      menuItem("Export", tabName = "download", icon = icon('download')),
+      menuItem("Download processed data", tabName = "download", icon = icon('download')),
       menuItem(
-        "About",
+        "Help and Documentation",
         tabName = "information",
         icon = icon('info'),
         menuSubItem('Gap-fill methods', tabName = 'gapfill_guide'),
@@ -148,12 +149,14 @@ ui <- dashboardPage(
                 value = 3,
                 step = 0.5
               ),
+              uiOutput("missing_comment_banner"),
               shinycssloaders::withSpinner(uiOutput("mytabs")),
               selectInput(
                 "select_imputation",
                 label = h5("Gap-Filling Method"),
                 choices = gf_choices
               ),
+              uiOutput("comment_box"),
               actionButton("impute", label = "Impute selection"),
               actionButton(
                 "finished_check",
@@ -172,28 +175,23 @@ ui <- dashboardPage(
           )
         ),
       ),
-      # radio button for choosing between metamet maker and existing metamet files
+
+      # upload file tab
       tabItem(
-        tabName = "import_data",
-        fluidRow(
-          box(
-            title = "Import Data",
-            status = "success",
-            solidHeader = TRUE,
-            width = 12,
-
-            radioButtons(
-              "import_mode",
-              "Choose how to import data:",
-              choices = c(
-                "Convert file to metamet object" = "maker",
-                "Upload existing metamet file" = "upload"
-              )
-            ),
-
-            uiOutput("import_ui")
-          )
-        )
+        tabName = "upload",
+        h4("Upload an existing metamet .rds file"),
+        shinyFilesButton(
+          id = "file",
+          label = "Browse for .rds file",
+          title = "Select a file",
+          multiple = FALSE
+        ),
+        br(),
+        verbatimTextOutput("status")
+      ),
+      tabItem(
+        tabName = "metadata_maker",
+        mod_metadata_maker_ui("mm_maker")
       ),
       tabItem(
         tabName = 'download',
@@ -279,7 +277,7 @@ server <- function(input, output, session) {
   # Non-reactive code
   # Format the start and end dates----
   df_proc <- data.frame(
-    start_date = "1995/01/01 00:00",
+    start_date = "1900/01/01 00:00",
     end_date = "2026/12/31 00:00"
   )
   df_proc$start_date <- as.POSIXct(
@@ -320,24 +318,7 @@ server <- function(input, output, session) {
     req(uploaded())
     paste("Loaded file:", basename(uploaded()$fname))
   })
-  # import files and metamet maker
-  output$import_ui <- renderUI({
-    req(input$import_mode)
 
-    if (input$import_mode == "maker") {
-      mod_metadata_maker_ui("mm_maker")
-    } else if (input$import_mode == "upload") {
-      tagList(
-        shinyFilesButton(
-          id = "file",
-          label = "Open metamet .rds file",
-          title = "Select a file",
-          multiple = FALSE
-        ),
-        verbatimTextOutput("status")
-      )
-    }
-  })
   # confirms upload was succesful and then switches to calendar selection
   observeEvent(uploaded(), {
     showNotification(
@@ -390,6 +371,8 @@ server <- function(input, output, session) {
   disable('compare_vars')
 
   v_names_checklist <- reactiveValues()
+  v_missing_comments <- reactiveValues()
+  comments <- reactiveValues()
 
   # Create a reactive element with the earliest start date
   first_start_date <- reactive({
@@ -507,6 +490,10 @@ server <- function(input, output, session) {
     mm_qry$dt[, row_name := as.factor(rownames(mm_qry$dt))]
     mm_qry$dt$datect_num <<- as.numeric(mm_qry$dt$TIMESTAMP)
 
+    if (!"qc_orig" %in% names(mm_qry$dt)) {
+      mm_qry$dt[, qc_orig := qc]
+    }
+
     # Add a tab to the plotting panel for each variable that has been selected by the user.
     output$mytabs <- renderUI({
       my_tabs <- lapply(paste(uploaded()$v_names), function(i) {
@@ -517,9 +504,13 @@ server <- function(input, output, session) {
           tags$style(HTML(paste0(
             '.tabbable > .nav > li > a[data-value=',
             i,
-            '] {border: transparent;background-color:',
-            ifelse(v_names_checklist[[i]] == TRUE, '#bcbcbc', 'transparent'),
-            ';}'
+            '] {',
+            if (v_names_checklist[[i]] == TRUE) {
+              'background-color:#bcbcbc;' # finished checking
+            } else {
+              'background-color:transparent;'
+            },
+            '}'
           ))),
           if (length(replicates) > 1L) {
             checkboxGroupInput(
@@ -605,6 +596,24 @@ server <- function(input, output, session) {
     if (is.null(selected_state())) {
       shinyjs::alert("Please select a point to impute.")
     } else {
+      current_var <- input$plotTabs
+      # get comment from the UI
+      input_comment <- input$comment
+
+      # store it only now (not on every keystroke)
+      comments[[current_var]] <- input_comment
+
+      # store the comment
+      row_ids <- selected_state()
+      if (!"comment" %in% names(mm_qry$dt)) {
+        mm_qry$dt[, comment := NA_character_]
+      }
+
+      # only write comment to data if provided (makes it optional)
+      if (!is.null(input_comment) && input_comment != "") {
+        mm_qry$dt[row_name %in% row_ids, comment := input_comment]
+      }
+
       mm_qry <<- metamet::impute(
         v_y = input$plotTabs,
         mm = mm_qry,
@@ -660,6 +669,27 @@ server <- function(input, output, session) {
   observeEvent(input$finished_check, {
     # Insert validation flag for date range here
     v_names_checklist[[input$plotTabs]] <- TRUE
+  })
+
+  # dynamic comment box for each variable that has been imputed
+  output$comment_box <- renderUI({
+    req(input$plotTabs)
+    var <- input$plotTabs
+
+    # Load existing comment if present
+    existing <- comments[[var]]
+    if (is.null(existing)) {
+      existing <- ""
+    }
+
+    textAreaInput(
+      "comment",
+      label = paste0("Reason for imputation for ", var, " (optional)"),
+      value = existing,
+      placeholder = paste("Explain why data for", var, "was changed..."),
+      width = "100%",
+      rows = 3
+    )
   })
 
   output$download_data <- downloadHandler(
@@ -718,15 +748,43 @@ server <- function(input, output, session) {
     shinyjs::disable("submitchanges")
     shinyjs::disable("edit_table_cols")
 
+    # missing comment warning for variables that were imputed
+    for (v in uploaded()$v_names) {
+      rows_var <- mm_qry$dt[
+        name_icos == v & !is.na(qc) & qc != 0L & !is.na(qc_orig) & qc_orig != qc
+      ]
+
+      # If no imputed rows then no comment is needed
+      if (nrow(rows_var) == 0) {
+        v_missing_comments[[v]] <- FALSE
+        next
+      }
+
+      # If imputed rows exist then require comments
+      if (any(is.na(rows_var$comment) | rows_var$comment == "")) {
+        v_missing_comments[[v]] <- TRUE
+      } else {
+        v_missing_comments[[v]] <- FALSE
+      }
+    }
+
+    # Identify which rows were invalidated (qc != 0)
+    imputed_rows <- mm_qry$dt[
+      !is.na(qc) & qc != 0L & !is.na(qc_orig) & qc_orig != qc
+    ]
+
     # update lev2 with mm_qry
     # update validator on imputed rows (qc != 0 means imputed or flagged)
     mm_qry$dt[!is.na(qc) & qc != 0L, validator := username]
 
-    # drop app-internal temporaries before joining back to the full dataset
-    mm_qry$dt[, c("row_name", "datect_num") := NULL]
+    # Make a copy for saving, so the app keeps row_name for plotting
+    mm_qry_save <- data.table::copy(mm_qry)
 
-    # overwrite existing data with changes in query
-    mm <- join(uploaded()$mm, mm_qry)
+    # Remove internal columns ONLY from the saved copy
+    mm_qry_save$dt[, c("row_name", "datect_num") := NULL]
+
+    # Overwrite existing data with changes in query
+    mm <- join(uploaded()$mm, mm_qry_save)
 
     fname <- uploaded()$fname
     print(uploaded()$fname)

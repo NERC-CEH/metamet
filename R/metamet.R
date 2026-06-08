@@ -52,6 +52,26 @@ new_metamet <- function(
   # should this be ..site_id?
   dt[, site := as.character(site_id)]
   if (!is.null(dt_qc)) {
+    # Convert wide-format dt_qc (one column per variable) to always-long format
+    if (
+      !is.null(dt_meta) &&
+        data.table::is.data.table(dt_meta) &&
+        "type" %in% names(dt_meta) &&
+        !"var_name" %in% names(dt_qc)
+    ) {
+      time_nm <- dt_meta[type == "time", name_dt][1L]
+      id_cols <- intersect(c("site", time_nm, "validator"), names(dt_qc))
+      dt_qc <- data.table::melt(
+        dt_qc,
+        id.vars = id_cols,
+        variable.name = "var_name",
+        value.name = "qc"
+      )
+      if (!"validator" %in% names(dt_qc)) {
+        dt_qc[, validator := NA_character_]
+      }
+      if (!"comment" %in% names(dt_qc)) dt_qc[, comment := NA_character_]
+    }
     dt_qc[, site := as.character(site_id)]
   }
   if (!is.null(dt_ref)) {
@@ -332,9 +352,9 @@ restrict <- function(mm) {
   v_name_dt <- v_name_dt[v_name_dt %in% v_name_meta]
   mm$dt <- mm$dt[, ..v_name_dt]
   # possibly subset these based on time in dt but time is just a character here
-  # qc table has an extra column for the name of the validator
+  # dt_qc is long format: filter rows to variables present in dt
   if (!is.null(mm$dt_qc)) {
-    mm$dt_qc <- mm$dt_qc[, c(..v_name_dt, "validator")]
+    mm$dt_qc <- mm$dt_qc[var_name %in% v_name_dt]
   }
   if (!is.null(mm$dt_ref)) {
     mm$dt_ref <- mm$dt_ref[, ..v_name_dt]

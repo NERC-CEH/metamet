@@ -2,29 +2,53 @@
 % Please edit documentation in R/reshape.R
 \name{rbind_metamet}
 \alias{rbind_metamet}
-\title{Combine lists of metamet data tables into a single metamet object}
+\title{Combine metamet objects or data-table lists into a single metamet object}
 \usage{
-rbind_metamet(mm, l_dt, l_dt_meta, l_dt_site)
+rbind_metamet(mm_or_list, l_dt, l_dt_meta, l_dt_site)
 }
 \arguments{
-\item{mm}{A `metamet` object to receive the combined tables.}
+\item{mm_or_list}{Either a list of `metamet` objects (new interface) or a
+single `metamet` object to receive combined tables (legacy interface).}
 
-\item{l_dt}{A list of data tables to row-bind into `mm$dt`.}
+\item{l_dt}{(Legacy) A list of data tables to row-bind into `mm$dt`.}
 
-\item{l_dt_meta}{A list of metadata tables to row-bind into `mm$dt_meta`.}
+\item{l_dt_meta}{(Legacy) A list of metadata tables to row-bind into
+`mm$dt_meta`.}
 
-\item{l_dt_site}{A list of site tables to row-bind into `mm$dt_site`.}
+\item{l_dt_site}{(Legacy) A list of site tables to row-bind into
+`mm$dt_site`.}
 }
 \value{
-The modified `metamet` object.
+A `metamet` object with combined data.
 }
 \description{
-Row-binds lists of data tables into an existing `metamet` object. Typically
-used to merge data from multiple sites or time periods.
+Two calling conventions are supported:
+}
+\details{
+**List of `metamet` objects** (preferred):
+`rbind_metamet(list(mm1, mm2, mm3))`
+All objects must have the same `format` attribute (`"wide"` or `"long"`).
+For **long-format** objects the combination is a plain `rbindlist` — rows
+from different sites never share the same
+`(site, TIMESTAMP, var_name)` key, so no join logic is needed.
+For **wide-format** objects `Reduce(join, l_mm)` is used, which applies
+`power_full_join` with `coalesce_yx` for correct handling of overlapping
+timestamps within a site.
+
+**Legacy four-argument form** (kept for backward compatibility):
+`rbind_metamet(mm, l_dt, l_dt_meta, l_dt_site)`
+Row-binds lists of individual data tables into an existing `metamet` object.
 }
 \examples{
 \dontrun{
-mm <- rbind_metamet(mm, list(dt1, dt2), list(meta1, meta2), list(site1, site2))
+# New interface — list of metamet objects:
+mm_all <- rbind_metamet(list(mm_amo_qc, mm_buc_qc, mm_ebu_qc, mm_whm_qc))
+
+# Legacy interface:
+mm <- rbind_metamet(
+  mm,
+  list(dt1, dt2), list(meta1, meta2), list(site1, site2)
+)
 }
 
 }

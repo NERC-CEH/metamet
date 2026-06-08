@@ -114,7 +114,8 @@ add_era5 <- function(
       wd_name = mm$dt_meta[type == "wind direction", name_dt],
       ws_name = mm$dt_meta[type == "wind speed" | type == "windspeed", name_dt],
       report_end_interval = report_end_interval,
-      extra_rows = extra_rows
+      extra_rows = extra_rows,
+      fill_na = TRUE
     )
   }
   # Normalise both timestamp vectors to integer seconds in UTC so the equi-join

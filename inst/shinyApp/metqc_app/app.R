@@ -6,6 +6,7 @@ library(shinyFiles)
 library(ggiraph)
 
 source("mod_metadata_maker.R", local = TRUE)
+source("mod_machine_faults.R", local = TRUE)
 
 # Set the gap-filling methods and codes----
 gf_choices <- setNames(df_method$method, df_method$method_longname)
@@ -131,8 +132,14 @@ ui <- dashboardPage(
                 step = 1
               )
             ),
+            tags$script("
+            Shiny.addCustomMessageHandler('trigger_faults_modal', function(message) {
+            Shiny.setInputValue('machine_faults-show_faults_modal', Math.random());
+            });
+            "),
             actionButton("retrieve_data", "Retrieve from database"),
             actionButton("compare_vars", "Compare variables"),
+            actionButton("batch_invalidate", "Batch invalidate from file")
           )
         ),
         hidden(
@@ -272,6 +279,16 @@ server <- function(input, output, session) {
     v_roots = roots,
     default_root = default_root
   )
+
+  mod_machine_faults_server(
+    id = "machine_faults",
+    mm_qry = reactive(mm_qry),
+    username = username
+  )
+
+  observeEvent(input$batch_invalidate, {
+    session$sendCustomMessage("trigger_faults_modal", TRUE)
+  })
 
   # Non-reactive code
   # Format the start and end dates----

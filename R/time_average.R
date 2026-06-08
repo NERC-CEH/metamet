@@ -106,7 +106,8 @@ time_average <- function(
       wd_name = wd_name,
       ws_name = ws_name,
       report_end_interval = report_end_interval,
-      extra_rows = extra_rows
+      extra_rows = extra_rows,
+      fill_na = TRUE # ERA5 is hourly; fill sub-hourly gaps by carrying forward
     )
   }
 

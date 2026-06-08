@@ -28,26 +28,27 @@ ui <- dashboardPage(
     sidebarMenu(
       id = 'tabs',
       menuItem(
-        "Metamet Maker",
+        "Create new Metamet object",
         tabName = "metadata_maker",
         icon = icon("table")
       ),
-      menuItem("Choose file", tabName = "upload", icon = icon("upload")),
-      # with shinyfiles lib
-      shinyFilesButton(
-        id = "file",
-        label = "Open metamet .rds file",
-        title = "Select a file",
-        multiple = FALSE
+      menuItem(
+        "Open existing Metamet object",
+        tabName = "upload",
+        icon = icon("upload")
       ),
       menuItem(
-        "Choose date range",
+        "Select date range and QA/QC",
         tabName = "dashboard",
         icon = icon('database')
       ),
-      menuItem("Download", tabName = "download", icon = icon('download')),
       menuItem(
-        "Information",
+        "Download processed data",
+        tabName = "download",
+        icon = icon('download')
+      ),
+      menuItem(
+        "Help and Documentation",
         tabName = "information",
         icon = icon('info'),
         menuSubItem('Gap-fill methods', tabName = 'gapfill_guide'),
@@ -177,7 +178,7 @@ ui <- dashboardPage(
               ),
               uiOutput("impute_extra_info"),
               actionButton("reset", label = "Restart app"),
-              actionButton("submitchanges", "Submit changes")
+              actionButton("submitchanges", "Save changes")
             ),
           )
         ),
@@ -186,6 +187,14 @@ ui <- dashboardPage(
       # upload file tab
       tabItem(
         tabName = "upload",
+        h4("Upload an existing metamet .rds file"),
+        shinyFilesButton(
+          id = "file",
+          label = "Browse for .rds file",
+          title = "Select a file",
+          multiple = FALSE
+        ),
+        br(),
         verbatimTextOutput("status")
       ),
       tabItem(

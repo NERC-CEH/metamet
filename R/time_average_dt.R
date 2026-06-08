@@ -144,6 +144,24 @@ time_average_dt <- function(
     data.table::setnafill(dt_num, type = "nocb")
     data.table::setnafill(dt_num, type = "locf")
   }
+
+  # Remove all-NA rows at the leading/trailing edges. These arise when the
+  # padding window (extra_rows) extends the averaging range beyond the data
+  # and the report_end_interval shift moves an empty padding bin to exactly
+  # first_date, causing it to pass the trim. Interior NAs (genuine gaps)
+  # are kept because they are bounded by non-NA rows on both sides.
+  if (nrow(dt_num) > 0L) {
+    v_has_obs <- rowSums(!is.na(dt_num)) > 0L
+    if (any(v_has_obs)) {
+      i_first <- which(v_has_obs)[1L]
+      i_last <- max(which(v_has_obs))
+      if (i_first > 1L || i_last < nrow(dt_num)) {
+        dt_num <- dt_num[i_first:i_last]
+        dt <- dt[i_first:i_last]
+      }
+    }
+  }
+
   dt <- cbind(dt[, c("date", "site")], dt_num)
 
   # restore original time name

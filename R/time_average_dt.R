@@ -57,7 +57,8 @@ time_average_dt <- function(
   wd_name = NULL,
   ws_name = NULL,
   report_end_interval = TRUE,
-  extra_rows = 2
+  extra_rows = 2,
+  fill_na = FALSE
 ) {
   # we need to make a copy to avoid modifying the original object by reference
   # i.e. we (probably) want to retain the unaveraged mm object
@@ -137,9 +138,12 @@ time_average_dt <- function(
     )
   }
 
-  # first few rows may be missing data; fill in with nocb
-  data.table::setnafill(dt_num, type = "nocb")
-  data.table::setnafill(dt_num, type = "locf")
+  # fill_na=TRUE carries ERA5 hourly values forward/backward into sub-hourly
+  # intervals; never set for observation data (would mask real data gaps).
+  if (fill_na) {
+    data.table::setnafill(dt_num, type = "nocb")
+    data.table::setnafill(dt_num, type = "locf")
+  }
   dt <- cbind(dt[, c("date", "site")], dt_num)
 
   # restore original time name

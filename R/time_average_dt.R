@@ -27,6 +27,7 @@
 ##' - Pads the averaging window with extra intervals (controlled by \code{extra_rows}) then restricts
 ##'   results to the original date range.
 ##' - Converts any factor columns (e.g., "site") to character for consistency.
+##' - Uses "nocb" (next observation carried backward) to fill leading missing values.
 ##' - Restores original time and column names in the output.
 ##'
 ##' @return A data table with time-averaged values, preserving the original time column name and
@@ -136,6 +137,9 @@ time_average_dt <- function(
     )
   }
 
+  # first few rows may be missing data; fill in with nocb
+  data.table::setnafill(dt_num, type = "nocb")
+  data.table::setnafill(dt_num, type = "locf")
   dt <- cbind(dt[, c("date", "site")], dt_num)
 
   # restore original time name

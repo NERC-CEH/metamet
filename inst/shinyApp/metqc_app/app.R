@@ -178,7 +178,7 @@ ui <- dashboardPage(
               ),
               uiOutput("impute_extra_info"),
               actionButton("reset", label = "Restart app"),
-              actionButton("submitchanges", "Submit changes")
+              actionButton("submitchanges", "Save changes")
             ),
           )
         ),

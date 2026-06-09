@@ -35,7 +35,7 @@ test_that("QC sheet exists and has the correct cols", {
   # Read QC sheet
   qc_df <- readxl::read_excel(qc_file, sheet = "QC")
   # check cols names in QC sheet
-  required_cols <- c("start_time", "end_time", "QC_variable_name", "comment")
+  required_cols <- c("start_time", "end_time", "var_name", "comment")
   missing_cols <- setdiff(required_cols, names(qc_df))
   expect_equal(
     length(missing_cols), 0,

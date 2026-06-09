@@ -26,8 +26,12 @@ mod_machine_faults_server <- function(id, mm_qry, username) {
       req(input$faults_excel)
       faults <<- readxl::read_excel(input$faults_excel$datapath,
                                     sheet = "QC")
+      # read sheet as data table
+      faults_dt <<- data.table::as.data.table(
+        readxl::read_excel(input$faults_excel$datapath, sheet = "QC")
+      )
       # Required cols
-      required_cols <- c("start_time", "end_time", "QC_variable_name", "comment")
+      required_cols <- c("start_time", "end_time", "var_name", "comment")
       missing_cols <- setdiff(required_cols, names(faults))
       if (length(missing_cols) > 0) {
         showNotification(
@@ -48,28 +52,31 @@ mod_machine_faults_server <- function(id, mm_qry, username) {
 
     # apply invalidation to metamet obj
     observeEvent(input$apply_batch_invalidation, {
-      req(exists("faults"))
-      req(!is.null(mm_qry$dt))
+      if (is.null(mm_qry) || is.null(mm_qry$dt)) {
+        showNotification("Please retrieve data before applying batch invalidation.", type = "error")
+        return()
+      }
+      req(exists("faults_dt"))
       dt <- mm_qry$dt
+
+      # Ensure comment column exists
+      if (!"comment" %in% names(dt)) {
+        dt[, comment := NA_character_]
+      }
+
       for (i in seq_len(nrow(faults))) {
         start <- faults$start_time[i]
         end   <- faults$end_time[i]
-        var   <- faults$QC_variable_name[i]
+        var   <- faults$var_name[i]
         note  <- faults$comment[i]
-        # Select rows for this variable
-        rows <- dt[
-          TIMESTAMP >= start &
-            TIMESTAMP <= end &
-            name_icos == var
-        ]
 
-        if (nrow(rows) == 0) next
         dt[
-          TIMESTAMP >= start &
-            TIMESTAMP <= end &
-            name_icos == var,
+          var_name == var &
+          #name_icos == var &
+            TIMESTAMP >= start &
+            TIMESTAMP <= end,
           `:=`(
-            qc = 699,
+            qc = 1L,
             comment = paste0(
               format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
               " - Batch invalidation: ", note

@@ -109,7 +109,7 @@ read_ceda_csv <- function(fname, drop_flags = TRUE) {
   )
 
   v_col_names[[1L]] <- "TIMESTAMP"
-  v_col_names <- make.unique(v_col_names, sep = ".")
+  v_col_names <- make.names(v_col_names, unique = TRUE)
 
   # ---- Read data -----------------------------------------------------------
   dt <- data.table::fread(

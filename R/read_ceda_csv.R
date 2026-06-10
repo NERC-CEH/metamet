@@ -153,18 +153,38 @@ read_ceda_csv <- function(fname, drop_flags = TRUE) {
   # parse_date_time with multiple orders uses a training heuristic that can
   # misidentify 4-digit years (e.g. "01/01/2024 00:30" parsed as dmy HMS with
   # y=20, H=24). Try explicit strptime formats individually instead.
+  #
+  # Detect slash-separated date order (D/M vs M/D) before parsing. Some CEDA
+  # files use M/D/YYYY without zero-padding (e.g. BushCabin 1988-2022). If any
+  # sampled value has its second slash-field > 12 it must be a day, so the
+  # order is M/D. Default to D/M when all sampled values are <= 12.
+  v_ts_raw <- dt[["TIMESTAMP"]]
+  v_slash <- v_ts_raw[!is.na(v_ts_raw) & grepl("/", v_ts_raw, fixed = TRUE)]
+  v_second_field <- suppressWarnings(
+    as.integer(sub("^[^/]+/([0-9]+)/.*", "\\1", v_slash))
+  )
+  v_use_mdy <- any(!is.na(v_second_field) & v_second_field > 12L)
+  v_slash_fmts <- if (v_use_mdy) {
+    c(
+      "%m/%d/%y %H:%M",
+      "%m/%d/%Y %H:%M",
+      "%m/%d/%y %H:%M:%S",
+      "%m/%d/%Y %H:%M:%S"
+    )
+  } else {
+    c(
+      "%d/%m/%y %H:%M",
+      "%d/%m/%Y %H:%M",
+      "%d/%m/%y %H:%M:%S",
+      "%d/%m/%Y %H:%M:%S"
+    )
+  }
+
   dt[,
     TIMESTAMP := {
       v_ts <- TIMESTAMP
       v_result <- as.POSIXct(rep(NA_real_, .N), tz = "UTC")
-      for (fmt in c(
-        "%d/%m/%y %H:%M",
-        "%d/%m/%Y %H:%M",
-        "%d/%m/%y %H:%M:%S",
-        "%d/%m/%Y %H:%M:%S",
-        "%Y-%m-%d %H:%M",
-        "%Y-%m-%d %H:%M:%S"
-      )) {
+      for (fmt in c(v_slash_fmts, "%Y-%m-%d %H:%M", "%Y-%m-%d %H:%M:%S")) {
         v_fill <- is.na(v_result) & !is.na(v_ts)
         if (!any(v_fill)) {
           break

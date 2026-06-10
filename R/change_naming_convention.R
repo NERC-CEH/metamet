@@ -37,7 +37,11 @@
 #' }
 #'
 #' @export
-change_naming_convention <- function(mm_in, name_convention = "name_era5") {
+change_naming_convention <- function(
+  mm_in,
+  name_convention = "name_era5",
+  convert_units = TRUE
+) {
   mm <- copy(mm_in)
   v_cols_id <- c("horizontal_id", "vertical_id", "replicate_id")
   v_cols <- c(name_convention, "horizontal_id", "vertical_id", "replicate_id")
@@ -50,8 +54,55 @@ change_naming_convention <- function(mm_in, name_convention = "name_era5") {
     .SDcols = v_cols
   ]
 
+  # Unit conversion — before rename so name_dt still identifies columns/values
+  from_convention <- attr(mm, "name_convention") %||% "name_local"
+  units_from_col <- sub("^name_", "units_", from_convention)
+  units_to_col <- sub("^name_", "units_", name_convention)
+
+  if (
+    convert_units &&
+      units_from_col %in% names(mm$dt_meta) &&
+      units_to_col %in% names(mm$dt_meta)
+  ) {
+    mm$dt_meta[, .u_from := .normalize_unit_str(get(units_from_col))]
+    mm$dt_meta[, .u_to := .normalize_unit_str(get(units_to_col))]
+
+    unit_map <- mm$dt_meta[
+      !is.na(.u_from) & !is.na(.u_to) & .u_from != .u_to,
+      .(name_dt, .u_from, .u_to)
+    ]
+
+    if (nrow(unit_map) > 0L) {
+      if (identical(attr(mm, "format"), "long")) {
+        for (i in seq_len(nrow(unit_map))) {
+          vn <- unit_map$name_dt[i]
+          mm$dt[
+            var_name == vn,
+            value := .convert_col(value, unit_map$.u_from[i], unit_map$.u_to[i])
+          ]
+        }
+      } else {
+        for (i in seq_len(nrow(unit_map))) {
+          col <- unit_map$name_dt[i]
+          for (tbl in list(mm$dt, mm$dt_ref)) {
+            if (!is.null(tbl) && col %in% names(tbl)) {
+              tbl[,
+                (col) := .convert_col(
+                  get(col),
+                  unit_map$.u_from[i],
+                  unit_map$.u_to[i]
+                )
+              ]
+            }
+          }
+        }
+      }
+    }
+    mm$dt_meta[, c(".u_from", ".u_to") := NULL]
+  }
+
+  # Rename
   if (identical(attr(mm, "format"), "long")) {
-    # Long format: update var_name values rather than column names
     name_map <- mm$dt_meta[, .(name_dt, new_names)]
     mm$dt[name_map, var_name := new_names, on = c(var_name = "name_dt")]
   } else {
@@ -60,11 +111,17 @@ change_naming_convention <- function(mm_in, name_convention = "name_era5") {
       setnames(mm$dt_ref, mm$dt_meta[, name_dt], mm$dt_meta[, new_names])
     }
     if (!is.null(mm$dt_qc)) {
-      setnames(mm$dt_qc, mm$dt_meta[, name_dt], mm$dt_meta[, new_names])
+      if ("var_name" %in% names(mm$dt_qc)) {
+        name_map <- mm$dt_meta[, .(name_dt, new_names)]
+        mm$dt_qc[name_map, var_name := new_names, on = c(var_name = "name_dt")]
+      } else {
+        setnames(mm$dt_qc, mm$dt_meta[, name_dt], mm$dt_meta[, new_names])
+      }
     }
   }
 
   mm$dt_meta[, name_dt := new_names]
+  attr(mm, "name_convention") <- name_convention
 
   return(mm)
 }

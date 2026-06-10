@@ -4,3 +4,5 @@ utils::globalVariables(c("errorMessage"))
 Sys.setenv(TZ = "GMT")
 
 "%!in%" <- Negate("%in%")
+
+`%||%` <- function(x, y) if (!is.null(x)) x else y

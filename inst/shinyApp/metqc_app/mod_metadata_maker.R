@@ -23,6 +23,8 @@ mod_metadata_maker_ui <- function(id) {
         white-space: nowrap;
       }
     ")),
+    uiOutput(ns("loaded_file_banner")),
+    br(),
     # ---- Step 1: load file ---------------------------------------------------
     div(
       id = ns("step1"),
@@ -289,6 +291,10 @@ mod_metadata_maker_ui <- function(id) {
           width = 12,
           uiOutput(ns("summary_ui")),
           br(),
+          p(
+            "You can now download your metamet object as an .rds file. ",
+            "This file can be open in the Open existing Metamet object sidetab of this app,
+            allowing you to visualise and impute the data."),
           downloadButton(ns("save_rds"), "Download as metamet .rds"),
           br(),
           br(),
@@ -354,6 +360,7 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
 
     # ---- reactive state ------------------------------------------------------
     rv <- reactiveValues(
+      loaded_files = NULL,
       format = NULL,
       dt_raw = NULL,
       l_raw_tables = NULL,
@@ -452,6 +459,15 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
       dat_path <- as.character(dat_info$datapath)
       fmt <- input$format
       rv$format <- fmt
+      # store filenames
+      v_files <- basename(dat_info$datapath)
+      if (fmt == "oldcampbell") {
+        dld_info <- parseFilePaths(v_roots, input$dld_file)
+        validate(need(nrow(dld_info) > 0, "Please also select the .dld metadata file."))
+        v_files <- c(v_files, basename(dld_info$datapath))
+      }
+
+      rv$loaded_files <- v_files
 
       dt_loaded <- tryCatch(
         {
@@ -517,6 +533,26 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
           selected = names(rv$l_raw_tables)[1L]
         ),
         actionButton(ns("use_table"), "Use selected table")
+      )
+    })
+
+    # render banner with filenames
+    output$loaded_file_banner <- renderUI({
+      req(rv$loaded_files)
+
+      tagList(
+        box(
+          width = 12,
+          status = "success",
+          solidHeader = TRUE,
+          title = tags$span(icon("file"), "Loaded file(s)"),
+          div(
+            style = "font-size:16px; font-weight:600; margin-bottom:10px;",
+            lapply(rv$loaded_files, function(f) {
+              tags$div(icon("file"), f)
+            })
+          )
+        )
       )
     })
 
@@ -943,7 +979,7 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
           column(2, tags$b("Units")),
           column(2, tags$b("Range min")),
           column(2, tags$b("Range max")),
-          column(2, tags$b("Imputation method"))
+          column(2, tags$b("Default Imputation method"))
         ),
         hr(),
         lapply(rv$v_mapped_cols, function(col_nm) {
@@ -1192,6 +1228,9 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
     observeEvent(input$back_6, go_to(5L))
 
     observeEvent(input$restart, {
+      go_to(1L)
+      # clear loaded files so the banner disappears
+      rv$loaded_files <- NULL
       rv$format <- NULL
       rv$dt_raw <- NULL
       rv$l_raw_tables <- NULL
@@ -1205,7 +1244,6 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
       rv$dt_meta_from_file <- NULL
       rv$skipped_step4 <- FALSE
       rv$era5_path <- NULL
-      go_to(1L)
     })
 
     output$summary_ui <- renderUI({

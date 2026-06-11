@@ -65,22 +65,21 @@ ui <- dashboardPage(
       tabItem(
         tabName = "dashboard",
         uiOutput("loaded_file_banner"),
-
         tags$style(HTML("
-  /* Disabled sidebar tabs */
-  .sidebar-menu li.disabled > a {
-    color: #999 !important;
-    background: #f0f0f0 !important;
-    cursor: not-allowed !important;
-    pointer-events: none !important;
-    box-shadow: none !important;
-  }
+        /* Greys out the first 2 disabled sidebar menu items */
+        .sidebar-menu a.disabled {
+          color: #999 !important;
+          background-color: #e6e6e6 !important;
+          cursor: not-allowed !important;
+          pointer-events: none !important;
+          opacity: 0.6 !important;
+        }
 
-  /* Remove hover animation */
-  .sidebar-menu li.disabled > a:hover {
-    background: #f0f0f0 !important;
-    color: #999 !important;
-  }
+        /* also removes the hover effect */
+        .sidebar-menu a.disabled:hover {
+          background-color: #e6e6e6 !important;
+          color: #999 !important;
+        }
 ")),
         br(),
         fluidRow(
@@ -435,6 +434,12 @@ server <- function(input, output, session) {
 
     # reset the UI
     shinyjs::hide("extracted_data")
+
+    # Clear shinyFiles selection
+    shinyjs::reset("file")
+
+    # Force status text to reset
+    output$status <- renderText("No file selected yet.")
 
     # re enable the first two tabs
     shinyjs::enable(selector = "a[data-value='metadata_maker']")

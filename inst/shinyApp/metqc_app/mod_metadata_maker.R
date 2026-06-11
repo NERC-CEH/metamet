@@ -17,6 +17,12 @@
 mod_metadata_maker_ui <- function(id) {
   ns <- NS(id)
   tagList(
+  # prevents column headers from wrapping in the preview table; also applies to mapping and details tables in later steps
+    tags$style(HTML("
+      .shiny-table {
+        white-space: nowrap;
+      }
+    ")),
     # ---- Step 1: load file ---------------------------------------------------
     div(
       id = ns("step1"),
@@ -552,7 +558,10 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
       tagList(
         hr(),
         h5("Preview (first 6 rows):"),
-        tableOutput(ns("preview_table"))
+        div(
+          style = "max-width: 100%; overflow-x: auto; border: 1px solid #ddd; padding: 5px;",
+          tableOutput(ns("preview_table"))
+        )
       )
     })
 

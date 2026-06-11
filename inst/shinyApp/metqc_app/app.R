@@ -29,18 +29,11 @@ ui <- dashboardPage(
     sidebarMenu(
       id = 'tabs',
       menuItem(
-        "Metamet Maker",
+        "Create new Metamet object",
         tabName = "metadata_maker",
         icon = icon("table")
       ),
-      menuItem("Choose file", tabName = "upload", icon = icon("upload")),
-      # with shinyfiles lib
-      shinyFilesButton(
-        id = "file",
-        label = "Open metamet .rds file",
-        title = "Select a file",
-        multiple = FALSE
-      ),
+      menuItem("Open existing Metamet object", tabName = "upload", icon = icon("upload")),
       menuItem(
         "Choose date range",
         tabName = "dashboard",
@@ -71,6 +64,25 @@ ui <- dashboardPage(
     tabItems(
       tabItem(
         tabName = "dashboard",
+        uiOutput("loaded_file_banner"),
+
+        tags$style(HTML("
+  /* Disabled sidebar tabs */
+  .sidebar-menu li.disabled > a {
+    color: #999 !important;
+    background: #f0f0f0 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Remove hover animation */
+  .sidebar-menu li.disabled > a:hover {
+    background: #f0f0f0 !important;
+    color: #999 !important;
+  }
+")),
+        br(),
         fluidRow(
           box(
             title = "Data Selection",
@@ -186,6 +198,14 @@ ui <- dashboardPage(
       # upload file tab
       tabItem(
         tabName = "upload",
+        h4("Upload an existing metamet .rds file"),
+        shinyFilesButton(
+          id = "file",
+          label = "Browse for .rds file",
+          title = "Select a file",
+          multiple = FALSE
+        ),
+        br(),
         verbatimTextOutput("status")
       ),
       tabItem(
@@ -355,6 +375,7 @@ server <- function(input, output, session) {
   observeEvent(input$retrieve_data, label = "validator for dates", {
     if (!iv$is_valid()) {
       showModal(modalDialog("Please fill in both dates.", easyClose = TRUE))
+
       return()
     }
 
@@ -381,6 +402,48 @@ server <- function(input, output, session) {
   # Create a reactive element with the latest end date
   last_end_date <- reactive({
     max(as.Date(df_proc$end_date))
+  })
+
+  # shows loaded file in data selection tab and allows users to remove it
+  output$loaded_file_banner <- renderUI({
+    req(uploaded())
+
+    tagList(
+      box(
+        width = 12,
+        status = "success",
+        solidHeader = TRUE,
+        title = tags$span(icon("file"), "Loaded file"),
+        div(
+          style = "font-size:16px; font-weight:600; margin-bottom:10px;",
+          basename(uploaded()$fname)
+        ),
+        actionButton(
+          "remove_file",
+          "Remove file and start again",
+          icon = icon("trash"),
+          class = "btn btn-danger"
+        )
+      )
+    )
+  })
+
+  observeEvent(input$remove_file, {
+    # clears the reactive values
+    uploaded <- NULL
+    mm_qry <<- NULL
+
+    # reset the UI
+    shinyjs::hide("extracted_data")
+
+    # re enable the first two tabs
+    shinyjs::enable(selector = "a[data-value='metadata_maker']")
+    shinyjs::enable(selector = "a[data-value='upload']")
+
+    # Send user back to upload tab
+    updateTabItems(session, "tabs", "upload")
+
+    showNotification("Metamet file removed. You can now load a new one.", type = "message")
   })
 
   # Create a date input for the user to select start date
@@ -475,6 +538,9 @@ server <- function(input, output, session) {
   observeEvent(input$retrieve_data, {
     for (i in seq_along(uploaded()$v_names)) {
       v_names_checklist[[uploaded()$v_names[i]]] <- FALSE
+      # disable the first two tabs after data retrieval
+      shinyjs::disable(selector = "a[data-value='metadata_maker']")
+      shinyjs::disable(selector = "a[data-value='upload']")
     }
 
     # enabling previously disabled buttons

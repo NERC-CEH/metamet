@@ -73,29 +73,17 @@ change_naming_convention <- function(
     ]
 
     if (nrow(unit_map) > 0L) {
-      if (identical(attr(mm, "format"), "long")) {
-        for (i in seq_len(nrow(unit_map))) {
-          vn <- unit_map$name_dt[i]
-          mm$dt[
-            var_name == vn,
-            value := .convert_col(value, unit_map$.u_from[i], unit_map$.u_to[i])
-          ]
-        }
-      } else {
-        for (i in seq_len(nrow(unit_map))) {
-          col <- unit_map$name_dt[i]
-          for (tbl in list(mm$dt, mm$dt_ref)) {
-            if (!is.null(tbl) && col %in% names(tbl)) {
-              tbl[,
-                (col) := .convert_col(
-                  get(col),
-                  unit_map$.u_from[i],
-                  unit_map$.u_to[i]
-                )
-              ]
-            }
-          }
-        }
+      orig_format <- attr(mm, "format") %||% "wide"
+      mm <- .ensure_long(mm)
+      for (i in seq_len(nrow(unit_map))) {
+        vn <- unit_map$name_dt[i]
+        u_from <- unit_map$.u_from[i]
+        u_to <- unit_map$.u_to[i]
+        mm$dt[var_name == vn, value := .convert_col(value, u_from, u_to)]
+        mm$dt[var_name == vn, ref := .convert_col(ref, u_from, u_to)]
+      }
+      if (!identical(orig_format, "long")) {
+        mm <- .ensure_wide(mm)
       }
     }
     mm$dt_meta[, c(".u_from", ".u_to") := NULL]

@@ -118,6 +118,30 @@ test_that("change_naming_convention converts units in long format", {
   )
 })
 
+test_that("change_naming_convention: unit conversion round-trips local -> icos -> era5 -> local", {
+  mm <- make_test_metamet()
+  mm$dt_meta[, name_local := c("TIMESTAMP", "temp", "flux")]
+  mm$dt_meta[, name_era5 := c("time", "t2m", "flux_era5")]
+  mm$dt_meta[, units_local := c(NA_character_, "hPa", "cm")]
+  mm$dt_meta[, units_icos := c(NA_character_, "kPa", "m")]
+  mm$dt_meta[, units_era5 := c(NA_character_, "Pa", "mm")]
+  mm$dt[, temp := 100.0]
+  mm$dt[, flux := 3.0]
+
+  mm_icos <- suppressWarnings(change_naming_convention(mm, "name_icos"))
+  mm_era5 <- suppressWarnings(change_naming_convention(mm_icos, "name_era5"))
+  mm_back <- suppressWarnings(change_naming_convention(mm_era5, "name_local"))
+
+  # Values must be identical to originals within floating-point precision
+  expect_equal(mm_back$dt$temp, 100.0, tolerance = 1e-10)
+  expect_equal(mm_back$dt$flux, 3.0, tolerance = 1e-10)
+  # Convention attribute must be restored
+  expect_equal(attr(mm_back, "name_convention"), "name_local")
+  # Intermediate values: 100 hPa -> 10 kPa -> 10000 Pa
+  expect_equal(mm_icos$dt$TA, 10.0, tolerance = 1e-10)
+  expect_equal(mm_era5$dt$t2m, 10000.0, tolerance = 1e-10)
+})
+
 test_that("change_naming_convention works on long-format objects", {
   mm_long <- suppressWarnings(metamet_reshape(mm1, "long"))
   original_var_names <- unique(mm_long$dt$var_name)

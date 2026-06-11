@@ -3,6 +3,7 @@ library(shinydashboard)
 library(shinyjs)
 library(shinyvalidate)
 library(shinyFiles)
+library(shinycssloaders)
 library(ggiraph)
 
 source("mod_metadata_maker.R", local = TRUE)
@@ -520,7 +521,11 @@ server <- function(input, output, session) {
               inline = TRUE
             )
           },
-          girafeOutput(paste0(i, "_interactive_plot")),
+          #loading progress bar for plots
+          shinycssloaders::withSpinner(
+            girafeOutput(paste0(i, "_interactive_plot")),
+            type = 6
+          )
         )
       })
       do.call(tabsetPanel, c(my_tabs, id = "plotTabs"))

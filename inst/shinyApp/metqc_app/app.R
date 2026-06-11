@@ -46,7 +46,7 @@ ui <- dashboardPage(
         tabName = "dashboard",
         icon = icon('database')
       ),
-      menuItem("Download", tabName = "download", icon = icon('download')),
+      menuItem("Save Processed Data", tabName = "download", icon = icon('download')),
       menuItem(
         "Information",
         tabName = "information",
@@ -168,7 +168,7 @@ ui <- dashboardPage(
               actionButton("impute", label = "Impute selection"),
               actionButton(
                 "finished_check",
-                label = "Finished checking variable for date range."
+                label = "Mark variable as checked for date range"
               ),
               checkboxGroupInput(
                 "qc_tokeep",
@@ -177,8 +177,7 @@ ui <- dashboardPage(
                 choiceValues = df_method$qc
               ),
               uiOutput("impute_extra_info"),
-              actionButton("reset", label = "Restart app"),
-              actionButton("submitchanges", "Submit changes")
+              actionButton("reset", label = "Restart app")
             ),
           )
         ),

@@ -16,6 +16,12 @@
 #' @param name_convention A character string giving the column in `dt_meta`
 #'   that contains the base names to use (default: `"name_era5"`).
 #'
+#' @param convert_units Controls which numeric columns are unit-converted when
+#'   the source and target conventions carry different `units_*` values in
+#'   `dt_meta`. `TRUE` (default) converts both observations (`value`) and
+#'   reference data (`ref`); `FALSE` converts neither; `"obs"` converts
+#'   observations only; `"ref"` converts reference data only.
+#'
 #' @return The modified `mm_in` object with updated column names in all relevant
 #'   data.tables and updated `name_dt` values in `dt_meta`.
 #'
@@ -60,7 +66,7 @@ change_naming_convention <- function(
   units_to_col <- sub("^name_", "units_", name_convention)
 
   if (
-    convert_units &&
+    !isFALSE(convert_units) &&
       units_from_col %in% names(mm$dt_meta) &&
       units_to_col %in% names(mm$dt_meta)
   ) {
@@ -79,8 +85,12 @@ change_naming_convention <- function(
         vn <- unit_map$name_dt[i]
         u_from <- unit_map$.u_from[i]
         u_to <- unit_map$.u_to[i]
-        mm$dt[var_name == vn, value := .convert_col(value, u_from, u_to)]
-        mm$dt[var_name == vn, ref := .convert_col(ref, u_from, u_to)]
+        if (!identical(convert_units, "ref")) {
+          mm$dt[var_name == vn, value := .convert_col(value, u_from, u_to)]
+        }
+        if (!identical(convert_units, "obs")) {
+          mm$dt[var_name == vn, ref := .convert_col(ref, u_from, u_to)]
+        }
       }
       if (!identical(orig_format, "long")) {
         mm <- .ensure_wide(mm)

@@ -1,13 +1,16 @@
 .normalize_unit_str <- function(u) {
   lookup <- c(
-    "degC" = "celsius",
-    "degree_C" = "celsius",
+    "degree_C" = "degC", # alias for degC (UDUNITS2 standard symbol)
+    "celsius" = "degC", # name -> symbol
     "degrees" = "degree",
+    "dimensionless" = "1", # UDUNITS2 rejects "dimensionless"; "1" is correct
     "percent" = "%",
     "W / m^2" = "W/m^2",
     "W / m2" = "W/m^2",
     "micromol / m^2 / s" = "umol/m^2/s",
-    "m / s" = "m/s"
+    "micromol m-2 s-1" = "umol/m^2/s",
+    "m / s" = "m/s",
+    "m s-1" = "m/s"
   )
   u <- trimws(u)
   ifelse(u %in% names(lookup), unname(lookup[u]), u)

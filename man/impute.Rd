@@ -16,7 +16,8 @@ impute(
   x = NULL,
   lat = 55.792,
   lon = -3.243,
-  plot_graph = TRUE
+  plot_graph = TRUE,
+  comment = NULL
 )
 }
 \arguments{

@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
   out.width = "100%",
   warning = FALSE,
   message = FALSE,
-  fig.show='hold'
+  fig.show = "hold"
 )
 ```
 
@@ -37,16 +37,17 @@ from file.
 ```{r}
 here::i_am("vignettes/workflow_example.Rmd")
 library(here)
+library(ggplot2)
 library(metamet)
 
 mm_amo <- readRDS(
-  file = here::here("data-raw/UK-AMO/UK-AMO_BM_mm_2023.rds")
+  file = here::here("inst/extdata/UK-AMO/UK-AMO_BM_mm_2023.rds")
 )
 mm_ebu <- readRDS(
-  file = here::here("data-raw/UK-EBU/UK-EBU_BM_mm_2023.rds")
+  file = here::here("inst/extdata/UK-EBU/UK-EBU_BM_mm_2023.rds")
 )
 mm_whm <- readRDS(
-  file = here::here("data-raw/UK-WHM/UK-WHM_BM_mm_2023.rds")
+  file = here::here("inst/extdata/UK-WHM/UK-WHM_BM_mm_2023.rds")
 )
 ```
 
@@ -83,9 +84,9 @@ identify the site, timestamp, varaiable type and specific varaiable name. We do
 this with the `reshape_wide_to_long` function, shown below.
 
 ```{r}
-mm_amo <- reshape_wide_to_long(mm_amo)
-mm_ebu <- reshape_wide_to_long(mm_ebu)
-mm_whm <- reshape_wide_to_long(mm_whm)
+mm_amo <- metamet_reshape(mm_amo, "long")
+mm_ebu <- metamet_reshape(mm_ebu, "long")
+mm_whm <- metamet_reshape(mm_whm, "long")
 ```
 
 We can now see the structure of UK-AMO data 

@@ -9,11 +9,12 @@ The simplest function is simply to create a network map with the
 `network_map` function shown below
 
 ``` r
+
 here::i_am("vignettes/openairmaps.Rmd")
 library(metamet)
 
 fname_site <- here::here("data-raw/dt_site.csv")
-dt_site <- fread(fname_site)
+dt_site <- data.table::fread(fname_site)
 network_map(dt_site)
 ```
 
@@ -26,6 +27,7 @@ direction fields from a metamet object, and produces a leaflet-based
 polar map. for a varible `var_name` chosen to be mapped.
 
 ``` r
+
 fname_dt <- here::here("data-raw/UK-AMO/UK-AMO_BM_dt_2026.csv")
   fname_meta <- here::here("data-raw/dt_meta.xlsx")
   fname_site <- here::here("data-raw/dt_site.csv")

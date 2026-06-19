@@ -7,9 +7,9 @@
 \format{
 A named list with one element per convention. Currently:
   \describe{
-    \item{`icos`}{Data frame with columns `name`, `long_name`, `units`,
+    \item{`df_icos`}{Data frame with columns `name`, `long_name`, `units`,
       `uri`. One row per ICOS variable (e.g. `TA`, `WS`, `P`).}
-    \item{`era5`}{Data frame with the same columns for ERA5 variables
+    \item{`df_era5`}{Data frame with the same columns for ERA5 variables
       (e.g. `t2m`, `ws`, `tp`). Keyed by ICOS variable (`name` is the
       ICOS name); multiple ICOS variables may share one ERA5 proxy.}
   }

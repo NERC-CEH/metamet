@@ -21,7 +21,8 @@ time_average_dt(
   wd_name = NULL,
   ws_name = NULL,
   report_end_interval = TRUE,
-  extra_rows = 2
+  extra_rows = 2,
+  fill_na = FALSE
 )
 ```
 

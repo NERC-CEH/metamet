@@ -12,18 +12,20 @@ First, we load the `metamet` library, and read the data for each of
 three sites from file.
 
 ``` r
+
 here::i_am("vignettes/workflow_example.Rmd")
 library(here)
+library(ggplot2)
 library(metamet)
 
 mm_amo <- readRDS(
-  file = here::here("data-raw/UK-AMO/UK-AMO_BM_mm_2023.rds")
+  file = here::here("inst/extdata/UK-AMO/UK-AMO_BM_mm_2023.rds")
 )
 mm_ebu <- readRDS(
-  file = here::here("data-raw/UK-EBU/UK-EBU_BM_mm_2023.rds")
+  file = here::here("inst/extdata/UK-EBU/UK-EBU_BM_mm_2023.rds")
 )
 mm_whm <- readRDS(
-  file = here::here("data-raw/UK-WHM/UK-WHM_BM_mm_2023.rds")
+  file = here::here("inst/extdata/UK-WHM/UK-WHM_BM_mm_2023.rds")
 )
 ```
 
@@ -32,6 +34,7 @@ want to process a shorter time period, we can subset as required with
 `subset_by_date`. Here we look at two days just for speed.
 
 ``` r
+
 mm_amo <- subset_by_date(mm_amo, "2023-09-01", "2023-09-03")
 mm_ebu <- subset_by_date(mm_ebu, "2023-09-01", "2023-09-03")
 mm_whm <- subset_by_date(mm_whm, "2023-09-01", "2023-09-03")
@@ -43,6 +46,7 @@ sites to the ICOS convention using the `change_naming_convention`
 function below (UK-AMO data are already produced in this form).
 
 ``` r
+
 mm_ebu <- change_naming_convention(mm_ebu, name_convention = "name_icos")
 mm_whm <- change_naming_convention(mm_whm, name_convention = "name_icos")
 ```
@@ -60,14 +64,16 @@ timestamp, varaiable type and specific varaiable name. We do this with
 the `reshape_wide_to_long` function, shown below.
 
 ``` r
-mm_amo <- reshape_wide_to_long(mm_amo)
-mm_ebu <- reshape_wide_to_long(mm_ebu)
-mm_whm <- reshape_wide_to_long(mm_whm)
+
+mm_amo <- metamet_reshape(mm_amo, "long")
+mm_ebu <- metamet_reshape(mm_ebu, "long")
+mm_whm <- metamet_reshape(mm_whm, "long")
 ```
 
 We can now see the structure of UK-AMO data
 
 ``` r
+
 mm_amo$dt
 #> Key: <site, TIMESTAMP, var_name>
 #>         site  TIMESTAMP          var_name       value          type   name_icos
@@ -83,24 +89,25 @@ mm_amo$dt
 #> 3587: UK-AMO 2023-09-03 NDVI_797OUT_5_1_1          NA   energy flux NDVI_797OUT
 #> 3588: UK-AMO 2023-09-03         LWS_4_1_1 360.6000000     arbitrary         LWS
 #> 3589: UK-AMO 2023-09-03         LWS_4_1_2 285.0000000     arbitrary         LWS
-#>          qc validator           ref
-#>       <num>    <char>         <num>
-#>    1:     0      auto  1.173913e+01
-#>    2:     0      auto  3.360330e+01
-#>    3:     0      auto -6.467518e-14
-#>    4:     0      auto  3.360330e+01
-#>    5:     1      auto  3.360330e+01
-#>   ---                              
-#> 3585:     1      auto  0.000000e+00
-#> 3586:     1      auto  0.000000e+00
-#> 3587:     1      auto  0.000000e+00
-#> 3588:     0      auto  8.707268e+01
-#> 3589:     0      auto  8.707268e+01
+#>          qc validator comment           ref
+#>       <num>    <char>  <char>         <num>
+#>    1:     0      auto    <NA>  1.173913e+01
+#>    2:     0      auto    <NA>  3.360330e+01
+#>    3:     0      auto    <NA> -6.467518e-14
+#>    4:     0      auto    <NA>  3.360330e+01
+#>    5:     1      auto    <NA>  3.360330e+01
+#>   ---                                      
+#> 3585:     1      auto    <NA>  0.000000e+00
+#> 3586:     1      auto    <NA>  0.000000e+00
+#> 3587:     1      auto    <NA>  0.000000e+00
+#> 3588:     0      auto    <NA>  8.707268e+01
+#> 3589:     0      auto    <NA>  8.707268e+01
 ```
 
 and see it is identical to the structure of UK-EBU (and UK-WHM) data.
 
 ``` r
+
 mm_ebu$dt
 #> Key: <site, TIMESTAMP, var_name>
 #>         site  TIMESTAMP  var_name   value          type name_icos    qc
@@ -116,25 +123,26 @@ mm_ebu$dt
 #> 1841: UK-EBU 2023-09-03   G_5_1_1   0.171   energy flux         G     0
 #> 1842: UK-EBU 2023-09-03   G_5_2_1  -3.032   energy flux         G     0
 #> 1843: UK-EBU 2023-09-03 WTD_5_1_1  -0.576        height       WTD     0
-#>       validator      ref
-#>          <char>    <num>
-#>    1:      auto 88.06677
-#>    2:      auto 11.23692
-#>    3:      auto 88.06677
-#>    4:      auto 97.53844
-#>    5:      auto  0.00000
-#>   ---                   
-#> 1839:      auto 13.84093
-#> 1840:      auto 13.84093
-#> 1841:      auto  0.00000
-#> 1842:      auto  0.00000
-#> 1843:      auto 32.56382
+#>       validator comment      ref
+#>          <char>  <char>    <num>
+#>    1:      auto    <NA> 88.06677
+#>    2:      auto    <NA> 11.23692
+#>    3:      auto    <NA> 88.06677
+#>    4:      auto    <NA> 97.53844
+#>    5:      auto    <NA>  0.00000
+#>   ---                           
+#> 1839:      auto    <NA> 13.84093
+#> 1840:      auto    <NA> 13.84093
+#> 1841:      auto    <NA>  0.00000
+#> 1842:      auto    <NA>  0.00000
+#> 1843:      auto    <NA> 32.56382
 ```
 
 Given this structure, we can simply append all the rows for all data
 tables to create a single `metamet` object.
 
 ``` r
+
 mm <- rbind_metamet(
   mm_amo,
   l_dt = list(mm_amo$dt, mm_ebu$dt, mm_whm$dt),
@@ -150,6 +158,7 @@ data, which in this case is ERA5 reanalysis data for the grid cell
 containing the site.
 
 ``` r
+
 p <- ggplot(
   mm$dt[name_icos == "TS", ],
   aes(TIMESTAMP, value, colour = var_name)
@@ -166,6 +175,7 @@ Below we plot PPFD (photosynthetic photon flux density, commonly ‘PAR’)
 against time; the solid black line shows the ERA5 reference data.
 
 ``` r
+
 p <- ggplot(
   mm$dt[name_icos == "PPFD_IN", ],
   aes(TIMESTAMP, value, colour = var_name)
@@ -182,6 +192,7 @@ We can also plot all variable against the reference (ERA5) data to check
 for anomalous deviations from the expected relationship.
 
 ``` r
+
 p <- ggplot(
   mm$dt[name_icos == "TA", ],
   aes(ref, value, colour = var_name)

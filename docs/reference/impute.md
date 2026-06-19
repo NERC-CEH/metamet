@@ -14,14 +14,15 @@ impute(
   mm,
   method = NULL,
   qc_tokeep = 0,
-  selection = TRUE,
+  row_selected = TRUE,
   k = 40,
   fit = TRUE,
   n_min = 10,
   x = NULL,
   lat = 55.792,
   lon = -3.243,
-  plot_graph = TRUE
+  plot_graph = TRUE,
+  comment = NULL
 )
 ```
 
@@ -80,12 +81,6 @@ impute(
   unchanged. Default `0`. Data with QC codes not in `qc_tokeep` are
   candidates for imputation.
 
-- selection:
-
-  Logical. If `TRUE` (default), applies selection filtering from
-  metadata. If `FALSE`, imputes all values matching `qc_tokeep`
-  criteria.
-
 - k:
 
   Integer. Smoothing basis dimension for GAM in "time" method (default:
@@ -128,6 +123,12 @@ impute(
   files to the `output/` directory with naming convention
   `plot_<variable>_<method>.png`.
 
+- is_selected:
+
+  Logical. If `TRUE` (default), applies imputation to all missing values
+  If called from the shiny app, this will be a vector showing which
+  points were selected by the user.
+
 ## Value
 
 The input `metamet` object `mm`, invisibly returned with updated `dt`
@@ -138,7 +139,7 @@ The input `metamet` object `mm`, invisibly returned with updated `dt`
 \*\*Imputation Process:\*\* The function iterates over each variable in
 `v_y`. For each variable: 1. Determines the imputation method (from
 parameter or metadata). 2. Identifies which rows to impute based on QC
-codes and `selection` flag. 3. Applies the selected imputation method.
+codes and `is_selected` flag. 3. Applies the selected imputation method.
 4. Updates the QC table to flag imputed values. 5. Optionally generates
 a diagnostic plot.
 

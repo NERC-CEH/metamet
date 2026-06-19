@@ -62,14 +62,15 @@ All imputed values are flagged in the quality control (QC) table.</p>
 <span>  <span class="va">mm</span>,</span>
 <span>  method <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  qc_tokeep <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  selection <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  row_selected <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  k <span class="op">=</span> <span class="fl">40</span>,</span>
 <span>  fit <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  n_min <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  x <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  lat <span class="op">=</span> <span class="fl">55.792</span>,</span>
 <span>  lon <span class="op">=</span> <span class="op">-</span><span class="fl">3.243</span>,</span>
-<span>  plot_graph <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  plot_graph <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  comment <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -122,11 +123,6 @@ column in <code>dt_meta</code>. Supported methods:</p><dl><dt><code>"time"</code
 Default <code>0</code>. Data with QC codes not in <code>qc_tokeep</code> are candidates for imputation.</p></dd>
 
 
-<dt id="arg-selection">selection<a class="anchor" aria-label="anchor" href="#arg-selection"></a></dt>
-<dd><p>Logical. If <code>TRUE</code> (default), applies selection filtering
-from metadata. If <code>FALSE</code>, imputes all values matching <code>qc_tokeep</code> criteria.</p></dd>
-
-
 <dt id="arg-k">k<a class="anchor" aria-label="anchor" href="#arg-k"></a></dt>
 <dd><p>Integer. Smoothing basis dimension for GAM in "time" method (default: 40).
 Automatically reduced if data is sparse. Controls temporal smoothness.</p></dd>
@@ -165,6 +161,11 @@ Used by "nightzero" method to calculate sunrise/sunset times.</p></dd>
 showing observations, reference data (if available), and QC flags. Saves PNG files
 to the <code>output/</code> directory with naming convention <code>plot_&lt;variable&gt;_&lt;method&gt;.png</code>.</p></dd>
 
+
+<dt id="arg-is-selected">is_selected<a class="anchor" aria-label="anchor" href="#arg-is-selected"></a></dt>
+<dd><p>Logical. If <code>TRUE</code> (default), applies imputation to all missing values
+If called from the shiny app, this will be a vector showing which points were selected by the user.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -176,7 +177,7 @@ to the <code>output/</code> directory with naming convention <code>plot_&lt;vari
     <p>**Imputation Process:**
 The function iterates over each variable in <code>v_y</code>. For each variable:
 1. Determines the imputation method (from parameter or metadata).
-2. Identifies which rows to impute based on QC codes and <code>selection</code> flag.
+2. Identifies which rows to impute based on QC codes and <code>is_selected</code> flag.
 3. Applies the selected imputation method.
 4. Updates the QC table to flag imputed values.
 5. Optionally generates a diagnostic plot.</p>

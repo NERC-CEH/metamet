@@ -5,6 +5,7 @@ library(devtools)
 library(usethis)
 library(pkgload)
 library(pkgbuild)
+library(pkgdown)
 # usethis::use_package_doc()
 
 # add to .RBuildIgnore

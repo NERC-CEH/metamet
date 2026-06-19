@@ -1,9 +1,8 @@
 # Apply Quality Control Checks to Meteorological Data
 
-Applies quality control procedures to a \`metamet\` object by removing
-out-of-range values and creating a quality code table. The function
-flags missing or invalid values that fall outside acceptable ranges
-defined in the metadata.
+Applies range-based quality control to a \`metamet\` object by setting
+out-of-range values to \`NA\` and recording QC codes in the \`qc\`
+column. Accepts both wide and long format; always returns long format.
 
 ## Usage
 
@@ -15,39 +14,26 @@ apply_qc(mm0)
 
 - mm0:
 
-  A \`metamet\` object containing at least \`dt\` (data table),
-  \`dt_meta\` (metadata table with min/max ranges), and \`dt_site\`
-  (site information).
+  A \`metamet\` object (wide or long format).
 
 ## Value
 
-A modified \`metamet\` object with:
-
-- dt:
-
-  Data values, with out-of-range values set to NA
-
-- dt_qc:
-
-  New quality control table (1 = invalid/missing, 0 = valid)
-
-All other fields from the input object are preserved.
+A long-format \`metamet\` object with updated \`value\`, \`qc\`, and
+\`validator\` columns.
 
 ## Details
 
 The function performs the following steps:
 
-1.  Removes values outside the min/max range specified in \`dt_meta\`
+1.  Reshapes to long format if necessary.
 
-2.  Creates a quality control table (\`dt_qc\`) where 1 indicates a
-    missing or out-of-range value, and 0 indicates a valid value
+2.  Sets values outside the min/max range specified in \`dt_meta\` to
+    \`NA\`.
 
-3.  Adds a validator field marked as "auto" (to be replaced by username
-    when manually validated)
+3.  Sets \`qc = 1\` for missing or invalid values, \`qc = 0\` for valid
+    values.
 
-## See also
-
-`remove_out_of_range` for the range-checking implementation
+4.  Sets \`validator = "auto"\` for flagged rows.
 
 ## Examples
 

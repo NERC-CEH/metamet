@@ -193,8 +193,16 @@ rename_era5 <- function(mm) {
   mm$dt_ref[, site := mm$dt_site$site]
   ind <- match(names(mm$dt), mm$dt_meta$name_dt)
   v_names_era5 <- mm$dt_meta$name_era5[ind]
-  mm$dt_ref <- mm$dt_ref[, ..v_names_era5]
-  names(mm$dt_ref) <- names(mm$dt)
+  v_has_era5 <- !is.na(v_names_era5)
+  # Select only columns that have an ERA5 equivalent
+  dt_ref_sub <- mm$dt_ref[, v_names_era5[v_has_era5], with = FALSE]
+  setnames(dt_ref_sub, names(mm$dt)[v_has_era5])
+  # Variables with no ERA5 equivalent get an NA column
+  v_no_era5_cols <- names(mm$dt)[!v_has_era5]
+  for (col in v_no_era5_cols) {
+    dt_ref_sub[, (col) := NA_real_]
+  }
+  mm$dt_ref <- dt_ref_sub[, names(mm$dt), with = FALSE] # reorder to match dt
   setcolorder(mm$dt_ref, neworder = names(mm$dt))
   return(mm)
 }

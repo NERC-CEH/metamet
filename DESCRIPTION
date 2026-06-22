@@ -42,6 +42,7 @@ Imports:
     mgcv,
     dplyr,
     utils,
-    here
+    here,
+    units
 Config/testthat/edition: 3
 URL: https://nerc-ceh.github.io/metamet/

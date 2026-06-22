@@ -37,3 +37,37 @@ NULL
 ##' @rdname mm1
 ##' @name mm3
 NULL
+
+##' Convention registry for ICOS and ERA5 variable names and units
+##'
+##' A named list providing the authoritative mapping between variable names and
+##' canonical UDUNITS2 unit strings for each supported naming convention.
+##' Used by [check_dt_meta()] and [populate_convention_cols()].
+##'
+##' @format A named list with one element per convention. Currently:
+##'   \describe{
+##'     \item{`df_icos`}{Data frame with columns `name`, `long_name`, `units`,
+##'       `uri`. One row per ICOS variable (e.g. `TA`, `WS`, `P`).}
+##'     \item{`df_era5`}{Data frame with the same columns for ERA5 variables
+##'       (e.g. `t2m`, `ws`, `tp`). Keyed by ICOS variable (`name` is the
+##'       ICOS name); multiple ICOS variables may share one ERA5 proxy.}
+##'   }
+##'   The `uri` column is reserved for future NVS/SKOS linked-data identifiers
+##'   and is currently `NA` for all rows.
+##'
+##' @details
+##' New conventions (e.g. CF, BODC/NVS) can be added by:
+##' 1. Appending columns to `data-raw/convention_lookup.csv`.
+##' 2. Adding a corresponding element to the `l_conventions` list in
+##'    `data-raw/make_data-sets.R`.
+##' 3. Adding `name_<conv>` / `units_<conv>` columns to `dt_meta` for the new
+##'    convention. [check_dt_meta()] and [change_naming_convention()] will then
+##'    pick them up automatically.
+##'
+##' @source Derived from `data-raw/convention_lookup.csv`, which consolidates
+##'   ICOS ETC variable definitions and ERA5 parameter names.
+##'
+##' @name l_conventions
+##' @docType data
+##' @keywords datasets
+NULL

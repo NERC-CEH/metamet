@@ -16,7 +16,10 @@ make_test_metamet <- function(include_qc = TRUE, include_ref = TRUE) {
     site = "A",
     name_dt = c("TIMESTAMP", "temp", "flux"),
     type = c("time", "climate", "flux"),
-    name_icos = c(NA_character_, "TA", "NEE")
+    name_icos = c("TIMESTAMP", "TA", "NEE"),
+    horizontal_id = c(NA_integer_, 1L, 1L),
+    vertical_id = c(NA_integer_, 1L, 1L),
+    replicate_id = c(NA_integer_, NA_integer_, NA_integer_)
   )
 
   dt_site <- data.table::data.table(

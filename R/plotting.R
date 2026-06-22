@@ -1,6 +1,7 @@
 #' Custom plotting function for each variable
 #'
 
+#' @import ggiraph
 #' @importFrom ggplot2 scale_linetype_manual
 #' @title ggiraph_plot
 #' @description Creates an interactive girafe plot, whereby the user can select
@@ -21,6 +22,13 @@ ggiraph_plot <- function(
     by = "qc",
     all.x = TRUE
   )
+
+  units_icos <- mm_qry$dt_meta[name_icos == input_variable, units_icos][1L]
+  y_label <- if (!is.na(units_icos)) {
+    paste0(input_variable, " (", units_icos, ")")
+  } else {
+    input_variable
+  }
 
   if (scale_ref) {
     dt_plot[
@@ -88,7 +96,7 @@ ggiraph_plot <- function(
     scale_linetype_manual(name = NULL, values = "solid") +
     scale_color_manual(values = col_pal, limits = force) +
     xlab("Date") +
-    ylab(paste("Your variable:", input_variable)) +
+    ylab(y_label) +
     ggtitle(paste(input_variable, "time series")) +
     theme(
       plot.title = element_text(hjust = 0.5),

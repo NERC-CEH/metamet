@@ -742,9 +742,13 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
       cat("DEBUG: preview_table called\n")
       req(rv$dt_raw)
 
-      cat("DEBUG: preview_table — dt_raw has",
-          nrow(rv$dt_raw), "rows and",
-          ncol(rv$dt_raw), "columns\n")
+      cat(
+        "DEBUG: preview_table — dt_raw has",
+        nrow(rv$dt_raw),
+        "rows and",
+        ncol(rv$dt_raw),
+        "columns\n"
+      )
 
       dt <- head(rv$dt_raw, 6L)
       # integer64 columns (e.g. compact timestamps) display as 0 in renderTable;

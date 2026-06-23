@@ -722,8 +722,10 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
     # Data preview
     output$preview_ui <- renderUI({
       # debug table visibility
-      cat("DEBUG: preview_ui called — dt_raw is",
-          if (is.null(rv$dt_raw)) "NULL\n" else "NOT NULL\n")
+      cat(
+        "DEBUG: preview_ui called — dt_raw is",
+        if (is.null(rv$dt_raw)) "NULL\n" else "NOT NULL\n"
+      )
       #############################
       req(rv$dt_raw)
       tagList(

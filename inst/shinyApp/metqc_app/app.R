@@ -179,7 +179,8 @@ ui <- dashboardPage(
                 "finished_check",
                 label = "Mark variable as reviewed"
               ),
-              tags$br(), tags$br(),
+              tags$br(),
+              tags$br(),
               tags$h4("Batch Quality Control"),
               actionButton("batch_invalidate", "Batch invalidate from file"),
               bsTooltip("batch_invalidate",

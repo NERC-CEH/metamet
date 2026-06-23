@@ -985,7 +985,11 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
     #reset button
     output$reset_button_ui <- renderUI({
       req(rv$loaded_files)
-      actionButton(ns("reset_files"), "Remove and load other files", class = "btn-warning")
+      actionButton(
+        ns("reset_files"),
+        "Remove and load other files",
+        class = "btn-warning"
+      )
     })
 
     # Match summary for file-loaded dt_meta

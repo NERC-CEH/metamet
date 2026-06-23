@@ -43,7 +43,11 @@ ui <- dashboardPage(
         tabName = "dashboard",
         icon = icon('database')
       ),
-      menuItem("Save Processed Data", tabName = "download", icon = icon('download')),
+      menuItem(
+        "Save Processed Data",
+        tabName = "download",
+        icon = icon('download')
+      ),
       menuItem(
         "Information",
         tabName = "information",

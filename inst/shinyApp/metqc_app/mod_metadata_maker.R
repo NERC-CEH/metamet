@@ -82,7 +82,7 @@ mod_metadata_maker_ui <- function(id) {
           id = ns("loading_spinner"),
           style = "display:none; margin-top:10px;",
           shinycssloaders::withSpinner(
-            div(style="height:40px;"),
+            div(style = "height:40px;"),
             type = 4,
             color = "#0072B2"
           )

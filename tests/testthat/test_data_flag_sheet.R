@@ -38,8 +38,11 @@ test_that("QC sheet exists and has the correct cols", {
   required_cols <- c("start_time", "end_time", "var_name", "comment")
   missing_cols <- setdiff(required_cols, names(qc_df))
   expect_equal(
-    length(missing_cols), 0,
-    info = sprintf("QC sheet is missing the required columns: %s",
-                   paste(missing_cols, collapse = ", "))
+    length(missing_cols),
+    0,
+    info = sprintf(
+      "QC sheet is missing the required columns: %s",
+      paste(missing_cols, collapse = ", ")
+    )
   )
 })

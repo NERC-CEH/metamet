@@ -563,7 +563,10 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
             metamet:::import_campbell_data(dat_path)
           } else if (fmt == "oldcampbell") {
             dld_info <- parseFilePaths(v_roots, input$dld_file)
-            metamet::read_old_campbell_dat(dat_path, as.character(dld_info$datapath))
+            metamet::read_old_campbell_dat(
+              dat_path,
+              as.character(dld_info$datapath)
+            )
           } else {
             metamet::read_ceda_csv(dat_path)
           }

@@ -2,8 +2,7 @@
 
 mod_machine_faults_ui <- function(id) {
   ns <- NS(id)
-  tagList(
-  )
+  tagList()
 }
 
 mod_machine_faults_server <- function(id, mm_qry, username) {

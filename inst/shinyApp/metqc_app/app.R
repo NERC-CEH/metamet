@@ -6,6 +6,7 @@ library(shinyFiles)
 library(ggiraph)
 
 source("mod_metadata_maker.R", local = TRUE)
+source("mod_time_average.R", local = TRUE)
 
 # Set the gap-filling methods and codes----
 gf_choices <- setNames(df_method$method, df_method$method_longname)
@@ -132,12 +133,14 @@ ui <- dashboardPage(
                 step = 1
               )
             ),
+            mod_time_average_ui("timeavg"),
             actionButton("retrieve_data", "Retrieve from database"),
             actionButton("compare_vars", "Compare variables"),
           )
         ),
         hidden(
           fluidRow(
+            uiOutput("time_avg_banner"),
             id = "extracted_data",
             box(
               title = "Extracted Data",
@@ -480,6 +483,13 @@ server <- function(input, output, session) {
     }
   })
 
+  # call time average mod
+  mm_timeavg <- mod_time_average_server(
+    id = "timeavg",
+    mm_qry_in = reactive(mm_qry_raw),
+    daterange_reactive = df_daterange
+  )
+
   # Data retrieval functionality-----
   observeEvent(input$retrieve_data, {
     for (i in seq_along(uploaded()$v_names)) {
@@ -494,6 +504,14 @@ server <- function(input, output, session) {
       start_date = df_daterange()$start_date,
       end_date = df_daterange()$end_date
     )
+
+    # TIME AVERAGING
+    # doesn't overwrite raw data, but creates subset
+    mm_qry_raw <<- data.table::copy(mm_qry)
+
+    # Call module to get averaged or raw version
+    mm_qry <<- mm_timeavg()
+
     data.table::setkeyv(mm_qry$dt, c("name_icos", "site", "TIMESTAMP"))
     mm_qry$dt[, row_name := as.factor(rownames(mm_qry$dt))]
     mm_qry$dt$datect_num <<- as.numeric(mm_qry$dt$TIMESTAMP)
@@ -501,6 +519,15 @@ server <- function(input, output, session) {
     if (!"qc_orig" %in% names(mm_qry$dt)) {
       mm_qry$dt[, qc_orig := qc]
     }
+
+    # show which avg the plots are displaying
+    output$time_avg_banner <- renderUI({
+      req(input$time_avg != "none")
+      div(
+        style = "padding:6px; background:#e6ffe6; border-left:4px solid #2e7d32;",
+        strong("Time averaging applied: "), input$time_avg
+      )
+    })
 
     # Add a tab to the plotting panel for each variable that has been selected by the user.
     output$mytabs <- renderUI({

@@ -32,8 +32,10 @@ mod_metadata_maker_ui <- function(id) {
     if (el.length) el.remove();
     $('#' + message.id).val('');
   });
-    ")),
-    tags$script(HTML("
+    "
+    )),
+    tags$script(HTML(
+      "
   Shiny.addCustomMessageHandler('click', function(message) {
     $('#' + message.id).click();
   });

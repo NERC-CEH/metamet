@@ -7,6 +7,7 @@ library(ggiraph)
 
 source("mod_metadata_maker.R", local = TRUE)
 source("mod_time_average.R", local = TRUE)
+source("mod_qc_propagation.R", local = TRUE)
 
 # Set the gap-filling methods and codes----
 gf_choices <- setNames(df_method$method, df_method$method_longname)
@@ -772,96 +773,17 @@ server <- function(input, output, session) {
     }
   )
 
-  # Writing validated data to file---- From main Dashboard
-  observeEvent(input$submitchanges, {
-    # Update button text
-    runjs(
-      'document.getElementById("submitchanges").textContent="Submitting changes...";'
-    )
-
-    # disable button while working
-    shinyjs::disable("submitchanges")
-    shinyjs::disable("edit_table_cols")
-
-    # missing comment warning for variables that were imputed
-    for (v in uploaded()$v_names) {
-      rows_var <- mm_qry$dt[
-        name_icos == v & !is.na(qc) & qc != 0L & !is.na(qc_orig) & qc_orig != qc
-      ]
-
-      # If no imputed rows then no comment is needed
-      if (nrow(rows_var) == 0) {
-        v_missing_comments[[v]] <- FALSE
-        next
-      }
-
-      # If imputed rows exist then require comments
-      if (any(is.na(rows_var$comment) | rows_var$comment == "")) {
-        v_missing_comments[[v]] <- TRUE
-      } else {
-        v_missing_comments[[v]] <- FALSE
-      }
-    }
-
-    # Identify which rows were invalidated (qc != 0)
-    imputed_rows <- mm_qry$dt[
-      !is.na(qc) & qc != 0L & !is.na(qc_orig) & qc_orig != qc
-    ]
-
-    # update lev2 with mm_qry
-    # update validator on imputed rows (qc != 0 means imputed or flagged)
-    mm_qry$dt[!is.na(qc) & qc != 0L, validator := username]
-
-    # Make a copy for saving, so the app keeps row_name for plotting
-    mm_qry_save <- data.table::copy(mm_qry)
-
-    # Remove internal columns ONLY from the saved copy
-    mm_qry_save$dt[, c("row_name", "datect_num") := NULL]
-
-    # Overwrite existing data with changes in query
-    mm <- join(uploaded()$mm, mm_qry_save)
-
-    fname <- uploaded()$fname
-    print(uploaded()$fname)
-    saveRDS(
-      mm,
-      file = paste0(
-        fs::path_ext_remove(fname),
-        "_qc_by_",
-        username,
-        "_on_",
-        Sys.Date(),
-        ".",
-        fs::path_ext(fname)
-      )
-    )
-    df_ceda <- metamet:::format_for_ceda(mm)
-    saveRDS(
-      df_ceda,
-      file = paste0(
-        fs::path_ext_remove(fname),
-        "_qc_by_",
-        username,
-        "_on_",
-        Sys.Date(),
-        "_ceda.",
-        fs::path_ext(fname)
-      )
-    )
-
-    # notify user that file was created
-    showNotification(
-      "Your file was successfully created.",
-      type = "message",
-      duration = 5
-    )
-
-    # remove button activation and reactivate button
-    runjs(
-      'document.getElementById("submitchanges").textContent="Submit";'
-    )
-    shinyjs::enable("submitchanges")
-  })
+  # Writing validated data to file---- From main Dashboard with mod_qc_propagation.R
+  mod_qc_propagation_server(
+    id = "qc",
+    mm_qry = reactive(mm_qry),
+    mm_qry_raw = reactive(mm_qry_raw),
+    v_names = uploaded()$v_names,
+    time_avg = reactive(input$time_avg),
+    username = username,
+    fname = uploaded()$fname,
+    save_trigger = reactive(input$submitchanges)
+  )
 }
 
 shinyApp(ui, server)

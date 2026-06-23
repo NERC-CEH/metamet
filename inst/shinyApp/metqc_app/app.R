@@ -8,6 +8,7 @@ library(ggiraph)
 source("mod_metadata_maker.R", local = TRUE)
 source("mod_time_average.R", local = TRUE)
 source("mod_qc_propagation.R", local = TRUE)
+source("mod_download.R", local = TRUE)
 
 # Set the gap-filling methods and codes----
 gf_choices <- setNames(df_method$method, df_method$method_longname)
@@ -208,21 +209,10 @@ ui <- dashboardPage(
       tabItem(
         tabName = 'download',
         fluidRow(
-          box(
-            id = 'download_box',
-            title = 'Data download',
-            status = "success",
-            solidHeader = TRUE,
-            selectInput(
-              'download_file',
-              'Data to download:',
-              choices = c(
-                'Level 1' = 'lev1',
-                'Level 2' = 'lev2',
-                'CEDA' = 'ceda'
-              )
-            ),
-            downloadButton('download_data', label = 'Download')
+          column(
+            width = 6,
+            style = "padding-left: 30px; padding-top: 20px;",
+            mod_download_ui("download")
           )
         )
       ),
@@ -728,51 +718,6 @@ server <- function(input, output, session) {
     )
   })
 
-  output$download_data <- downloadHandler(
-    filename = function() {
-      if (input$download_file == 'lev1') {
-        paste("level_1-", Sys.Date(), ".zip", sep = "")
-      } else if (input$download_file == 'lev2') {
-        paste("level_2-", Sys.Date(), ".zip", sep = "")
-      } else if (input$download_file == 'ceda') {
-        paste("ceda-", Sys.Date(), ".zip", sep = "")
-      }
-    },
-    content = function(file) {
-      if (input$download_file == 'lev2') {
-        runjs(
-          'document.getElementById("download_data").textContent="Preparing download...";'
-        )
-        shinyjs::disable("download_data")
-        tmpdir <- tempdir()
-        setwd(tempdir())
-        fs <- c('level_2-data.csv', 'level_2-qc.csv')
-        data.table::fwrite(mm$dt, 'level_2-data.csv')
-        data.table::fwrite(mm$dt_qc, 'level_2-qc.csv')
-        zip(zipfile = file, files = fs)
-        runjs(
-          'document.getElementById("download_data").textContent="Download";'
-        )
-        shinyjs::enable("download_data")
-      } else if (input$download_file == 'ceda') {
-        runjs(
-          'document.getElementById("download_data").textContent="Preparing download...";'
-        )
-        shinyjs::disable("download_data")
-        tmpdir <- tempdir()
-        setwd(tempdir())
-        fs <- c('ceda-data.csv')
-        df_ceda <- metamet:::format_for_ceda(mm)
-        data.table::fwrite(df_ceda, 'ceda-data.csv')
-        zip(zipfile = file, files = fs)
-        runjs(
-          'document.getElementById("download_data").textContent="Download";'
-        )
-        shinyjs::enable("download_data")
-      }
-    }
-  )
-
   # Writing validated data to file---- From main Dashboard with mod_qc_propagation.R
   mod_qc_propagation_server(
     id = "qc",
@@ -784,6 +729,13 @@ server <- function(input, output, session) {
     fname = uploaded()$fname,
     save_trigger = reactive(input$submitchanges)
   )
+
+  mod_download_server(
+    id = "download",
+    mm_final = reactive(mm_qry)
+  )
+
+
 }
 
 shinyApp(ui, server)

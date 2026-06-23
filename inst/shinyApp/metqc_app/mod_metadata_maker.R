@@ -584,8 +584,13 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
       # file debugging
       if (!is.null(dt_loaded)) {
         if (is.data.frame(dt_loaded)) {
-          cat("DEBUG: Loaded data frame with", nrow(dt_loaded), "rows and",
-              ncol(dt_loaded), "columns\n")
+          cat(
+            "DEBUG: Loaded data frame with",
+            nrow(dt_loaded),
+            "rows and",
+            ncol(dt_loaded),
+            "columns\n"
+          )
         } else if (is.list(dt_loaded)) {
           cat("DEBUG: Loaded list of", length(dt_loaded), "tables\n")
           lapply(names(dt_loaded), function(nm) {

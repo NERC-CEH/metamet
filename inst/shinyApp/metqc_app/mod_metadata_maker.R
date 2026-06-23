@@ -683,7 +683,10 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
       req(rv$l_raw_tables, input$table_select)
       dt <- rv$l_raw_tables[[input$table_select]]
       if (!"TIMESTAMP" %in% names(dt)) {
-        showNotification("Selected table has no TIMESTAMP column.", type = "error")
+        showNotification(
+          "Selected table has no TIMESTAMP column.",
+          type = "error"
+        )
         return()
       }
       rv$dt_raw <- dt

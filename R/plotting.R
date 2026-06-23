@@ -10,10 +10,10 @@
 #' @details DETAILS
 #' @export
 ggiraph_plot <- function(
-    input_variable,
-    scale_ref = FALSE,
-    point_size = 3,
-    vars_to_show = NULL
+  input_variable,
+  scale_ref = FALSE,
+  point_size = 3,
+  vars_to_show = NULL
 ) {
   dt_plot <- merge(
     mm_qry$dt,

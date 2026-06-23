@@ -458,7 +458,10 @@ server <- function(input, output, session) {
     # Send user back to upload tab
     updateTabItems(session, "tabs", "upload")
 
-    showNotification("Metamet file removed. You can now load a new one.", type = "message")
+    showNotification(
+      "Metamet file removed. You can now load a new one.",
+      type = "message"
+    )
   })
 
   # Create a date input for the user to select start date

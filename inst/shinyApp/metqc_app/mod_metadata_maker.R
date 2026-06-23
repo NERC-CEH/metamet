@@ -518,9 +518,12 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
       # loading spinner
       shinyjs::show(id = ns("loading_spinner"))
 
-      on.exit({
-        shinyjs::hide(id = ns("loading_spinner"))
-      }, add = TRUE)
+      on.exit(
+        {
+          shinyjs::hide(id = ns("loading_spinner"))
+        },
+        add = TRUE
+      )
       req(input$dat_file)
       dat_info <- parseFilePaths(v_roots, input$dat_file)
       req(nrow(dat_info) > 0)

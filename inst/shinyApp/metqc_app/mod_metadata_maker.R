@@ -572,8 +572,11 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
           }
         },
         error = function(e) {
-          showNotification(paste("Error loading file:", conditionMessage(e)),
-                           type = "error", duration = 8)
+          showNotification(
+            paste("Error loading file:", conditionMessage(e)),
+            type = "error",
+            duration = 8
+          )
           NULL
         }
       )

@@ -11,8 +11,11 @@ mod_machine_faults_server <- function(id, mm_qry, username) {
     observeEvent(input$show_faults_modal, {
       showModal(modalDialog(
         title = "Batch invalidate data",
-        fileInput(session$ns("faults_excel"), "Upload file (.xlsx, .xls)",
-                  accept = c(".xlsx", ".xls")),
+        fileInput(
+          session$ns("faults_excel"),
+          "Upload file (.xlsx, .xls)",
+          accept = c(".xlsx", ".xls")
+        ),
         uiOutput(session$ns("faults_preview")),
         actionButton(session$ns("apply_batch_invalidation"), "Apply invalidation"),
         footer = modalButton("Close"),

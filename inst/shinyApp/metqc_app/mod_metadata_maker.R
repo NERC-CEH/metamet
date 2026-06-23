@@ -543,7 +543,10 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
       v_files <- basename(dat_info$datapath)
       if (fmt == "oldcampbell") {
         dld_info <- parseFilePaths(v_roots, input$dld_file)
-        validate(need(nrow(dld_info) > 0, "Please also select the .dld metadata file."))
+        validate(need(
+          nrow(dld_info) > 0,
+          "Please also select the .dld metadata file."
+        ))
         v_files <- c(v_files, basename(dld_info$datapath))
       }
       rv$loaded_files <- v_files

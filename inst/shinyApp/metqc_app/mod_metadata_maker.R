@@ -23,8 +23,10 @@ mod_metadata_maker_ui <- function(id) {
       .shiny-table {
         white-space: nowrap;
       }
-    ")),
-    tags$script(HTML("
+    "
+    )),
+    tags$script(HTML(
+      "
   Shiny.addCustomMessageHandler('resetFileInput', function(message) {
     var el = $('#' + message.id + '_progress');
     if (el.length) el.remove();

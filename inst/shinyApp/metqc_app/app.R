@@ -73,7 +73,8 @@ ui <- dashboardPage(
       tabItem(
         tabName = "dashboard",
         uiOutput("loaded_file_banner"),
-        tags$style(HTML("
+        tags$style(HTML(
+          "
         /* Greys out the first 2 disabled sidebar menu items */
         .sidebar-menu a.disabled {
           color: #999 !important;

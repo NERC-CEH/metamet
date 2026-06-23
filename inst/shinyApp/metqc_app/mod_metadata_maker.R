@@ -554,7 +554,11 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
       dt_loaded <- tryCatch(
         {
           if (fmt == "csv") {
-            data.table::fread(dat_path, na.strings = c("", "NA"), showProgress = FALSE)
+            data.table::fread(
+              dat_path,
+              na.strings = c("", "NA"),
+              showProgress = FALSE
+            )
           } else if (fmt == "toa5") {
             metamet:::import_campbell_data(dat_path)
           } else if (fmt == "oldcampbell") {

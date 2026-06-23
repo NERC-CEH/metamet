@@ -39,7 +39,7 @@ ui <- dashboardPage(
         icon = icon("upload")
       ),
       menuItem(
-        "Choose date range",
+        "Select date range and QA/QC",
         tabName = "dashboard",
         icon = icon('database')
       ),
@@ -49,7 +49,12 @@ ui <- dashboardPage(
         icon = icon('download')
       ),
       menuItem(
-        "Information",
+        "Download processed data",
+        tabName = "download",
+        icon = icon('download')
+      ),
+      menuItem(
+        "Help and Documentation",
         tabName = "information",
         icon = icon('info'),
         menuSubItem('Gap-fill methods', tabName = 'gapfill_guide'),

@@ -47,7 +47,7 @@ read_csv_with_excel_datetimes <- function(
   tz = "UTC",
   sample_n = 5000L
 ) {
-  dt <- fread(file)
+  dt <- fread(file, na.strings = c("NA", "#N/A", ""))
 
   for (col in datetime_cols) {
     if (!col %in% names(dt)) {

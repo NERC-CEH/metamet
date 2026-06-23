@@ -4,7 +4,11 @@
 \alias{change_naming_convention}
 \title{Change the naming convention of measurement variables}
 \usage{
-change_naming_convention(mm_in, name_convention = "name_era5")
+change_naming_convention(
+  mm_in,
+  name_convention = "name_era5",
+  convert_units = TRUE
+)
 }
 \arguments{
 \item{mm_in}{A metamet object containing at least:
@@ -17,6 +21,12 @@ change_naming_convention(mm_in, name_convention = "name_era5")
 
 \item{name_convention}{A character string giving the column in `dt_meta`
 that contains the base names to use (default: `"name_era5"`).}
+
+\item{convert_units}{Controls which numeric columns are unit-converted when
+the source and target conventions carry different `units_*` values in
+`dt_meta`. `TRUE` (default) converts both observations (`value`) and
+reference data (`ref`); `FALSE` converts neither; `"obs"` converts
+observations only; `"ref"` converts reference data only.}
 }
 \value{
 The modified `mm_in` object with updated column names in all relevant

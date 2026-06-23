@@ -13,10 +13,12 @@ read_plain_csv(fname, ...)
 e.g. \code{sep}, \code{na.strings}.}
 }
 \value{
-A \code{data.table} with a \code{TIMESTAMP} column (still in its
-  original character or numeric class — conversion to POSIXct happens
-  inside \code{\link{metamet}} via \code{time_char_format} in
-  \code{dt_meta}).
+A \code{data.table} with column names exactly as written in the
+  file header. No renaming is performed; the caller's \code{dt_meta} must
+  use \code{name_dt} values that match the actual column names.
+  Downstream metamet functions (\code{metamet_wide_to_long},
+  \code{convert_time_char_to_posix}) normalise the time column to
+  \code{TIMESTAMP} automatically based on \code{dt_meta}.
 }
 \description{
 Reads a standard CSV file in which the first row is a column header. The

@@ -44,6 +44,30 @@ df_method$method_longname <- factor(
 
 usethis::use_data(df_method, overwrite = TRUE)
 
+# Convention lookup registry: one row per ICOS variable, keyed by name_icos.
+# Derived from data-raw/convention_lookup.csv (which is maintained by hand from
+# data-raw/not_using/met_variable_standard_formats.csv).
+# uri_icos / uri_era5 are blank for now; reserved for NVS/SKOS linked-data URIs.
+dt_cv <- data.table::fread("data-raw/convention_lookup.csv", na.strings = "")
+l_conventions <- list(
+  df_icos = data.frame(
+    name = dt_cv$name_icos,
+    long_name = dt_cv$long_name_icos,
+    units = dt_cv$units_icos,
+    uri = dt_cv$uri_icos,
+    stringsAsFactors = FALSE
+  ),
+  df_era5 = data.frame(
+    name = dt_cv$name_era5,
+    long_name = dt_cv$long_name_era5,
+    units = dt_cv$units_era5,
+    uri = dt_cv$uri_era5,
+    stringsAsFactors = FALSE
+  )
+)
+l_conventions <- lapply(l_conventions, function(df) df[!is.na(df$name), ])
+usethis::use_data(l_conventions, overwrite = TRUE)
+
 
 # make some metamet objects from files
 site_id <- "UK-AMO"

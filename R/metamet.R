@@ -90,6 +90,8 @@ new_metamet <- function(
   # Specify the class and return the metamet object
   class(new_metamet) <- c("metamet", class(new_metamet))
   attr(new_metamet, "format") <- "wide"
+  attr(new_metamet, "name_convention") <- "name_local"
+  check_dt_meta(dt_meta)
   return(new_metamet)
 }
 

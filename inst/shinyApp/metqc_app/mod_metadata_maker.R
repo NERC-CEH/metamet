@@ -39,7 +39,8 @@ mod_metadata_maker_ui <- function(id) {
   Shiny.addCustomMessageHandler('click', function(message) {
     $('#' + message.id).click();
   });
-")),
+"
+    )),
     uiOutput(ns("loaded_file_banner")),
     uiOutput(ns("reset_button_ui")),
     br(),

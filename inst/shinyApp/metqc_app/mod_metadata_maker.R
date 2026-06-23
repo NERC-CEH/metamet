@@ -600,7 +600,9 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
       }
       ########################
 
-      if (is.null(dt_loaded)) return()
+      if (is.null(dt_loaded)) {
+        return()
+      }
 
       if (is.list(dt_loaded) && !is.data.frame(dt_loaded)) {
         rv$l_raw_tables <- dt_loaded

@@ -133,7 +133,8 @@ ui <- dashboardPage(
                 step = 1
               )
             ),
-            tags$script("
+            tags$script(
+              "
             Shiny.addCustomMessageHandler('trigger_faults_modal', function(message) {
             Shiny.setInputValue('machine_faults-show_faults_modal', Math.random());
             });

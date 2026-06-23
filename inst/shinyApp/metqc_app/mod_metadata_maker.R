@@ -319,7 +319,8 @@ mod_metadata_maker_ui <- function(id) {
           p(
             "You can now download your metamet object as an .rds file. ",
             "This file can be open in the Open existing Metamet object sidetab of this app,
-            allowing you to visualise and impute the data."),
+            allowing you to visualise and impute the data."
+          ),
           downloadButton(ns("save_rds"), "Download as metamet .rds"),
           br(),
           br(),

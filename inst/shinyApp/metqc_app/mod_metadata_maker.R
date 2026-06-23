@@ -755,8 +755,11 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
       # convert to character so the raw values are visible
       v_i64 <- names(dt)[vapply(dt, bit64::is.integer64, logical(1L))]
       if (length(v_i64)) {
-        cat("DEBUG: preview_table — converting integer64 columns:",
-            paste(v_i64, collapse = ", "), "\n")
+        cat(
+          "DEBUG: preview_table — converting integer64 columns:",
+          paste(v_i64, collapse = ", "),
+          "\n"
+        )
         dt <- data.table::copy(dt)
         dt[, (v_i64) := lapply(.SD, as.character), .SDcols = v_i64]
       }

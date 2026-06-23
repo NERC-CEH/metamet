@@ -18,7 +18,8 @@ mod_metadata_maker_ui <- function(id) {
   ns <- NS(id)
   tagList(
     # prevents column headers from wrapping in the preview table; also applies to mapping and details tables in later steps
-    tags$style(HTML("
+    tags$style(HTML(
+      "
       .shiny-table {
         white-space: nowrap;
       }

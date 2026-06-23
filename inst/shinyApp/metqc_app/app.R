@@ -89,7 +89,8 @@ ui <- dashboardPage(
           background-color: #e6e6e6 !important;
           color: #999 !important;
         }
-")),
+"
+        )),
         br(),
         fluidRow(
           box(

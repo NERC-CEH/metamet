@@ -138,7 +138,8 @@ ui <- dashboardPage(
             Shiny.addCustomMessageHandler('trigger_faults_modal', function(message) {
             Shiny.setInputValue('machine_faults-show_faults_modal', Math.random());
             });
-            "),
+            "
+            ),
             actionButton("retrieve_data", "Retrieve from database"),
             actionButton("compare_vars", "Compare variables")
           )

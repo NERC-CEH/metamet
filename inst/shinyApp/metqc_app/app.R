@@ -719,7 +719,7 @@ server <- function(input, output, session) {
   })
 
   # Writing validated data to file---- From main Dashboard with mod_qc_propagation.R
-  mod_qc_propagation_server(
+  mm_final_raw <- mod_qc_propagation_server(
     id = "qc",
     mm_qry = reactive(mm_qry),
     mm_qry_raw = reactive(mm_qry_raw),
@@ -730,12 +730,18 @@ server <- function(input, output, session) {
     save_trigger = reactive(input$submitchanges)
   )
 
+  mm_final_raw_safe <- reactive({
+    if (!is.null(mm_final_raw()) && !is.null(mm_final_raw()$dt)) {
+      mm_final_raw()
+    } else {
+      # fallback: raw data before QC
+      mm_qry_raw
+    }
+  })
+
   mod_download_server(
     id = "download",
-    mm_final = reactive(mm_qry)
-  )
-
-
+    mm_final = mm_final_raw_safe)
 }
 
 shinyApp(ui, server)

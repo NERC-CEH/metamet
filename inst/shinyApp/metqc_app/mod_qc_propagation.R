@@ -123,6 +123,9 @@ mod_qc_propagation_server <- function(
 ) {
 
   moduleServer(id, function(input, output, session) {
+
+    # This object will hold the final raw QC-corrected dataset
+    mm_final <- NULL
     observeEvent(save_trigger(), {
       # Detect whether ANY row was modified
       dt <- mm_qry()$dt
@@ -152,7 +155,6 @@ mod_qc_propagation_server <- function(
       }
 
       # propagate QC back to raw if averaging was used
-      mm_final <- mm_qry()
       ta <- time_avg()
       if (!is.null(ta) && length(ta) == 1 && ta != "none") {
         interval <- lubridate::duration(ta)
@@ -164,13 +166,18 @@ mod_qc_propagation_server <- function(
           username
         )
 
-        mm_final <- result$mm
+        mm_final <<- result$mm
 
         showNotification(
           paste("QC updates applied to", result$updated, "raw data rows."),
           type = "message",
           duration = 6
         )
+
+      } else {
+
+        # No averaging → the edited mm_qry() is already raw
+        mm_final <<- mm_qry()
       }
 
       # Prepare object for saving
@@ -188,5 +195,6 @@ mod_qc_propagation_server <- function(
         duration = 5
       )
     })
+    return(reactive(mm_final))
   })
 }

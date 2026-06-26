@@ -123,10 +123,11 @@ mod_download_server <- function(id, mm_final) {
                 report_end_interval = TRUE,
                 extra_rows = 0
               )
-
+              # reshape obj back to long format
+              mm_avg <- metamet_reshape(mm_avg, "long")
+              # debug
               cat("Averaging complete. Structure:\n")
               print(str(mm_avg))
-
             } else {
               cat("No averaging selected — using raw QC‑corrected data.\n")
               mm_avg <- mm_raw

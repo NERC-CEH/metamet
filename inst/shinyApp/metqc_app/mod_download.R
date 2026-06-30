@@ -155,7 +155,7 @@ mod_download_server <- function(id, mm_final) {
             }
 
             # -------------------------------------------------------
-            # 3. DEBUGGING (kept exactly as you want)
+            # 3. DEBUGGING
             # -------------------------------------------------------
             cat("\n--- DEBUG df_out for", prefix, "avg =", avg, "---\n")
             cat("class(df_out):", class(df_out), "\n")
@@ -163,6 +163,52 @@ mod_download_server <- function(id, mm_final) {
             cat("is.data.table:", data.table::is.data.table(df_out), "\n")
             print(utils::str(df_out))
             cat("--- END DEBUG ---\n\n")
+
+            # propagate comments from raw to averaged data if lev1 and averaging is applied
+            if (lev == "lev1" &&
+                avg != "none" &&
+                "comment" %in% names(mm_raw$dt)) {
+
+              # Map averaging string to lubridate duration
+              avg_duration <- switch(
+                avg,
+                "1 day"  = lubridate::ddays(1),
+                "1 week" = lubridate::dweeks(1),
+                "1 month"= lubridate::dmonths(1)
+              )
+
+              if (!is.null(avg_duration)) {
+
+                # Raw rows that actually have comments
+                comments_raw <- mm_raw$dt[
+                  !is.na(comment),
+                  .(site, name_icos, raw_time = TIMESTAMP, comment)
+                ]
+
+                cat("Number of raw commented rows:", nrow(comments_raw), "\n")
+
+                if (nrow(comments_raw) > 0) {
+
+                  # Compute interval start for each averaged row
+                  df_out[, interval_start := TIMESTAMP - avg_duration]
+
+                  # Non-equi join: raw_time within [interval_start, TIMESTAMP]
+                  df_out[comments_raw,
+                         on = .(
+                           site,
+                           name_icos,
+                           interval_start <= raw_time,
+                           TIMESTAMP      >= raw_time
+                         ),
+                         comment := i.comment
+                  ]
+
+                  # Drop helper column
+                  df_out[, interval_start := NULL]
+                }
+              }
+            }
+            ##################################
 
             # -------------------------------------------------------
             # 4. WRITE FILES (include averaging in filename)

@@ -180,6 +180,41 @@ mod_download_server <- function(id, mm_final) {
                 avg != "none" &&
                 "comment" %in% names(mm_raw$dt) &&
                 "qc" %in% names(mm_raw$dt)) {
+              if (avg == "1 month") {
+                cat("Applying MONTHLY QC/comment propagation...\n")
+                raw_dt <- mm_raw$dt[
+                  !is.na(qc) | !is.na(comment),
+                  .(
+                    site,
+                    name_icos,
+                    year_month = format(TIMESTAMP, "%Y-%m"),
+                    qc_raw = qc,
+                    comment_raw = comment
+                  )
+                ]
+                monthly_raw <- raw_dt[
+                  ,
+                  .(
+                    qc = if (all(is.na(qc_raw))) NA_integer_ else max(qc_raw, na.rm = TRUE),
+                    comment = {
+                      cmt <- comment_raw[!is.na(comment_raw) & comment_raw != ""]
+                      if (length(cmt) > 0) cmt[1] else NA_character_
+                    }
+                  ),
+                  by = .(site, name_icos, year_month)
+                ]
+                df_out[, year_month := format(TIMESTAMP, "%Y-%m")]
+                data.table::setkey(df_out, site, name_icos, year_month)
+                data.table::setkey(monthly_raw, site, name_icos, year_month)
+                df_out[monthly_raw,
+                       `:=`(
+                         qc = i.qc,
+                         comment = i.comment
+                       )
+                ]
+                df_out[, year_month := NULL]
+              } else {
+                cat("Applying QC/comment propagation for", avg, "averaging...\n")
 
               # Map averaging string to lubridate duration
               avg_duration <- switch(
@@ -280,6 +315,7 @@ mod_download_server <- function(id, mm_final) {
                 }
               }
             }
+          }
 
             # -------------------------------------------------------
             # 4. WRITE FILES (include averaging in filename)

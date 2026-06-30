@@ -192,7 +192,6 @@ mod_download_server <- function(id, mm_final) {
                   # Compute interval start for each averaged row
                   df_out[, interval_start := TIMESTAMP - avg_duration]
 
-                  # Non-equi join: raw_time within [interval_start, TIMESTAMP]
                   df_out[comments_raw,
                          on = .(
                            site,

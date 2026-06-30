@@ -36,6 +36,7 @@ mod_download_ui <- function(id) {
 
 mod_download_server <- function(id, mm_final) {
   moduleServer(id, function(input, output, session) {
+
     # warning if no level is selected or if a dataset is not available
     output$levels_warning <- renderUI({
       msgs <- c()
@@ -49,15 +50,20 @@ mod_download_server <- function(id, mm_final) {
       }
 
       if (length(msgs) > 0) {
-        tags$div(style="color:#b30000; font-size:0.9em;", HTML(paste(msgs, collapse="<br>")))
+        tags$div(
+          style = "color:#b30000; font-size:0.9em;",
+          HTML(paste(msgs, collapse = "<br>"))
+        )
       }
     })
 
     # warning if no format is selected
     output$format_warning <- renderUI({
       if (length(input$download_formats) == 0) {
-        tags$div(style="color:#b30000; font-size: 0.9em;",
-                 "Please select at least one format.")
+        tags$div(
+          style = "color:#b30000; font-size: 0.9em;",
+          "Please select at least one format."
+        )
       }
     })
 
@@ -65,13 +71,13 @@ mod_download_server <- function(id, mm_final) {
     output$avg_warning <- renderUI({
       if (length(input$download_avg) == 0) {
         tags$div(
-          style="color:#b30000; font-size:0.9em;",
+          style = "color:#b30000; font-size:0.9em;",
           "Please select at least one averaging option."
         )
       }
     })
 
-    # Disable download button unless at least one format and level are selected
+    # Disable download button unless at least one format, level, and averaging option are selected
     observe({
       if (length(input$download_formats) == 0 ||
           length(input$download_levels) == 0 ||
@@ -90,8 +96,8 @@ mod_download_server <- function(id, mm_final) {
       content = function(file) {
 
         cat("=== DOWNLOAD DEBUG START ===\n")
-        cat("Levels:", paste(input$download_levels, collapse=", "), "\n")
-        cat("Formats:", paste(input$download_formats, collapse=", "), "\n")
+        cat("Levels:", paste(input$download_levels, collapse = ", "), "\n")
+        cat("Formats:", paste(input$download_formats, collapse = ", "), "\n")
 
         progress <- shiny::Progress$new()
         on.exit(progress$close())
@@ -125,7 +131,6 @@ mod_download_server <- function(id, mm_final) {
               )
               # reshape obj back to long format
               mm_avg <- metamet_reshape(mm_avg, "long")
-              # debug
               cat("Averaging complete. Structure:\n")
               print(str(mm_avg))
             } else {
@@ -154,6 +159,10 @@ mod_download_server <- function(id, mm_final) {
               next
             }
 
+            # remove internal cols if present
+            if ("row_name" %in% names(df_out)) df_out[, row_name := NULL]
+            if ("datect_num" %in% names(df_out)) df_out[, datect_num := NULL]
+
             # -------------------------------------------------------
             # 3. DEBUGGING
             # -------------------------------------------------------
@@ -165,11 +174,12 @@ mod_download_server <- function(id, mm_final) {
             cat("--- END DEBUG ---\n\n")
 
             #########################################################
-            # propagate comments & qcfrom raw to averaged data if lev1
-            # and averaging is applied
+            # 3b. PROPAGATE QC + COMMENT FROM RAW TO AVERAGED LEVEL 1
+            #########################################################
             if (lev == "lev1" &&
                 avg != "none" &&
-                "comment" %in% names(mm_raw$dt)) {
+                "comment" %in% names(mm_raw$dt) &&
+                "qc" %in% names(mm_raw$dt)) {
 
               # Map averaging string to lubridate duration
               avg_duration <- switch(
@@ -181,39 +191,95 @@ mod_download_server <- function(id, mm_final) {
 
               if (!is.null(avg_duration)) {
 
-                # Raw rows that actually have comments
-                comments_raw <- mm_raw$dt[
-                  !is.na(comment),
-                  .(site, name_icos, raw_time = TIMESTAMP, comment, qc_raw = qc)
+                # Raw rows that actually have non‑zero QC or comments
+                raw_dt <- mm_raw$dt[
+                  !is.na(qc) | !is.na(comment),
+                  .(site, name_icos, TIMESTAMP, qc_raw = qc, comment_raw = comment)
                 ]
 
-                cat("Number of raw commented rows:", nrow(comments_raw), "\n")
+                cat("Number of raw rows with qc/comment:", nrow(raw_dt), "\n")
 
-                if (nrow(comments_raw) > 0) {
+                if (nrow(raw_dt) > 0) {
 
-                  # Helper: interval start for each averaged row
-                  df_out[, interval_start := TIMESTAMP - avg_duration]
+                  # Build interval table for averaged rows
+                  df_int <- data.table::copy(df_out)
+                  df_int[, interval_start := TIMESTAMP - avg_duration]
+                  df_int[, interval_end   := TIMESTAMP]
 
-                  # Non‑equi join: raw_time inside [interval_start, TIMESTAMP]
-                  df_out[comments_raw,
-                         on = .(
-                           site,
-                           name_icos,
-                           interval_start <= raw_time,
-                           TIMESTAMP      >= raw_time
-                         ),
-                         `:=`(
-                           comment = i.comment,
-                           qc      = pmax(qc, i.qc_raw, na.rm = TRUE)
-                         )
+                  df_int <- df_int[
+                    ,
+                    .(
+                      site,
+                      name_icos,
+                      start = interval_start,
+                      end   = interval_end,
+                      TIMESTAMP,
+                      value,
+                      type,
+                      var_name,
+                      qc,
+                      comment
+                    )
                   ]
 
-                  # Drop helper column
-                  df_out[, interval_start := NULL]
+                  # Raw as point intervals
+                  raw_int <- raw_dt[
+                    ,
+                    .(
+                      site,
+                      name_icos,
+                      start = TIMESTAMP,
+                      end   = TIMESTAMP,
+                      qc_raw,
+                      comment_raw
+                    )
+                  ]
+
+                  # Set keys
+                  data.table::setkey(df_int, site, name_icos, start, end)
+                  data.table::setkey(raw_int, site, name_icos, start, end)
+
+                  # Interval overlap join
+                  joined <- data.table::foverlaps(
+                    x = df_int,
+                    y = raw_int,
+                    type = "any",
+                    nomatch = 0L
+                  )
+
+                  # Aggregate per averaged row:
+                  # qc = max qc_raw (if any), comment = first non‑NA comment_raw
+                  joined <- joined[
+                    ,
+                    .(
+                      site      = site,
+                      name_icos = name_icos,
+                      TIMESTAMP = TIMESTAMP,
+                      var_name  = var_name,
+                      value     = value,
+                      type      = type,
+                      qc        = if (all(is.na(qc_raw))) qc[1] else max(qc_raw, na.rm = TRUE),
+                      comment   = {
+                        cmt <- comment_raw[!is.na(comment_raw) & comment_raw != ""]
+                        if (length(cmt) > 0) cmt[1] else comment[1]
+                      }
+                    ),
+                    by = .(site, name_icos, TIMESTAMP)
+                  ]
+
+                  # Put back into df_out (aligned by site, name_icos, TIMESTAMP)
+                  data.table::setkey(df_out, site, name_icos, TIMESTAMP)
+                  data.table::setkey(joined, site, name_icos, TIMESTAMP)
+
+                  df_out[joined,
+                         `:=`(
+                           qc      = i.qc,
+                           comment = i.comment
+                         )
+                  ]
                 }
               }
             }
-            ##################################
 
             # -------------------------------------------------------
             # 4. WRITE FILES (include averaging in filename)

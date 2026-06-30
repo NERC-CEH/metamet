@@ -164,7 +164,9 @@ mod_download_server <- function(id, mm_final) {
             print(utils::str(df_out))
             cat("--- END DEBUG ---\n\n")
 
-            # propagate comments from raw to averaged data if lev1 and averaging is applied
+            #########################################################
+            # propagate comments & qcfrom raw to averaged data if lev1
+            # and averaging is applied
             if (lev == "lev1" &&
                 avg != "none" &&
                 "comment" %in% names(mm_raw$dt)) {
@@ -182,16 +184,17 @@ mod_download_server <- function(id, mm_final) {
                 # Raw rows that actually have comments
                 comments_raw <- mm_raw$dt[
                   !is.na(comment),
-                  .(site, name_icos, raw_time = TIMESTAMP, comment)
+                  .(site, name_icos, raw_time = TIMESTAMP, comment, qc_raw = qc)
                 ]
 
                 cat("Number of raw commented rows:", nrow(comments_raw), "\n")
 
                 if (nrow(comments_raw) > 0) {
 
-                  # Compute interval start for each averaged row
+                  # Helper: interval start for each averaged row
                   df_out[, interval_start := TIMESTAMP - avg_duration]
 
+                  # Non‑equi join: raw_time inside [interval_start, TIMESTAMP]
                   df_out[comments_raw,
                          on = .(
                            site,
@@ -199,7 +202,10 @@ mod_download_server <- function(id, mm_final) {
                            interval_start <= raw_time,
                            TIMESTAMP      >= raw_time
                          ),
-                         comment := i.comment
+                         `:=`(
+                           comment = i.comment,
+                           qc      = pmax(qc, i.qc_raw, na.rm = TRUE)
+                         )
                   ]
 
                   # Drop helper column

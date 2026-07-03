@@ -1,95 +1,286 @@
-# MetQC app User Guide
-
-This document aims to explain how to use the MetQC app. We will go through common tasks and outline how they can be undertaken within the app and touch on what is going on 'behind the scenes'. 
-
-All users are required select their username upon entering the app (Figure 1). This is important as any changes made to the data (e.g. QC checks or data flags can then be associated with you). Simply select your username from the drop down list and click 'OK'. 
-
-### App start-up
-<img src="select_user.png" width="600"/>
-
-*Figure 1: Users will need to select a user from the drop down list on app launch.*
-
-### App dashboard
-Once the user has been selected, the app's dashboard (or home screen) (Figure 2) will load. Data validation is undertaken on the dashboard tab while other tasks (e.g. data download and adding data flags) are accessible on the left menu. 
-
-<!---![](dashboard_home.png)--->
-<img src="dashboard_home.png" width="600"/>
-
-*Figure 2: The MetQC app dashboard*
-
-<!---![](dashboard_loaded.png)--->
-<img src="dashboard_loaded.png" width="600"/>
-
-*Figure 3: The MetQC app dashboard after data has been retrieved.*
-
-<!---![](lasso_buttons.png)--->
-<img src="lasso_buttons.png" width="600"/>
-
-*Figure 4: The plot buttons made visible (red box on right) by moving the mouse over the plot window.*
-
-### Flagging data
-<!---![](flags_v2a.png)--->
-<img src="flags_v2a.png" width="600"/>
-
-*Figure 5: Data can be flagged on the 'Data flags' tab. By default whole days are flagged.*
-
-<!---![](flags.png)--->
-<img src="flags_v2b.png" width="600"/>
-
-*Figure 6: The data flags tab. By setting 'Flag the entire day?' to 'No' allows for start and end hours to be added.*
-
-### Downloading data
-<img src="download.png" width="600"/>
-
-*Figure 6: All data (level 1, 2 and the data flags) can be downloaded on the 'Download' tab. Level 1 and 2 data is downloaded as a .zip file which contains two .csv files of the data and the data qc codes. Data flag data is downloaded as a single .csv file.*
+---
+title: "MetQC App User Guide"
+author: "Peter Levy"
+date: "2026-07-03"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{MetQC App User Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
 
 
-### Finding more information
-<img src="info.png" width="600"/>
 
-*Figure 6: Further information, including the app's user guide, details of the gap-filling methods and the underlying data process, can be found on the 'Information' tab.*
+This document explains how to use the MetQC Shiny app bundled with the `metamet`
+package. It covers every tab in the app, all major controls, and includes a
+step-by-step FAQ for common tasks.
 
+---
 
-<br/><br/> 
-#### Q: How do I validate data?
-A: <br>
-1. Select your start and end validation dates from the 'Data selection' box on the Dashboard. <br>
-2. Click 'Retrieve from database'. The dashboard should now update as data is retrieved. <br>
-3. At any time, after importing data, you can compare variables by clicking on the 'Compare variables' (also in the 'Data selection' box). <br> 
-4.  The 'Validation Calendar' (top right Figure 3) shows the validation history for the data you have imported. The colours of the calendar correspond to the user who validated the data. If any data has been flagged on a given day the user is set to 'data flagged'. 'auto' is also listed as a user in this case. <br>
-5.  The 'Extracted Data' box (Figure 3) is the interface where data are checked. Each variable has it's own tab, which can be accessed by clicking on the variable name at the top of the box. <br>
-    - The plot shows the data extracted (for the selected variable). point colours show the current qc label. Hovering the mouse over points displays the data point timestamp and measurement value. <br>
-6. If the data for the selected variable looks correct, clicking the 'Finished checking variable for date range' button will flag this tab as complete. The tab (top of the 'Extracted Data') box will become grey and a different variable can then be validated. <br>
-7. If data looks unreliable, data can be imputed to correct this. <br>
-   - When the mouse is over the plot window the plot buttons will appear in the top right of the plot window (Figure 4). The left most button of these ('lasso selection') allows for point in the graph to be selected. Upon selection these will change colour (go red) to indicate their selection. Use this feature to select the unreliable looking data points. <br>
-   -   Select the 'Gap-Filling Method' from the drop down menu below the graph. Additional details of these methods can be found in the 'Information' tab. <br>
-   -   Data can be excluded form imputation by using the tick boxes lower down. <br>
-   -   Click 'Impute selection' box to impute the data selected (minus data highlighted by ticking the tick boxes at the bottom of the page) using the gap-filling method selected. <br>
-   -   The graph will update to show the edited data. <br>
-   -   This process can be repeated as required and the 'Finished checking variable for date range' button can be pressed when complete. <br>
-8. When you have finished data validation the 'Submit changes' button can be pressed to save your changes. **Any unsaved changes will be lost when a new date range is selected**. All changes are now submitted to the cloud. At any point the app can be restarted by using the 'Restart app' button at the bottom of the page. <br>
+## Prerequisites
 
-#### Q: How do I flag a period of time when I know data could be unreliable? (e.g. broken sensor)
-A: <br>
-1. Once you've selected your username on app start-up, click on the 'Flags' tab on the left of the app. <br>
-2. New data flags can be added by setting the start and end date of the period of concern, the variable and a brief description of why the time period is being flagged (e.g. damaged sensor). Then click 'Add Flag'. By default, whole days are flagged but by setting 'Flag the entire day?' to 'No' enables further inputs which can record the start and end times (Hours). Hours are all in 24 hours format (i.e. 2pm = 14) and can be recorded in local time (GMT/BST). <br>
-3. Your new flag will then appear in the data flags table below. Check this looks correct. Times are converted to UTC/GMT so, depending on the time of year, the hours may change from those input by the user. A new qc code (to highlight the flag) and your username will be added automatically. <br>
-4. If the data flag looks correct, click 'Save' to save the table. This also updates the qc codes in the data - allowing others to see the that the data has been flagged. You will then be asked if you'd like to apply these changes to the data. This process resets the app and only needs to be done if you would like to view or edit data in the 'Dashboard' tab after adding your flags. <br>
-5. If the data flag does not look correct click 'Reset' to undo your changes. If you have saved changes which you later realise are incorrect, we can revert the data to a previous version. Only a small number of versions are stored, so let us know before more changes are saved. <br>
+The app requires a set of optional packages that are not installed automatically.
+Install them before launching:
 
-  - Currently, data flags cannot be added for future dates. This is something that will may change, based on demand. <br>
-  - When flagging an entire day the validation calendar will show the flagged day and the following data as being flagged. This is because the period midnight to midnight is flagged. This can be changed in the future, if this is causing a problem. <br>
+```r
+# Recommended: install metamet plus all optional dependencies in one step
+pak::pak("NERC-CEH/metamet", dependencies = TRUE)
+
+# Or install the app packages individually
+install.packages(c(
+  "shiny", "shinydashboard", "shinyjs", "shinyFiles",
+  "shinyvalidate", "shinycssloaders", "ggiraph", "glue"
+))
+```
+
+Launch the app from R:
+
+```r
+metamet::run_shiny()
+```
+
+The app opens in your default web browser. It will stop automatically when you
+close the browser tab or click **Stop App** in the left sidebar.
+
+---
+
+## App layout
+
+The left sidebar contains five items:
+
+| Sidebar item | Purpose |
+|---|---|
+| Create new Metamet object | Six-step wizard to build a `.rds` from raw data files |
+| Open existing Metamet object | Browse and load an existing `.rds` |
+| Select date range and QA/QC | Main dashboard for interactive data validation |
+| Download processed data | Export processed data as CSV or ZIP |
+| Help and Documentation | Links to gap-fill methods and this guide |
+
+Your system username (from `Sys.info()[["user"]]`) is used automatically to
+label any changes you make. It is shown in the top-right corner of the app.
+Click it to update it if needed (for example, if you are working on a shared
+machine under a generic account).
+
+---
+
+## Tab 1 — Create new Metamet object
+
+This six-step wizard takes you from a raw data file to a saved `metamet` `.rds`
+file ready for QA/QC. Each step must be completed in order; use the **Back**
+and **Continue** buttons to navigate.
+
+### Step 1: Load data file
+
+Select the format of your raw data file:
+
+- **Plain CSV** — a standard CSV file with a header row.
+- **Campbell TOA5** — data logger output in TOA5 (ASCII) format.
+- **Old Campbell (.dat + .dld)** — older Campbell files; you will be prompted to
+  select both the `.dat` data file and the `.dld` metadata file.
+- **CEDA BADC-CSV** — the BADC-CSV format used by CEDA data archives.
+
+Click **Select data file**, browse to your file, then click **Load & preview**.
+A preview table will appear. If the file contains multiple tables (Campbell TOA5),
+a drop-down lets you choose which table to use. Select the column that contains
+the timestamp, then click **Continue**.
+
+### Step 2: Site information
+
+Provide site-level metadata. You can either:
+
+- **Enter manually** — fill in the Site ID, site name, latitude, longitude,
+  elevation, and the date range over which this metadata applies.
+- **Load from CSV file** — select an existing `dt_site` CSV and choose the row
+  corresponding to your site.
+
+Click **Continue to variable mapping** when ready.
+
+### Step 3: Map data columns to ICOS variable names
+
+Each column in your data file must be mapped to a standard variable name. You can:
+
+- **Map manually** — for each data column, select the matching ICOS variable from
+  a drop-down list. Columns not mapped to any variable can be left as *— skip —*.
+- **Load dt_meta from CSV file** — if you already have a `dt_meta` metadata file,
+  load it here and the mappings will be applied automatically.
+
+Click **Continue** when all required columns are mapped.
+
+### Step 4: Set units and QC ranges *(optional)*
+
+For each mapped variable you can set:
+
+- **Units** — the physical units of the raw data.
+- **Valid range** — minimum and maximum acceptable values for automatic range checking.
+- **Imputation method** — the default gap-filling algorithm to apply to this variable.
+
+This step can be skipped; settings can be refined later. Click **Continue**.
+
+### Step 5: ERA5 reference data *(optional)*
+
+Attach ERA5 reanalysis data as a reference dataset (`dt_ref`). Select an ERA5
+CSV file (as exported by `add_era5()`). The reference data will be plotted
+alongside observations in the QA/QC dashboard. Click **Continue** (or skip).
+
+### Step 6: Review and save
+
+A summary of the object is displayed. Click **Download as .rds** to save the
+`metamet` object to a file. This file is the input for the QA/QC dashboard.
+
+---
+
+## Tab 2 — Open existing Metamet object
+
+Click **Browse for .rds file**, navigate to a previously saved `metamet` `.rds`
+file, and select it. The file is loaded and the app switches automatically to
+the **Select date range and QA/QC** tab. A notification confirms the file name
+that was loaded.
+
+The `.rds` file must be a `metamet` object in long format (or wide format — the
+app reshapes it automatically).
+
+---
+
+## Tab 3 — Select date range and QA/QC
+
+This is the main validation interface.
+
+### Selecting a date range
+
+The **Data Selection** box contains:
+
+- **Start date / End date** — date pickers pre-filled with the earliest and latest
+  timestamps in the loaded file.
+- **Hour / Minute** — fine-tune the start and end times within the selected days.
+
+Click **Retrieve from database** to extract the chosen time window. The
+*Extracted Data* panel appears below.
+
+After retrieval, the **Compare variables** button becomes active. Click it to
+open a scatter-plot modal comparing any two variables in the extracted window.
+
+### Extracted data panel
+
+The panel contains one tab per variable. Each tab shows:
+
+- **Replicate checkboxes** *(if the variable has multiple replicates)* — tick/untick
+  individual sensor replicates to show or hide them on the plot.
+- **Interactive plot** — a time-series plot produced by `ggiraph`. Point colours
+  indicate the current QC code (grey = valid, coloured = imputed or flagged).
+  Hover over a point to see its timestamp and value.
+- **Rescale reference to observations** checkbox — when ERA5 reference data is
+  present, tick this to rescale the ERA5 values to the observation range before
+  plotting.
+- **Point size** slider — adjust the visual size of plotted points (0.5 – 8).
+
+### Imputing (gap-filling) data
+
+1. Move the mouse over the plot area. A toolbar appears in the top-right corner
+   of the plot. Click the **lasso selection** button (the left-most icon).
+2. Draw a lasso around the data points you want to replace. Selected points turn
+   red.
+3. Choose a **Gap-Filling Method** from the drop-down below the plot. Available
+   methods are described in the *Help and Documentation* tab (and in the
+   `gap_fill_methods` vignette):
+   - **Time interpolation** — GAM spline through time; a smoothness slider appears.
+   - **Regression** — linear regression against another variable; a covariate
+     drop-down appears.
+   - **ERA5** — substitute values from the reference dataset.
+   - **Zero** — set selected values to zero.
+   - **Non-negative** — set negative values to zero.
+   - **Night zero** — set night-time values to zero.
+4. *(Optional)* Type a brief **reason for imputation** in the comment box.
+5. Use the **Do not alter data estimated by** checkboxes to protect any previously
+   imputed points from being overwritten.
+6. Click **Impute selection**. The plot updates immediately.
+7. Repeat steps 1–6 as needed for the same or other variables.
+8. When a variable looks correct, click **Finished checking variable for date range**.
+   The variable's tab turns grey to indicate it has been signed off.
+
+### Saving changes
+
+Click **Save changes** when you are satisfied with all variables in the selected
+date range.
+
+> **Important:** unsaved changes are lost if you click *Retrieve from database*
+> again for a new date range. Always save before moving to a new window.
+
+The app writes two new files next to the source `.rds`:
+
+- `<original_name>_qc_by_<username>_on_<date>.rds` — full `metamet` object with
+  updated QC codes and imputed values.
+- `<original_name>_qc_by_<username>_on_<date>_ceda.rds` — CEDA-formatted output.
+
+A notification confirms the files were created.
+
+Click **Restart app** at any time to reload the app and start fresh.
+
+---
+
+## Tab 4 — Download processed data
+
+Select the format from the drop-down:
+
+| Option | Output | Contents |
+|---|---|---|
+| Level 1 | `.zip` containing two `.csv` files | Raw data (`dt`) and QC codes (`dt_qc`) |
+| Level 2 | `.zip` containing two `.csv` files | QC-processed data and updated QC codes |
+| CEDA | Single `.csv` file | CEDA BADC-CSV formatted output |
+
+Click **Download** to save the file.
+
+---
+
+## Tab 5 — Help and Documentation
+
+Sub-items link to:
+
+- **Gap-fill methods** — descriptions of each imputation algorithm.
+- **App guide** — this document.
+- **Data process guide** — overview of the data processing pipeline.
+
+---
+
+## Frequently asked questions
+
+#### Q: How do I validate data step by step?
+
+1. Load a `.rds` file via *Open existing Metamet object* (or create one first).
+2. On the *Select date range and QA/QC* tab, choose your start and end date/time.
+3. Click **Retrieve from database**.
+4. Work through each variable tab: inspect the plot, impute suspect points as
+   needed, and click **Finished checking variable** to sign off.
+5. Click **Save changes** to write the output files.
+
+#### Q: How do I change the username the app uses?
+
+The username is read automatically from your operating system account
+(`Sys.info()[["user"]]`). If you need to override it (e.g. on a shared machine),
+click the username shown in the top-right corner of the app header.
 
 #### Q: I want to download the data
-A: <br>
-1. Once you've selected your username on app start-up, click on the 'Download' tab on the left of the app.<br>
-2. Select the data you would like to download form the drop down menu. <br>
-3. Click download to download the data. <br>
-  - Level 1 and 2 data are downloaded as .zip files which contain both the data itself and the qc data in two .csv files. <br>
-  - Data flags data is downloaded as a single .csv file. <br>
 
-#### Q: I selected the wrong user when the app started
-A: You can change the current user by clicking on 'Current user: ... ' in the top right corner of the app. This will not update the user for any previously added data flags. <br>
+Click the *Download processed data* tab in the left sidebar. Choose Level 1,
+Level 2, or CEDA from the drop-down and click **Download**.
 
-#### Q: My question isn't listed here, I've noticed a mistake or Can the app do X, Y, Z in the future?
-A: Either post in the Teams channel, log a GitHub issue or email Pete (pleav@ceh.ac.uk) or Will (wilfinc@ceh.ac.uk).  
+Level 1 and Level 2 outputs are `.zip` archives containing a data CSV and a QC
+CSV. CEDA output is a single BADC-CSV file.
+
+#### Q: How do I create a metamet object from scratch (new site / new year)?
+
+Use the *Create new Metamet object* wizard (first item in the sidebar). Work
+through the six steps to load your raw data, enter site information, map
+variables, set QC ranges, attach ERA5 data, and download the `.rds`.
+
+#### Q: The app is slow or has frozen — what should I do?
+
+Click **Restart app** (visible in the *Extracted Data* panel after data
+retrieval) or close the browser tab and re-run `metamet::run_shiny()`.
+
+#### Q: My question is not listed here, I have noticed a mistake, or I would like a new feature
+
+log a [GitHub issue](https://github.com/NERC-CEH/metamet/issues), or email
+Pete (plevy@ceh.ac.uk) or Will (wilfinc@ceh.ac.uk).

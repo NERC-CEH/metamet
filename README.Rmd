@@ -44,17 +44,61 @@ and individual record-specific metadata; and
 2. methods/functions for converting data between formats, combining data from 
 different sources, quality control and gap-filling.
 
-## Installation
+## Getting started with the Shiny app
 
-You can install the development version of metamet from 
-[GitHub](https://github.com/NERC-CEH/metamet) with:
+`metamet` includes an interactive Shiny application for manual QA/QC and gap-filling of meteorological data. The app lets you build a `metamet` object from raw data files, inspect and correct observations interactively, and export the processed data.
+
+### Install app dependencies
+
+The app requires several additional packages that are not installed by default. Include them all at once with `pak`:
 
 ``` {r, eval = FALSE}
-install.packages("pak")
-pak::pak("NERC-CEH/metamet")
+pak::pak("NERC-CEH/metamet", dependencies = TRUE)
 ```
 
-## Example
+Or install them individually:
+
+``` {r, eval = FALSE}
+install.packages(c(
+  "shiny", "shinydashboard", "shinyjs", "shinyFiles",
+  "shinyvalidate", "shinycssloaders", "ggiraph", "glue"
+))
+```
+
+### Launch the app
+
+``` {r, eval = FALSE}
+metamet::run_shiny()
+```
+
+### App workflow overview
+
+The app guides you through a four-stage workflow:
+
+1. **Create or open a `metamet` object** – Use the *Create new Metamet object*
+   wizard to import a raw data file (CSV, Campbell TOA5, old Campbell `.dat`/`.dld`,
+   or CEDA BADC-CSV), map variables to ICOS names, set QC ranges, and optionally
+   attach ERA5 reference data. The wizard saves the result as a `.rds` file.
+   Alternatively, use *Open existing Metamet object* to load a previously saved `.rds`.
+
+2. **Select date range and QA/QC** – Choose a start and end date/time, click
+   *Retrieve from database*, then inspect each variable in its own interactive
+   plot tab. Select suspect data points with the lasso tool, pick a gap-filling
+   method (time interpolation, regression, ERA5 substitution, or others), add an
+   optional comment explaining the change, and click *Impute selection*. Click
+   *Finished checking variable* when a variable is signed off.
+
+3. **Save changes** – Click *Save changes* to write a new `.rds` file (named with
+   your system username and today's date) plus a CEDA-formatted output in the same
+   directory as the source file.
+
+4. **Download processed data** – Export Level 1, Level 2, or CEDA-formatted data
+   as `.csv` (or `.zip` for Level 1/2) from the *Download processed data* tab.
+
+For a detailed walkthrough see the
+[App User Guide](https://nerc-ceh.github.io/metamet/articles/app_user_guide.html).
+
+## Basic metamet workflow - create a metamet object without the app
 
 Basic usage is to first create `metamet` objects from files or pre-existing data 
 frames or data tables. Because all the metadata describing the observations is
@@ -111,3 +155,4 @@ explained in the table below.
 | dt_site | data.table | site-specific meta data (like netCDF global attributes) | sites | metadata variables |
 | dt_qc | data.table | QC codes | time intervals | variables |
 | dt_ref | data.table | ref data e.g. era5 | time intervals | variables |
+

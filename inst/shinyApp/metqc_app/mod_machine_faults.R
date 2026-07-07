@@ -29,8 +29,7 @@ mod_machine_faults_server <- function(id, mm_qry, username) {
     # Load excel file and preview
     observeEvent(input$faults_excel, {
       req(input$faults_excel)
-      faults <<- readxl::read_excel(input$faults_excel$datapath,
-                                    sheet = "QC")
+      faults <<- readxl::read_excel(input$faults_excel$datapath, sheet = "QC")
       # read sheet as data table
       faults_dt <<- data.table::as.data.table(
         readxl::read_excel(input$faults_excel$datapath, sheet = "QC")

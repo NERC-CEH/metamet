@@ -16,7 +16,10 @@ mod_machine_faults_server <- function(id, mm_qry, username) {
           accept = c(".xlsx", ".xls")
         ),
         uiOutput(session$ns("faults_preview")),
-        actionButton(session$ns("apply_batch_invalidation"), "Apply invalidation"),
+        actionButton(
+          session$ns("apply_batch_invalidation"),
+          "Apply invalidation"
+        ),
         footer = modalButton("Close"),
         size = "l",
         easyClose = TRUE

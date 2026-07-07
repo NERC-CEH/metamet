@@ -1,17 +1,4 @@
----
-title: "MetQC App User Guide"
-author: "Peter Levy"
-date: "2026-07-03"
-output:
-  rmarkdown::html_vignette:
-    toc: true
-    toc_depth: 3
-vignette: >
-  %\VignetteIndexEntry{MetQC App User Guide}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
-
+# MetQC App User Guide
 
 
 This document explains how to use the MetQC Shiny app bundled with the `metamet`

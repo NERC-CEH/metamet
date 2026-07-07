@@ -62,9 +62,7 @@ The left sidebar contains five items:
 | Help and Documentation | Links to gap-fill methods and this guide |
 
 Your system username (from `Sys.info()[["user"]]`) is used automatically to
-label any changes you make. It is shown in the top-right corner of the app.
-Click it to update it if needed (for example, if you are working on a shared
-machine under a generic account).
+label any changes you make. It is not currently configurable within the app.
 
 ---
 

@@ -1,12 +1,14 @@
 library(metamet)
 library(shinydashboard)
 library(shinyjs)
+library(shinyBS)
 library(shinyvalidate)
 library(shinyFiles)
 library(shinycssloaders)
 library(ggiraph)
 
 source("mod_metadata_maker.R", local = TRUE)
+source("mod_machine_faults.R", local = TRUE)
 
 # Set the gap-filling methods and codes----
 gf_choices <- setNames(df_method$method, df_method$method_longname)
@@ -158,8 +160,15 @@ ui <- dashboardPage(
                 step = 1
               )
             ),
+            tags$script(
+              "
+            Shiny.addCustomMessageHandler('trigger_faults_modal', function(message) {
+            Shiny.setInputValue('machine_faults-show_faults_modal', Math.random());
+            });
+            "
+            ),
             actionButton("retrieve_data", "Retrieve from database"),
-            actionButton("compare_vars", "Compare variables"),
+            actionButton("compare_vars", "Compare variables")
           )
         ),
         hidden(
@@ -191,11 +200,23 @@ ui <- dashboardPage(
                 choices = gf_choices
               ),
               uiOutput("comment_box"),
+              tags$h4("Manual Quality Control"),
               actionButton("impute", label = "Impute selection"),
               actionButton(
                 "finished_check",
-                label = "Mark variable as checked for date range"
+                label = "Mark variable as reviewed"
               ),
+              tags$br(),
+              tags$br(),
+              tags$h4("Batch Quality Control"),
+              actionButton("batch_invalidate", "Batch invalidate from file"),
+              bsTooltip(
+                "batch_invalidate",
+                "Upload a QC Excel file to invalidate entire time ranges.",
+                placement = "right"
+              ),
+              tags$br(),
+              tags$br(),
               checkboxGroupInput(
                 "qc_tokeep",
                 "Do not alter data estimated by",
@@ -306,6 +327,16 @@ server <- function(input, output, session) {
     v_roots = roots,
     default_root = default_root
   )
+
+  mod_machine_faults_server(
+    id = "machine_faults",
+    mm_qry = mm_qry,
+    username = username
+  )
+
+  observeEvent(input$batch_invalidate, {
+    session$sendCustomMessage("trigger_faults_modal", TRUE)
+  })
 
   # Non-reactive code
   # Format the start and end dates----

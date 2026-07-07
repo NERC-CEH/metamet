@@ -13,7 +13,7 @@
 
 `metamet` is an R package which attempts to solve many of the problems
 encountered in working with meteorological observation data.
-It provide a system for:
+It provides a system for:
 
 - standardising metadata
 - converting between file formats

@@ -38,7 +38,7 @@ here::i_am("vignettes/openairmaps.Rmd")
 library(metamet)
 
 fname_site <- here::here("data-raw/dt_site.csv")
-dt_site <- fread(fname_site)
+dt_site <- data.table::fread(fname_site)
 network_map(dt_site)
 ```
 

@@ -69,7 +69,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Workflow Example 2 - Multiple Sites</h1>
                         <h4 data-toc-skip class="author">Peter Levy</h4>
             
-            <h4 data-toc-skip class="date">2026-03-03</h4>
+            <h4 data-toc-skip class="date">2026-06-19</h4>
       
 
       <div class="d-none name"><code>workflow_multisite.Rmd</code></div>
@@ -89,16 +89,17 @@ for each of three sites from file.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org/reference/i_am.html" class="external-link">i_am</a></span><span class="op">(</span><span class="st">"vignettes/workflow_example.Rmd"</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://here.r-lib.org/" class="external-link">here</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://nerc-ceh.github.io/metamet/">metamet</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">mm_amo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span></span>
-<span>  file <span class="op">=</span> <span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org/reference/here.html" class="external-link">here</a></span><span class="op">(</span><span class="st">"data-raw/UK-AMO/UK-AMO_BM_mm_2023.rds"</span><span class="op">)</span></span>
+<span>  file <span class="op">=</span> <span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org/reference/here.html" class="external-link">here</a></span><span class="op">(</span><span class="st">"inst/extdata/UK-AMO/UK-AMO_BM_mm_2023.rds"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">mm_ebu</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span></span>
-<span>  file <span class="op">=</span> <span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org/reference/here.html" class="external-link">here</a></span><span class="op">(</span><span class="st">"data-raw/UK-EBU/UK-EBU_BM_mm_2023.rds"</span><span class="op">)</span></span>
+<span>  file <span class="op">=</span> <span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org/reference/here.html" class="external-link">here</a></span><span class="op">(</span><span class="st">"inst/extdata/UK-EBU/UK-EBU_BM_mm_2023.rds"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">mm_whm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span></span>
-<span>  file <span class="op">=</span> <span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org/reference/here.html" class="external-link">here</a></span><span class="op">(</span><span class="st">"data-raw/UK-WHM/UK-WHM_BM_mm_2023.rds"</span><span class="op">)</span></span>
+<span>  file <span class="op">=</span> <span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org/reference/here.html" class="external-link">here</a></span><span class="op">(</span><span class="st">"inst/extdata/UK-WHM/UK-WHM_BM_mm_2023.rds"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>This gives us all the half-hourly data for 2023 from each site. If we
 want to process a shorter time period, we can subset as required with
@@ -129,9 +130,9 @@ identify the site, timestamp, varaiable type and specific varaiable
 name. We do this with the <code>reshape_wide_to_long</code> function,
 shown below.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mm_amo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reshape_wide_to_long.html">reshape_wide_to_long</a></span><span class="op">(</span><span class="va">mm_amo</span><span class="op">)</span></span>
-<span><span class="va">mm_ebu</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reshape_wide_to_long.html">reshape_wide_to_long</a></span><span class="op">(</span><span class="va">mm_ebu</span><span class="op">)</span></span>
-<span><span class="va">mm_whm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reshape_wide_to_long.html">reshape_wide_to_long</a></span><span class="op">(</span><span class="va">mm_whm</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">mm_amo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metamet_reshape.html">metamet_reshape</a></span><span class="op">(</span><span class="va">mm_amo</span>, <span class="st">"long"</span><span class="op">)</span></span>
+<span><span class="va">mm_ebu</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metamet_reshape.html">metamet_reshape</a></span><span class="op">(</span><span class="va">mm_ebu</span>, <span class="st">"long"</span><span class="op">)</span></span>
+<span><span class="va">mm_whm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metamet_reshape.html">metamet_reshape</a></span><span class="op">(</span><span class="va">mm_whm</span>, <span class="st">"long"</span><span class="op">)</span></span></code></pre></div>
 <p>We can now see the structure of UK-AMO data</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mm_amo</span><span class="op">$</span><span class="va">dt</span></span>
@@ -149,19 +150,19 @@ shown below.</p>
 <span><span class="co">#&gt; 3587: UK-AMO 2023-09-03 NDVI_797OUT_5_1_1          NA   energy flux NDVI_797OUT</span></span>
 <span><span class="co">#&gt; 3588: UK-AMO 2023-09-03         LWS_4_1_1 360.6000000     arbitrary         LWS</span></span>
 <span><span class="co">#&gt; 3589: UK-AMO 2023-09-03         LWS_4_1_2 285.0000000     arbitrary         LWS</span></span>
-<span><span class="co">#&gt;          qc validator           ref</span></span>
-<span><span class="co">#&gt;       &lt;num&gt;    &lt;char&gt;         &lt;num&gt;</span></span>
-<span><span class="co">#&gt;    1:     0      auto  1.173913e+01</span></span>
-<span><span class="co">#&gt;    2:     0      auto  3.360330e+01</span></span>
-<span><span class="co">#&gt;    3:     0      auto -6.467518e-14</span></span>
-<span><span class="co">#&gt;    4:     0      auto  3.360330e+01</span></span>
-<span><span class="co">#&gt;    5:     1      auto  3.360330e+01</span></span>
-<span><span class="co">#&gt;   ---                              </span></span>
-<span><span class="co">#&gt; 3585:     1      auto  0.000000e+00</span></span>
-<span><span class="co">#&gt; 3586:     1      auto  0.000000e+00</span></span>
-<span><span class="co">#&gt; 3587:     1      auto  0.000000e+00</span></span>
-<span><span class="co">#&gt; 3588:     0      auto  8.707268e+01</span></span>
-<span><span class="co">#&gt; 3589:     0      auto  8.707268e+01</span></span></code></pre></div>
+<span><span class="co">#&gt;          qc validator comment           ref</span></span>
+<span><span class="co">#&gt;       &lt;num&gt;    &lt;char&gt;  &lt;char&gt;         &lt;num&gt;</span></span>
+<span><span class="co">#&gt;    1:     0      auto    &lt;NA&gt;  1.173913e+01</span></span>
+<span><span class="co">#&gt;    2:     0      auto    &lt;NA&gt;  3.360330e+01</span></span>
+<span><span class="co">#&gt;    3:     0      auto    &lt;NA&gt; -6.467518e-14</span></span>
+<span><span class="co">#&gt;    4:     0      auto    &lt;NA&gt;  3.360330e+01</span></span>
+<span><span class="co">#&gt;    5:     1      auto    &lt;NA&gt;  3.360330e+01</span></span>
+<span><span class="co">#&gt;   ---                                      </span></span>
+<span><span class="co">#&gt; 3585:     1      auto    &lt;NA&gt;  0.000000e+00</span></span>
+<span><span class="co">#&gt; 3586:     1      auto    &lt;NA&gt;  0.000000e+00</span></span>
+<span><span class="co">#&gt; 3587:     1      auto    &lt;NA&gt;  0.000000e+00</span></span>
+<span><span class="co">#&gt; 3588:     0      auto    &lt;NA&gt;  8.707268e+01</span></span>
+<span><span class="co">#&gt; 3589:     0      auto    &lt;NA&gt;  8.707268e+01</span></span></code></pre></div>
 <p>and see it is identical to the structure of UK-EBU (and UK-WHM)
 data.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
@@ -180,19 +181,19 @@ data.</p>
 <span><span class="co">#&gt; 1841: UK-EBU 2023-09-03   G_5_1_1   0.171   energy flux         G     0</span></span>
 <span><span class="co">#&gt; 1842: UK-EBU 2023-09-03   G_5_2_1  -3.032   energy flux         G     0</span></span>
 <span><span class="co">#&gt; 1843: UK-EBU 2023-09-03 WTD_5_1_1  -0.576        height       WTD     0</span></span>
-<span><span class="co">#&gt;       validator      ref</span></span>
-<span><span class="co">#&gt;          &lt;char&gt;    &lt;num&gt;</span></span>
-<span><span class="co">#&gt;    1:      auto 88.06677</span></span>
-<span><span class="co">#&gt;    2:      auto 11.23692</span></span>
-<span><span class="co">#&gt;    3:      auto 88.06677</span></span>
-<span><span class="co">#&gt;    4:      auto 97.53844</span></span>
-<span><span class="co">#&gt;    5:      auto  0.00000</span></span>
-<span><span class="co">#&gt;   ---                   </span></span>
-<span><span class="co">#&gt; 1839:      auto 13.84093</span></span>
-<span><span class="co">#&gt; 1840:      auto 13.84093</span></span>
-<span><span class="co">#&gt; 1841:      auto  0.00000</span></span>
-<span><span class="co">#&gt; 1842:      auto  0.00000</span></span>
-<span><span class="co">#&gt; 1843:      auto 32.56382</span></span></code></pre></div>
+<span><span class="co">#&gt;       validator comment      ref</span></span>
+<span><span class="co">#&gt;          &lt;char&gt;  &lt;char&gt;    &lt;num&gt;</span></span>
+<span><span class="co">#&gt;    1:      auto    &lt;NA&gt; 88.06677</span></span>
+<span><span class="co">#&gt;    2:      auto    &lt;NA&gt; 11.23692</span></span>
+<span><span class="co">#&gt;    3:      auto    &lt;NA&gt; 88.06677</span></span>
+<span><span class="co">#&gt;    4:      auto    &lt;NA&gt; 97.53844</span></span>
+<span><span class="co">#&gt;    5:      auto    &lt;NA&gt;  0.00000</span></span>
+<span><span class="co">#&gt;   ---                           </span></span>
+<span><span class="co">#&gt; 1839:      auto    &lt;NA&gt; 13.84093</span></span>
+<span><span class="co">#&gt; 1840:      auto    &lt;NA&gt; 13.84093</span></span>
+<span><span class="co">#&gt; 1841:      auto    &lt;NA&gt;  0.00000</span></span>
+<span><span class="co">#&gt; 1842:      auto    &lt;NA&gt;  0.00000</span></span>
+<span><span class="co">#&gt; 1843:      auto    &lt;NA&gt; 32.56382</span></span></code></pre></div>
 <p>Given this structure, we can simply append all the rows for all data
 tables to create a single <code>metamet</code> object.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">

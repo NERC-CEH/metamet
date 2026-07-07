@@ -20,6 +20,8 @@
   Join two \`metamet\` objects
 - [`metamet()`](https://nerc-ceh.github.io/metamet/reference/metamet.md)
   : Create a \`metamet\` object from various input types
+- [`metamet_reshape()`](https://nerc-ceh.github.io/metamet/reference/metamet_reshape.md)
+  : Reshape a metamet object between wide and long format
 - [`mm1`](https://nerc-ceh.github.io/metamet/reference/mm1.md)
   [`mm2`](https://nerc-ceh.github.io/metamet/reference/mm1.md)
   [`mm3`](https://nerc-ceh.github.io/metamet/reference/mm1.md) : Example
@@ -28,14 +30,19 @@
   : Create a Leaflet Map of Monitoring Network Sites
 - [`pad_data()`](https://nerc-ceh.github.io/metamet/reference/pad_data.md)
   : pad_data
-- [`plot_heatmap_calendar()`](https://nerc-ceh.github.io/metamet/reference/plot_heatmap_calendar.md)
-  : plot_heatmap_calendar
 - [`polar_map()`](https://nerc-ceh.github.io/metamet/reference/polar_map.md)
   : Create a Polar Plot Map for a Selected Variable
 - [`rbind_metamet()`](https://nerc-ceh.github.io/metamet/reference/rbind_metamet.md)
-  : Combine lists of metamet data tables into a single metamet object
-- [`reshape_wide_to_long()`](https://nerc-ceh.github.io/metamet/reference/reshape_wide_to_long.md)
-  : Reshape a metamet object from wide to long format
+  : Combine metamet objects or data-table lists into a single metamet
+  object
+- [`read_ceda_csv()`](https://nerc-ceh.github.io/metamet/reference/read_ceda_csv.md)
+  : Read a BADC-CSV (CEDA) formatted meteorological file
+- [`read_obs_autodetect()`](https://nerc-ceh.github.io/metamet/reference/read_obs_autodetect.md)
+  : read_obs_autodetect
+- [`read_old_campbell_dat()`](https://nerc-ceh.github.io/metamet/reference/read_old_campbell_dat.md)
+  : Read Campbell CR23X .dat files using .dld column definitions
+- [`read_plain_csv()`](https://nerc-ceh.github.io/metamet/reference/read_plain_csv.md)
+  : Read a plain-header CSV meteorological file
 - [`run_shiny()`](https://nerc-ceh.github.io/metamet/reference/run_shiny.md)
   : Launches the shiny app for the metamet package
 - [`subset_by_date()`](https://nerc-ceh.github.io/metamet/reference/subset_by_date.md)

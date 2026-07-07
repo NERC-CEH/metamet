@@ -29,6 +29,7 @@ You can install the development version of metamet from
 [GitHub](https://github.com/NERC-CEH/metamet) with:
 
 ``` r
+
 install.packages("pak")
 pak::pak("NERC-CEH/metamet")
 ```
@@ -46,6 +47,7 @@ be processed relatively easily so as to:
 - impute missing data.
 
 ``` r
+
 library(metamet)
 #> Loading required package: data.table
 #> data.table 1.17.8 using 7 threads (see ?getDTthreads).  Latest news: r-datatable.com
@@ -112,6 +114,7 @@ algorithms, and check the data manually for additional QC. This is
 illustrated below.
 
 ``` r
+
 mm <- add_era5(
   mm,
   fname_era5 = testthat::test_path("data-raw/dt_era5.csv")

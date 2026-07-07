@@ -23,6 +23,7 @@ Firstly, we load the `metamet` library, as well as the `here` library
 which simplifies specifying file paths.
 
 ``` r
+
 here::i_am("vignettes/workflow_example.Rmd")
 library(metamet)
 library(here)
@@ -34,8 +35,10 @@ Having downloaded the observation data, we can read it from a file and
 display a few rows.
 
 ``` r
-fname <- here("tests/testthat/data-raw/UK-WHM/whim_met_2002_2023.csv")
-dt <- fread(fname)
+
+fname <- here("inst/extdata/UK-WHM/historical/eidc/whim_met_2002_2023.csv")
+
+dt <- data.table::fread(fname)
 dim(dt)
 #> [1] 736321     14
 dt
@@ -73,6 +76,7 @@ The data consist of a timestamp column, and 13 variables observed every
 ### Observation metadata `dt_meta`
 
 ``` r
+
 knitr::kable(dt_meta[site == "UK-WHM", ..v_col], format = "html")
 ```
 
@@ -104,7 +108,8 @@ documentation and could be entered in excel, read in as a .csv text
 file, or entered directly in R as below.
 
 ``` r
-dt_site <- data.table(
+
+dt_site <- data.table::data.table(
   site = "UK-WHM",
   long_name = "Whim Moss",
   lon = -3.27155,
@@ -122,16 +127,18 @@ and it is easiest to append rows to a .csv or excel file as new sites
 are added.
 
 ``` r
-fname <- here("data-raw/dt_site.csv")
-dt_site <- fread(fname)
+
+fname <- here("inst/extdata/dt_site.csv")
+dt_site <- data.table::fread(fname)
 knitr::kable(dt_site, format = "html")
 ```
 
-| site   | long_name        |      lon |      lat | elev |
-|:-------|:-----------------|---------:|---------:|-----:|
-| UK-AMO | Auchencorth Moss | -3.24300 | 55.79230 |  120 |
-| UK-EBU | Easter Bush      | -3.20710 | 55.86740 |  119 |
-| UK-WHM | Whim Moss        | -3.27155 | 55.76566 |  316 |
+| site   | long_name        |       lon |      lat | elev |
+|:-------|:-----------------|----------:|---------:|-----:|
+| UK-AMO | Auchencorth Moss | -3.243000 | 55.79230 |  120 |
+| UK-EBU | Easter Bush      | -3.207100 | 55.86740 |  119 |
+| UK-WHM | Whim Moss        | -3.271550 | 55.76566 |  316 |
+| UK-BUC | Bush Cabin       | -3.205767 | 55.86227 |  189 |
 
 ### Create `metamet` object
 

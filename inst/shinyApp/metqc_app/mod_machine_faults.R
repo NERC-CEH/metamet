@@ -74,9 +74,9 @@ mod_machine_faults_server <- function(id, mm_qry, username) {
 
       for (i in seq_len(nrow(faults))) {
         start <- faults$start_time[i]
-        end   <- faults$end_time[i]
-        var   <- faults$var_name[i]
-        note  <- faults$comment[i]
+        end <- faults$end_time[i]
+        var <- faults$var_name[i]
+        note <- faults$comment[i]
 
         dt[
           var_name == var &

@@ -183,10 +183,13 @@ ui <- dashboardPage(
               tags$br(),
               tags$h4("Batch Quality Control"),
               actionButton("batch_invalidate", "Batch invalidate from file"),
-              bsTooltip("batch_invalidate",
-                        "Upload a QC Excel file to invalidate entire time ranges.",
-                        placement = "right"),
-              tags$br(), tags$br(),
+              bsTooltip(
+                "batch_invalidate",
+                "Upload a QC Excel file to invalidate entire time ranges.",
+                placement = "right"
+              ),
+              tags$br(),
+              tags$br(),
               checkboxGroupInput(
                 "qc_tokeep",
                 "Do not alter data estimated by",

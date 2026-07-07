@@ -29,8 +29,8 @@ Install them before launching:
 
 ```r
 # Recommended: install metamet plus all optional dependencies in one step
+install.packages("pak")
 pak::pak("NERC-CEH/metamet", dependencies = TRUE)
-
 # Or install the app packages individually
 install.packages(c(
   "shiny", "shinydashboard", "shinyjs", "shinyFiles",

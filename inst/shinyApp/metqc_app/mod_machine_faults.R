@@ -87,7 +87,8 @@ mod_machine_faults_server <- function(id, mm_qry, username) {
             qc = 1L,
             comment = paste0(
               format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
-              " - Batch invalidation: ", note
+              " - Batch invalidation: ",
+              note
             ),
             validator = username
           )

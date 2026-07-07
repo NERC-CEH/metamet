@@ -80,7 +80,7 @@ mod_machine_faults_server <- function(id, mm_qry, username) {
 
         dt[
           var_name == var &
-          #name_icos == var &
+            #name_icos == var &
             TIMESTAMP >= start &
             TIMESTAMP <= end,
           `:=`(

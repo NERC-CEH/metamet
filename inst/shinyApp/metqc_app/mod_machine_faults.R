@@ -58,7 +58,10 @@ mod_machine_faults_server <- function(id, mm_qry, username) {
     # apply invalidation to metamet obj
     observeEvent(input$apply_batch_invalidation, {
       if (is.null(mm_qry) || is.null(mm_qry$dt)) {
-        showNotification("Please retrieve data before applying batch invalidation.", type = "error")
+        showNotification(
+          "Please retrieve data before applying batch invalidation.",
+          type = "error"
+        )
         return()
       }
       req(exists("faults_dt"))

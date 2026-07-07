@@ -47,7 +47,7 @@ mod_machine_faults_server <- function(id, mm_qry, username) {
       }
       # Convert date columns
       faults$start_time <- as.POSIXct(faults$start_time, tz = "UTC")
-      faults$end_time   <- as.POSIXct(faults$end_time, tz = "UTC")
+      faults$end_time <- as.POSIXct(faults$end_time, tz = "UTC")
       # Preview table
       output$faults_preview <- renderUI({
         tableOutput(session$ns("faults_table"))

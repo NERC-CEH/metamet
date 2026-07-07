@@ -40,7 +40,10 @@ mod_machine_faults_server <- function(id, mm_qry, username) {
       missing_cols <- setdiff(required_cols, names(faults))
       if (length(missing_cols) > 0) {
         showNotification(
-          paste("Missing required columns:", paste(missing_cols, collapse = ", ")),
+          paste(
+            "Missing required columns:",
+            paste(missing_cols, collapse = ", ")
+          ),
           type = "error"
         )
         return()

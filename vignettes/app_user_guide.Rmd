@@ -258,8 +258,7 @@ Sub-items link to:
 #### Q: How do I change the username the app uses?
 
 The username is read automatically from your operating system account
-(`Sys.info()[["user"]]`). If you need to override it (e.g. on a shared machine),
-click the username shown in the top-right corner of the app header.
+(`Sys.info()[["user"]]`) and is not currently configurable within the app.
 
 #### Q: I want to download the data
 

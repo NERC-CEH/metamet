@@ -1,8 +1,8 @@
 #' Custom plotting function for each variable
 #'
 
+#' @import ggplot2
 #' @import ggiraph
-#' @importFrom ggplot2 scale_linetype_manual
 #' @title ggiraph_plot
 #' @description Creates an interactive girafe plot, whereby the user can select
 #'   points with dubious quality and impute new values.
@@ -78,7 +78,6 @@ ggiraph_plot <- function(
       ),
       size = point_size
     ) +
-
     facet_wrap_interactive(
       ncol = 2,
       interactive_on = "text",
@@ -88,16 +87,18 @@ ggiraph_plot <- function(
         data_id = site
       ))
     ) +
-
     geom_line(
-      aes(y = ref, linetype = paste0("Reference: ", input_variable)),
+      aes(y = ref, linetype = paste0("Reference Data: ", input_variable)),
+      alpha = 0.5,
       colour = "black"
     ) +
     scale_linetype_manual(name = NULL, values = "solid") +
     scale_color_manual(values = col_pal, limits = force) +
+
     xlab("Date") +
     ylab(y_label) +
     ggtitle(paste(input_variable, "time series")) +
+    ggplot2::theme_linedraw() +
     theme(
       plot.title = element_text(hjust = 0.5),
       legend.title = element_blank()

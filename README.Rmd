@@ -53,6 +53,7 @@ different sources, quality control and gap-filling.
 The app requires several additional packages that are not installed by default. Include them all at once with `pak`:
 
 ``` {r, eval = FALSE}
+install.packages("pak")
 pak::pak("NERC-CEH/metamet", dependencies = TRUE)
 ```
 

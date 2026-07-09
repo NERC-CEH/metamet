@@ -8,8 +8,14 @@ library(shinycssloaders)
 library(ggiraph)
 
 # Source module files using absolute paths
-source(system.file("shinyApp/metqc_app/mod_metadata_maker.R", package = "metamet"))
-source(system.file("shinyApp/metqc_app/mod_machine_faults.R", package = "metamet"))
+source(system.file(
+  "shinyApp/metqc_app/mod_metadata_maker.R",
+  package = "metamet"
+))
+source(system.file(
+  "shinyApp/metqc_app/mod_machine_faults.R",
+  package = "metamet"
+))
 
 # Set the gap-filling methods and codes----
 gf_choices <- setNames(df_method$method, df_method$method_longname)

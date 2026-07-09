@@ -53,10 +53,9 @@ ui <- dashboardPage(
       menuItem(
         "Help and Documentation",
         tabName = "information",
-        icon = icon('info'),
-        menuSubItem('Gap-fill methods', tabName = 'gapfill_guide'),
-        menuSubItem('App guide', tabName = 'app_guide'),
-        menuSubItem('Data process guide', tabName = 'data_guide')
+        icon = icon('info')
+        #,
+        #menuSubItem('Data process guide', tabName = 'data_guide')
       )
     ),
     tags$ul(
@@ -266,21 +265,24 @@ ui <- dashboardPage(
       ),
       tabItem(
         tabName = "information",
-      ),
-      tabItem(
-        tabName = "gapfill_guide"
-        # includeMarkdown(here::here("vignettes/gap_fill_methods.md"))
-      ),
-      tabItem(
-        tabName = "app_guide"
-        # includeMarkdown(here::here("vignettes/app_user_guide.md"))
-      ) # ,
-      # tabItem(
-      #   tabName = "data_guide",
-      #   includeHTML(
-      #     here::here("vignettes/metdb_shiny_version.html")
-      #   )
-      # )
+        h2("Help & Documentation"),
+        tags$ul(
+          tags$li(
+            tags$a(
+              href = "https://github.com/NERC-CEH/metamet",
+              target = "_blank",
+              "Github & README"
+            )
+          ),
+          tags$li(
+            tags$a(
+              href = "https://nerc-ceh.github.io/metamet/",
+              target = "_blank",
+              "App User Guide"
+            )
+          )
+        )
+      )
     )
   )
 )

@@ -194,6 +194,7 @@ ui <- dashboardPage(
                 label = h5("Gap-Filling Method"),
                 choices = gf_choices
               ),
+              uiOutput("impute_extra_info"),
               uiOutput("comment_box"),
               tags$h4("Manual Quality Control"),
               actionButton("impute", label = "Impute selection"),
@@ -203,22 +204,22 @@ ui <- dashboardPage(
               ),
               tags$br(),
               tags$br(),
-              tags$h4("Batch Quality Control"),
-              actionButton("batch_invalidate", "Batch invalidate from file"),
-              bsTooltip(
-                "batch_invalidate",
-                "Upload a QC Excel file to invalidate entire time ranges.",
-                placement = "right"
-              ),
-              tags$br(),
-              tags$br(),
+              # inactive for now
+              #tags$h4("Batch Quality Control"),
+              #actionButton("batch_invalidate", "Batch invalidate from file"),
+              #bsTooltip(
+              #  "batch_invalidate",
+              #  "Upload a QC Excel file to invalidate entire time ranges.",
+              #  placement = "right"
+              #),
+              #tags$br(),
+              #tags$br(),
               checkboxGroupInput(
                 "qc_tokeep",
                 "Do not alter data estimated by",
                 choiceNames = df_method$method_longname,
                 choiceValues = df_method$qc
               ),
-              uiOutput("impute_extra_info"),
               actionButton("reset", label = "Restart app")
             ),
           )

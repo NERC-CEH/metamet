@@ -1,4 +1,3 @@
-
 mod_time_average_ui <- function(id) {
   ns <- NS(id)
 
@@ -22,10 +21,8 @@ mod_time_average_ui <- function(id) {
 
 mod_time_average_server <- function(id, mm_qry_in, daterange_reactive) {
   moduleServer(id, function(input, output, session) {
-
     # Return a reactive metamet object (averaged or raw)
     averaged_mm <- reactive({
-
       req(mm_qry_in())
 
       mm_raw <- mm_qry_in()
@@ -37,7 +34,7 @@ mod_time_average_server <- function(id, mm_qry_in, daterange_reactive) {
       mm_avg <- metamet::time_average(
         mm_in = mm_raw,
         avg.time = input$time_avg,
-        report_end_interval = TRUE
+        report_end_interval = FALSE
       )
 
       # Convert back to long format so the rest of the app works
@@ -56,7 +53,8 @@ mod_time_average_server <- function(id, mm_qry_in, daterange_reactive) {
       req(input$time_avg != "none")
       div(
         style = "padding:6px; background:#e6ffe6; border-left:4px solid #2e7d32;",
-        strong("Time averaging applied by: "), input$time_avg
+        strong("Time averaging applied by: "),
+        input$time_avg
       )
     })
 

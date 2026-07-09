@@ -13,8 +13,10 @@ validate_missing_comments <- function(mm_qry, v_names) {
   for (v in v_names) {
     rows_var <- mm_qry$dt[
       name_icos == v &
-        !is.na(qc) & qc != 0L &
-        !is.na(qc_orig) & qc_orig != qc
+        !is.na(qc) &
+        qc != 0L &
+        !is.na(qc_orig) &
+        qc_orig != qc
     ]
     # debugging
     print(paste("Checking variable:", v))
@@ -59,7 +61,8 @@ propagate_qc_to_raw <- function(mm_qry_raw, mm_qry_avg, interval, username) {
     t_end <- changed$TIMESTAMP[i]
     t_start <- t_end - interval
     rows_to_update <- dt_raw[
-      TIMESTAMP > t_start & TIMESTAMP <= t_end &
+      TIMESTAMP >= t_start &
+        TIMESTAMP < t_end &
         name_icos == changed$name_icos[i]
     ]
     n_before <- 0
@@ -74,7 +77,8 @@ propagate_qc_to_raw <- function(mm_qry_raw, mm_qry_avg, interval, username) {
       }
       # Apply QC + comment + validator
       dt_raw[
-        TIMESTAMP > t_start & TIMESTAMP <= t_end &
+        TIMESTAMP >= t_start &
+          TIMESTAMP < t_end &
           name_icos == changed$name_icos[i],
         `:=`(
           qc = changed$qc[i],
@@ -95,8 +99,12 @@ save_validated_output <- function(mm, fname, username) {
     mm,
     file = paste0(
       fs::path_ext_remove(fname),
-      "_qc_by_", username,
-      "_on_", Sys.Date(), ".", fs::path_ext(fname)
+      "_qc_by_",
+      username,
+      "_on_",
+      Sys.Date(),
+      ".",
+      fs::path_ext(fname)
     )
   )
   df_ceda <- metamet:::format_for_ceda(mm)
@@ -104,26 +112,28 @@ save_validated_output <- function(mm, fname, username) {
     df_ceda,
     file = paste0(
       fs::path_ext_remove(fname),
-      "_qc_by_", username,
-      "_on_", Sys.Date(), "_ceda.", fs::path_ext(fname)
+      "_qc_by_",
+      username,
+      "_on_",
+      Sys.Date(),
+      "_ceda.",
+      fs::path_ext(fname)
     )
   )
 }
 
 # SERVER MODULE
 mod_qc_propagation_server <- function(
-    id,
-    mm_qry,
-    mm_qry_raw,
-    v_names,
-    time_avg,
-    username,
-    fname,
-    save_trigger
+  id,
+  mm_qry,
+  mm_qry_raw,
+  v_names,
+  time_avg,
+  username,
+  fname,
+  save_trigger
 ) {
-
   moduleServer(id, function(input, output, session) {
-
     # This object will hold the final raw QC-corrected dataset
     mm_final <- NULL
     observeEvent(save_trigger(), {
@@ -173,9 +183,7 @@ mod_qc_propagation_server <- function(
           type = "message",
           duration = 6
         )
-
       } else {
-
         # No averaging → the edited mm_qry() is already raw
         mm_final <<- mm_qry()
       }

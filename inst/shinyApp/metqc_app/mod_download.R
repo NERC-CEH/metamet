@@ -88,7 +88,7 @@ mod_download_server <- function(id, mm_final) {
     # download handler
     output$download_zip <- downloadHandler(
       filename = function() {
-        paste0("qc_qa_data_", Sys.Date(), ".zip")
+        paste0("processed_data_", Sys.Date(), ".zip")
       },
       content = function(file) {
         cat("=== DOWNLOAD DEBUG START ===\n")

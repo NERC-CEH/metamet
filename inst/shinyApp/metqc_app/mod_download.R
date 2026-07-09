@@ -5,7 +5,7 @@ mod_download_ui <- function(id) {
     checkboxGroupInput(
       ns("download_levels"),
       "Select data products:",
-      choices = c("Processed data" = "lev1", "CEDA" = "ceda"),
+      choices = c("QA/QC Data" = "lev1", "CEDA" = "ceda"),
       selected = c("lev1", "ceda")
     ),
     uiOutput(ns("levels_warning")),
@@ -88,7 +88,7 @@ mod_download_server <- function(id, mm_final) {
     # download handler
     output$download_zip <- downloadHandler(
       filename = function() {
-        paste0("processed_data_", Sys.Date(), ".zip")
+        paste0("qc_qa_data_", Sys.Date(), ".zip")
       },
       content = function(file) {
         cat("=== DOWNLOAD DEBUG START ===\n")
@@ -137,7 +137,7 @@ mod_download_server <- function(id, mm_final) {
             # -------------------------------------------------------
             if (lev == "lev1") {
               df_out <- mm_avg$dt
-              prefix <- "level1"
+              prefix <- "qa_qc_data"
             } else if (lev == "ceda") {
               df_out <- metamet:::format_for_ceda(mm_avg)
               prefix <- "ceda"
@@ -328,6 +328,11 @@ mod_download_server <- function(id, mm_final) {
                   }
                 }
               }
+            }
+
+            # formats timestamp for monthly avg
+            if (avg == "1 month") {
+              df_out[, TIMESTAMP := format(TIMESTAMP, "%Y-%m")]
             }
 
             # -------------------------------------------------------

@@ -5,8 +5,8 @@ mod_download_ui <- function(id) {
     checkboxGroupInput(
       ns("download_levels"),
       "Select data products:",
-      choices = c("Level 1" = "lev1", "Level 2" = "lev2", "CEDA" = "ceda"),
-      selected = c("lev1", "lev2", "ceda")
+      choices = c("Processed data" = "lev1", "CEDA" = "ceda"),
+      selected = c("lev1", "ceda")
     ),
     uiOutput(ns("levels_warning")),
 
@@ -23,7 +23,7 @@ mod_download_ui <- function(id) {
       "Averaging for download:",
       choices = c(
         "Raw (no averaging)" = "none",
-        "Daily"  = "1 day",
+        "Daily" = "1 day",
         "Weekly" = "1 week",
         "Monthly" = "1 month"
       ),
@@ -36,17 +36,12 @@ mod_download_ui <- function(id) {
 
 mod_download_server <- function(id, mm_final) {
   moduleServer(id, function(input, output, session) {
-
-    # warning if no level is selected or if a dataset is not available
+    # warning if no level is selected
     output$levels_warning <- renderUI({
       msgs <- c()
 
       if (length(input$download_levels) == 0) {
         msgs <- c(msgs, "Please select at least one data product.")
-      }
-
-      if ("lev2" %in% input$download_levels && is.null(mm_final()$dt_qc)) {
-        msgs <- c(msgs, "Level 2 data is not available for this dataset.")
       }
 
       if (length(msgs) > 0) {
@@ -79,9 +74,11 @@ mod_download_server <- function(id, mm_final) {
 
     # Disable download button unless at least one format, level, and averaging option are selected
     observe({
-      if (length(input$download_formats) == 0 ||
+      if (
+        length(input$download_formats) == 0 ||
           length(input$download_levels) == 0 ||
-          length(input$download_avg) == 0) {
+          length(input$download_avg) == 0
+      ) {
         shinyjs::disable("download_zip")
       } else {
         shinyjs::enable("download_zip")
@@ -94,7 +91,6 @@ mod_download_server <- function(id, mm_final) {
         paste0("processed_data_", Sys.Date(), ".zip")
       },
       content = function(file) {
-
         cat("=== DOWNLOAD DEBUG START ===\n")
         cat("Levels:", paste(input$download_levels, collapse = ", "), "\n")
         cat("Formats:", paste(input$download_formats, collapse = ", "), "\n")
@@ -113,18 +109,16 @@ mod_download_server <- function(id, mm_final) {
         # APPLY DOWNLOAD‑TIME AVERAGING (if selected)
         for (lev in input$download_levels) {
           for (avg in input$download_avg) {
-
             cat("\n=== PROCESSING:", lev, "with averaging:", avg, "===\n")
 
             # -------------------------------------------------------
             # 1. APPLY AVERAGING (if not "none")
             # -------------------------------------------------------
             if (avg != "none") {
-
               cat("Applying metamet::time_average()...\n")
 
               mm_avg <- metamet::time_average(
-                mm_in    = mm_raw,
+                mm_in = mm_raw,
                 avg.time = avg,
                 report_end_interval = TRUE,
                 extra_rows = 0
@@ -144,11 +138,6 @@ mod_download_server <- function(id, mm_final) {
             if (lev == "lev1") {
               df_out <- mm_avg$dt
               prefix <- "level1"
-
-            } else if (lev == "lev2") {
-              df_out <- mm_avg$dt_qc
-              prefix <- "level2"
-
             } else if (lev == "ceda") {
               df_out <- metamet:::format_for_ceda(mm_avg)
               prefix <- "ceda"
@@ -160,8 +149,12 @@ mod_download_server <- function(id, mm_final) {
             }
 
             # remove internal cols if present
-            if ("row_name" %in% names(df_out)) df_out[, row_name := NULL]
-            if ("datect_num" %in% names(df_out)) df_out[, datect_num := NULL]
+            if ("row_name" %in% names(df_out)) {
+              df_out[, row_name := NULL]
+            }
+            if ("datect_num" %in% names(df_out)) {
+              df_out[, datect_num := NULL]
+            }
 
             # -------------------------------------------------------
             # 3. DEBUGGING
@@ -176,10 +169,12 @@ mod_download_server <- function(id, mm_final) {
             #########################################################
             # 3b. PROPAGATE QC + COMMENT FROM RAW TO AVERAGED LEVEL 1
             #########################################################
-            if (lev == "lev1" &&
+            if (
+              lev == "lev1" &&
                 avg != "none" &&
                 "comment" %in% names(mm_raw$dt) &&
-                "qc" %in% names(mm_raw$dt)) {
+                "qc" %in% names(mm_raw$dt)
+            ) {
               if (avg == "1 month") {
                 cat("Applying MONTHLY QC/comment propagation...\n")
                 raw_dt <- mm_raw$dt[
@@ -192,12 +187,17 @@ mod_download_server <- function(id, mm_final) {
                     comment_raw = comment
                   )
                 ]
-                monthly_raw <- raw_dt[
-                  ,
+                monthly_raw <- raw_dt[,
                   .(
-                    qc = if (all(is.na(qc_raw))) NA_integer_ else max(qc_raw, na.rm = TRUE),
+                    qc = if (all(is.na(qc_raw))) {
+                      NA_integer_
+                    } else {
+                      max(qc_raw, na.rm = TRUE)
+                    },
                     comment = {
-                      cmt <- comment_raw[!is.na(comment_raw) & comment_raw != ""]
+                      cmt <- comment_raw[
+                        !is.na(comment_raw) & comment_raw != ""
+                      ]
                       if (length(cmt) > 0) cmt[1] else NA_character_
                     }
                   ),
@@ -206,126 +206,139 @@ mod_download_server <- function(id, mm_final) {
                 df_out[, year_month := format(TIMESTAMP, "%Y-%m")]
                 data.table::setkey(df_out, site, name_icos, year_month)
                 data.table::setkey(monthly_raw, site, name_icos, year_month)
-                df_out[monthly_raw,
-                       `:=`(
-                         qc = i.qc,
-                         comment = i.comment
-                       )
+                df_out[
+                  monthly_raw,
+                  `:=`(
+                    qc = i.qc,
+                    comment = i.comment
+                  )
                 ]
                 df_out[, year_month := NULL]
               } else {
-                cat("Applying QC/comment propagation for", avg, "averaging...\n")
+                cat(
+                  "Applying QC/comment propagation for",
+                  avg,
+                  "averaging...\n"
+                )
 
-              # Map averaging string to lubridate duration
-              avg_duration <- switch(
-                avg,
-                "1 day"  = lubridate::ddays(1),
-                "1 week" = lubridate::dweeks(1),
-                "1 month"= lubridate::dmonths(1)
-              )
+                # Map averaging string to lubridate duration
+                avg_duration <- switch(
+                  avg,
+                  "1 day" = lubridate::ddays(1),
+                  "1 week" = lubridate::dweeks(1),
+                  "1 month" = lubridate::dmonths(1)
+                )
 
-              if (!is.null(avg_duration)) {
-
-                # Raw rows that actually have non‑zero QC or comments
-                raw_dt <- mm_raw$dt[
-                  !is.na(qc) | !is.na(comment),
-                  .(site, name_icos, TIMESTAMP, qc_raw = qc, comment_raw = comment)
-                ]
-
-                cat("Number of raw rows with qc/comment:", nrow(raw_dt), "\n")
-
-                if (nrow(raw_dt) > 0) {
-
-                  # Build interval table for averaged rows
-                  df_int <- data.table::copy(df_out)
-                  df_int[, interval_start := TIMESTAMP - avg_duration]
-                  df_int[, interval_end   := TIMESTAMP]
-
-                  df_int <- df_int[
-                    ,
+                if (!is.null(avg_duration)) {
+                  # Raw rows that actually have non‑zero QC or comments
+                  raw_dt <- mm_raw$dt[
+                    !is.na(qc) | !is.na(comment),
                     .(
                       site,
                       name_icos,
-                      start = interval_start,
-                      end   = interval_end,
                       TIMESTAMP,
-                      value,
-                      type,
-                      var_name,
-                      qc,
-                      comment
+                      qc_raw = qc,
+                      comment_raw = comment
                     )
                   ]
 
-                  # Raw as point intervals
-                  raw_int <- raw_dt[
-                    ,
-                    .(
-                      site,
-                      name_icos,
-                      start = TIMESTAMP,
-                      end   = TIMESTAMP,
-                      qc_raw,
-                      comment_raw
+                  cat("Number of raw rows with qc/comment:", nrow(raw_dt), "\n")
+
+                  if (nrow(raw_dt) > 0) {
+                    # Build interval table for averaged rows
+                    df_int <- data.table::copy(df_out)
+                    df_int[, interval_start := TIMESTAMP - avg_duration]
+                    df_int[, interval_end := TIMESTAMP]
+
+                    df_int <- df_int[,
+                      .(
+                        site,
+                        name_icos,
+                        start = interval_start,
+                        end = interval_end,
+                        TIMESTAMP,
+                        value,
+                        type,
+                        var_name,
+                        qc,
+                        comment
+                      )
+                    ]
+
+                    # Raw as point intervals
+                    raw_int <- raw_dt[,
+                      .(
+                        site,
+                        name_icos,
+                        start = TIMESTAMP,
+                        end = TIMESTAMP,
+                        qc_raw,
+                        comment_raw
+                      )
+                    ]
+
+                    # Set keys
+                    data.table::setkey(df_int, site, name_icos, start, end)
+                    data.table::setkey(raw_int, site, name_icos, start, end)
+
+                    # Interval overlap join
+                    joined <- data.table::foverlaps(
+                      x = df_int,
+                      y = raw_int,
+                      type = "any",
+                      nomatch = 0L
                     )
-                  ]
 
-                  # Set keys
-                  data.table::setkey(df_int, site, name_icos, start, end)
-                  data.table::setkey(raw_int, site, name_icos, start, end)
+                    # Aggregate per averaged row:
+                    # qc = max qc_raw (if any), comment = first non‑NA comment_raw
+                    joined <- joined[,
+                      .(
+                        site = site,
+                        name_icos = name_icos,
+                        TIMESTAMP = TIMESTAMP,
+                        var_name = var_name,
+                        value = value,
+                        type = type,
+                        qc = if (all(is.na(qc_raw))) {
+                          qc[1]
+                        } else {
+                          max(qc_raw, na.rm = TRUE)
+                        },
+                        comment = {
+                          cmt <- comment_raw[
+                            !is.na(comment_raw) & comment_raw != ""
+                          ]
+                          if (length(cmt) > 0) cmt[1] else comment[1]
+                        }
+                      ),
+                      by = .(site, name_icos, TIMESTAMP)
+                    ]
 
-                  # Interval overlap join
-                  joined <- data.table::foverlaps(
-                    x = df_int,
-                    y = raw_int,
-                    type = "any",
-                    nomatch = 0L
-                  )
+                    # Put back into df_out (aligned by site, name_icos, TIMESTAMP)
+                    data.table::setkey(df_out, site, name_icos, TIMESTAMP)
+                    data.table::setkey(joined, site, name_icos, TIMESTAMP)
 
-                  # Aggregate per averaged row:
-                  # qc = max qc_raw (if any), comment = first non‑NA comment_raw
-                  joined <- joined[
-                    ,
-                    .(
-                      site      = site,
-                      name_icos = name_icos,
-                      TIMESTAMP = TIMESTAMP,
-                      var_name  = var_name,
-                      value     = value,
-                      type      = type,
-                      qc        = if (all(is.na(qc_raw))) qc[1] else max(qc_raw, na.rm = TRUE),
-                      comment   = {
-                        cmt <- comment_raw[!is.na(comment_raw) & comment_raw != ""]
-                        if (length(cmt) > 0) cmt[1] else comment[1]
-                      }
-                    ),
-                    by = .(site, name_icos, TIMESTAMP)
-                  ]
-
-                  # Put back into df_out (aligned by site, name_icos, TIMESTAMP)
-                  data.table::setkey(df_out, site, name_icos, TIMESTAMP)
-                  data.table::setkey(joined, site, name_icos, TIMESTAMP)
-
-                  df_out[joined,
-                         `:=`(
-                           qc      = i.qc,
-                           comment = i.comment
-                         )
-                  ]
+                    df_out[
+                      joined,
+                      `:=`(
+                        qc = i.qc,
+                        comment = i.comment
+                      )
+                    ]
+                  }
                 }
               }
             }
-          }
 
             # -------------------------------------------------------
             # 4. WRITE FILES (include averaging in filename)
             # -------------------------------------------------------
             avg_tag <- switch(
               avg,
-              "none"   = "raw",
-              "1 day"  = "daily",
+              "none" = "raw",
+              "1 day" = "daily",
               "1 week" = "weekly",
-              "1 month"= "monthly"
+              "1 month" = "monthly"
             )
 
             if ("csv" %in% input$download_formats) {
@@ -356,7 +369,10 @@ mod_download_server <- function(id, mm_final) {
         print(file.exists(files_to_zip))
 
         cat("Running zip()...\n")
-        zip_result <- try(zip(zipfile = file, files = files_to_zip), silent = TRUE)
+        zip_result <- try(
+          zip(zipfile = file, files = files_to_zip),
+          silent = TRUE
+        )
 
         cat("zip() result class:", class(zip_result), "\n")
         print(zip_result)

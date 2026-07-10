@@ -1,4 +1,3 @@
-cat(">>> app.R started, getwd() = ", getwd(), "\n")
 library(metamet)
 library(shinydashboard)
 library(shinyjs)
@@ -384,6 +383,9 @@ server <- function(input, output, session) {
 
   # confirms upload was succesful and then switches to calendar selection
   observeEvent(uploaded(), {
+    # NEW: reset metadata maker module
+    session$sendCustomMessage("click", list(id = "mm_maker-reset_files"))
+
     showNotification(
       paste("Upload successful:", basename(uploaded()$fname)),
       type = "message",

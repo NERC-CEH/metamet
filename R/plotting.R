@@ -77,7 +77,24 @@ ggiraph_plot <- function(
         colour = factor(var_name)
       ),
       size = point_size
-    ) +
+    )
+
+  # highlight selected points only if column exists
+  if ("is_selected" %in% names(dt_plot)) {
+    p1_ggplot <- p1_ggplot +
+      geom_point(
+        data = dt_plot[name_icos == input_variable & is_selected == TRUE],
+        aes(TIMESTAMP, value),
+        colour = "red",
+        fill = "red",
+        size = point_size + 1.5,
+        shape = 21,
+        stroke = 1.2,
+        inherit.aes = FALSE
+      )
+  }
+
+  p1_ggplot <- p1_ggplot +
     facet_wrap_interactive(
       ncol = 2,
       interactive_on = "text",

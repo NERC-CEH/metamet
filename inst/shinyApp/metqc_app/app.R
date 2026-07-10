@@ -578,10 +578,14 @@ server <- function(input, output, session) {
         step = 1
       )
     } else if (input$select_imputation == "regn") {
+      # remove the current variable from covariate choices
+      cov_choices <- uploaded()$v_names
+      cov_choices <- cov_choices[cov_choices != input$plotTabs]
+
       selectInput(
         "select_covariate",
         label = h5("Covariate"),
-        choices = uploaded()$v_names
+        choices = cov_choices
       )
     }
   })
@@ -603,8 +607,9 @@ server <- function(input, output, session) {
       start_date = df_daterange()$start_date,
       end_date = df_daterange()$end_date
     )
+    attr(mm_qry, "format") <- "long"
     data.table::setkeyv(mm_qry$dt, c("name_icos", "site", "TIMESTAMP"))
-    mm_qry$dt[, row_name := as.factor(rownames(mm_qry$dt))]
+    mm_qry$dt[, row_name := as.character(seq_len(.N))]
     mm_qry$dt$datect_num <<- as.numeric(mm_qry$dt$TIMESTAMP)
 
     if (!"qc_orig" %in% names(mm_qry$dt)) {
@@ -709,7 +714,18 @@ server <- function(input, output, session) {
 
   # Creating reactive variables-----
   selected_state <- reactive({
-    input[[paste0(input$plotTabs, "_interactive_plot_selected")]]
+    sel <- input[[paste0(input$plotTabs, "_interactive_plot_selected")]]
+    if (is.null(sel)) {
+      return(NULL)
+    }
+
+    # sel is row index of the plot subset
+    plot_dt <- mm_qry$dt[name_icos == input$plotTabs]
+
+    # convert plot row index → dt row_name
+    dt_row_names <- plot_dt$row_name[as.numeric(sel)]
+
+    return(dt_row_names)
   })
 
   # Impute button functionality----
@@ -735,16 +751,30 @@ server <- function(input, output, session) {
         mm_qry$dt[row_name %in% row_ids, comment := input_comment]
       }
 
-      mm_qry <<- metamet::impute(
-        v_y = input$plotTabs,
-        mm = mm_qry,
-        method = input$select_imputation,
-        qc_tokeep = as.numeric(input$qc_tokeep),
-        x = input$select_covariate,
-        k = input$intslider,
-        plot_graph = FALSE,
-        row_selected = selected_state()
-      )
+      # handle regn - regression with covariate
+      if (input$select_imputation == "regn") {
+        mm_qry <<- metamet::impute(
+          v_y = input$plotTabs,
+          mm = mm_qry,
+          method = "regn",
+          qc_tokeep = as.numeric(input$qc_tokeep),
+          x = input$select_covariate,
+          k = input$intslider,
+          plot_graph = FALSE,
+          row_selected = selected_state()
+        )
+      } else {
+        mm_qry <<- metamet::impute(
+          v_y = input$plotTabs,
+          mm = mm_qry,
+          method = input$select_imputation,
+          qc_tokeep = as.numeric(input$qc_tokeep),
+          x = input$select_covariate,
+          k = input$intslider,
+          plot_graph = FALSE,
+          row_selected = selected_state()
+        )
+      }
 
       # Re-plotting plot after imputation is confirmed to illustrate changes
       shinyjs::show("plotted_data")

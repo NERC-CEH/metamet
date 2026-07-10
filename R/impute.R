@@ -177,17 +177,12 @@ impute <- function(
     qc <- df_method$qc[match(method, df_method$method)]
     print(paste("using method", qc, method))
 
-    # qc_tokeep typically set to 0, so this selects any other value (missing or imputed)
-    # is_selected optionally adds those selected in the metqc app ggiraph plots
-    # by default, this selects all points marked as missing because the only
-    # qc_tokeep is the raw data. Run interactively in the app, this applies only
-    # to those selected with the additional condition "is_selected".
-    if (isTRUE(row_selected)) {
-      dt[name_icos == y, is_selected := TRUE]
-    } else {
-      dt[name_icos == y, is_selected := row_name %in% row_selected]
-    }
-    dt[name_icos == y, is_selected := qc %!in% qc_tokeep & is_selected]
+    # start by marking nothing as selected
+    dt[name_icos == y, is_selected := FALSE]
+    # mark only the rows the user actually selected
+    dt[name_icos == y & row_name %in% row_selected, is_selected := TRUE]
+    # apply qc_tokeep filter
+    dt[name_icos == y, is_selected := is_selected & (qc %!in% qc_tokeep)]
 
     if (method == "noneg") {
       # only previously selected values which are negative stay selected
@@ -259,31 +254,123 @@ impute <- function(
           ]
           dt[is_selected & name_icos == y & var_name == vn, value := pred]
           dt[, pred := NULL]
+
+          # DEBUGGING
+          message("DEBUG: unique name_icos:")
+          message(paste(unique(dt$name_icos), collapse = ", "))
+
+          message("DEBUG: covariate x = ", x)
+          print(dt[name_icos == x][1:20])
+
+          message("DEBUG: variable y = ", y)
+          print(dt[name_icos == y][1:20])
+
+          message("DEBUG: row_selected:")
+          print(head(row_selected, 20))
         } else if (method == "regn" || method == "era5") {
-          if (method == "era5") {
-            v_x <- dt[name_icos == y & var_name == vn, ref]
-          } else {
-            stop("regn method does not currently work with long-format data")
-          }
-          if (fit_vn) {
-            dtt <- data.table(
-              y = dt[name_icos == y & var_name == vn, value],
-              x = v_x,
-              is_selected = dt[name_icos == y & var_name == vn, is_selected]
+          #browser() # debugging
+
+          # prevent regressing a variable against itself
+          if (method == "regn" && identical(y, x)) {
+            stop(
+              paste0(
+                "Regression imputation error: variable '",
+                y,
+                "' cannot be used as its own covariate."
+              ),
+              call. = FALSE
             )
-            dtt[is_selected == TRUE, y := NA]
-            m <- lm(y ~ x, data = dtt, na.action = na.exclude)
-            v_pred <- predict(m, newdata = dtt)
-            dt[
-              name_icos == y & var_name == vn & is_selected == TRUE,
-              value := v_pred[dtt$is_selected]
-            ]
-          } else {
-            dt[
-              name_icos == y & var_name == vn & is_selected == TRUE,
-              value := ref
-            ]
           }
+
+          # extract y values for this replicate
+          y_dt <- dt[
+            name_icos == y & var_name == vn,
+            .(TIMESTAMP, y = value, is_selected)
+          ]
+
+          # extract ALL covariate values (all replicates)
+          if (method == "era5") {
+            x_dt <- dt[name_icos == y & var_name == vn, .(TIMESTAMP, x = ref)]
+          } else {
+            x_dt <- dt[name_icos == x, .(TIMESTAMP, x = value)]
+          }
+
+          # merge by timestamp
+          dtt <- merge(y_dt, x_dt, by = "TIMESTAMP", all.x = TRUE)
+
+          # diagnostics
+          message(
+            "Covariate check for ",
+            y,
+            " (",
+            vn,
+            "): variable '",
+            x,
+            "' has ",
+            sum(!is.na(dtt$x)),
+            " non-missing values."
+          )
+
+          message(
+            "Regression table for ",
+            y,
+            " (",
+            vn,
+            "): ",
+            sum(!is.na(dtt$y)),
+            " usable y-values; ",
+            sum(!is.na(dtt$x)),
+            " usable x-values; ",
+            sum(dtt$is_selected),
+            " selected points."
+          )
+
+          # remove selected points from fitting
+          dtt[is_selected == TRUE, y := NA]
+
+          # count usable regression points
+          n_fit <- sum(!is.na(dtt$y))
+          n_x <- sum(!is.na(dtt$x))
+          n_sel <- sum(dtt$is_selected)
+
+          message(
+            "Regression data for ",
+            y,
+            " (",
+            vn,
+            "): ",
+            n_fit,
+            " usable y-values; ",
+            n_x,
+            " usable x-values."
+          )
+
+          # skip regression if insufficient data
+          if (n_fit < 3 || n_x < 3 || n_sel == 0) {
+            message(
+              "Skipping regression for ",
+              y,
+              " (",
+              vn,
+              ") due to insufficient data."
+            )
+            next
+          }
+
+          # fit regression
+          m <- lm(y ~ x, data = dtt, na.action = na.exclude)
+
+          # predict
+          v_pred <- predict(m, newdata = dtt)
+
+          # Extract predicted values only for selected timestamps
+          pred_dt <- dtt[is_selected == TRUE, .(TIMESTAMP, pred = v_pred)]
+
+          # Assign predictions by TIMESTAMP
+          dt[
+            name_icos == y & var_name == vn & TIMESTAMP %in% pred_dt$TIMESTAMP,
+            value := pred_dt$pred[match(TIMESTAMP, pred_dt$TIMESTAMP)]
+          ]
         }
 
         dt[name_icos == y & var_name == vn & is_selected == TRUE, qc := ..qc]

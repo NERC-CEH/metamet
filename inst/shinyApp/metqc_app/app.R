@@ -12,6 +12,7 @@ source("mod_machine_faults.R", local = TRUE)
 
 # Set the gap-filling methods and codes----
 gf_choices <- setNames(df_method$method, df_method$method_longname)
+default_method <- "time"
 
 # Define UI for the app
 ui <- dashboardPage(
@@ -191,7 +192,8 @@ ui <- dashboardPage(
               selectInput(
                 "select_imputation",
                 label = h5("Gap-Filling Method"),
-                choices = gf_choices[gf_choices != "raw"]
+                choices = gf_choices[gf_choices != "raw"],
+                selected = default_method
               ),
               uiOutput("impute_extra_info"),
               uiOutput("comment_box"),

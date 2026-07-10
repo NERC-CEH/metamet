@@ -16,11 +16,22 @@ ggiraph_plot <- function(
   point_size = 3,
   vars_to_show = NULL
 ) {
+  message(">>> ggiraph_plot called with input_variable = ", input_variable)
+
   dt_plot <- merge(
     mm_qry$dt,
     data.table::as.data.table(df_method)[, .(qc, method_longname)],
     by = "qc",
     all.x = TRUE
+  )
+  message(">>> names(dt_plot): ", paste(names(dt_plot), collapse = ", "))
+  message(
+    ">>> unique name_icos in dt_plot: ",
+    paste(unique(dt_plot$name_icos), collapse = ", ")
+  )
+  message(
+    ">>> nrows for selected variable: ",
+    nrow(dt_plot[name_icos == input_variable])
   )
 
   units_icos <- mm_qry$dt_meta[name_icos == input_variable, units_icos][1L]
@@ -49,6 +60,11 @@ ggiraph_plot <- function(
   if (!is.null(vars_to_show) && length(vars_to_show) > 0L) {
     dt_plot <- dt_plot[var_name %in% vars_to_show]
   }
+
+  message(
+    ">>> nrows after vars_to_show filter: ",
+    nrow(dt_plot[name_icos == input_variable])
+  )
 
   col_pal_base <- c(
     "#E69F00",

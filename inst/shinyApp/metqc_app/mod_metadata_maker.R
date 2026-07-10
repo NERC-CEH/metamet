@@ -1166,13 +1166,14 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
           } else {
             NA_real_
           }
-          default_method <- if (
-            nrow(ref_row) && !is.na(ref_row$imputation_method[1L])
-          ) {
-            ref_row$imputation_method[1L]
-          } else {
-            "time"
-          }
+          default_method <- "time"
+          #default_method <- if (
+          #  nrow(ref_row) && !is.na(ref_row$imputation_method[1L])
+          #) {
+          #  ref_row$imputation_method[1L]
+          #} else {
+          #  "time"
+          #}
 
           fluidRow(
             column(2, tags$span(icos_nm, style = "font-weight: bold;")),

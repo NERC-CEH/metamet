@@ -1212,7 +1212,7 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
               selectInput(
                 ns(safe_id("method_", col_nm)),
                 label = NULL,
-                choices = v_method_choices,
+                choices = v_method_choices[v_method_choices != "raw"],
                 selected = default_method
               )
             )

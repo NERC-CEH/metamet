@@ -191,7 +191,7 @@ ui <- dashboardPage(
               selectInput(
                 "select_imputation",
                 label = h5("Gap-Filling Method"),
-                choices = gf_choices
+                choices = gf_choices[gf_choices != "raw"]
               ),
               uiOutput("impute_extra_info"),
               uiOutput("comment_box"),

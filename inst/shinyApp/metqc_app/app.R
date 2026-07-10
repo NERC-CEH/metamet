@@ -1,3 +1,4 @@
+cat(">>> app.R started, getwd() = ", getwd(), "\n")
 library(metamet)
 library(shinydashboard)
 library(shinyjs)
@@ -218,8 +219,7 @@ ui <- dashboardPage(
                 "Do not alter data estimated by",
                 choiceNames = df_method$method_longname,
                 choiceValues = df_method$qc
-              ),
-              actionButton("reset", label = "Restart app")
+              )
             ),
           )
         ),
@@ -288,6 +288,7 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output, session) {
+  cat(">>> server() started\n")
   # increase input file size limit to 200 MB
   options(shiny.maxRequestSize = 200 * 1024^2)
 
@@ -798,22 +799,6 @@ server <- function(input, output, session) {
         "_interactive_plot"
       )]] <- renderGirafe(plot_selected())
     }
-  })
-
-  # Reset button functionality----
-  observeEvent(input$reset, {
-    showModal(modalDialog(
-      title = "Are you sure you want to restart the app? All progress will be lost",
-      footer = tagList(
-        actionButton("confirm_reset", "I want to restart the app."),
-        modalButton("Cancel")
-      ),
-      easyClose = TRUE
-    ))
-
-    observeEvent(input$confirm_reset, {
-      session$reload()
-    })
   })
 
   # Finished checking, close tab functionality----

@@ -659,12 +659,44 @@ server <- function(input, output, session) {
     observe(
       lapply(paste(uploaded()$v_names), function(i) {
         output[[paste0(i, "_interactive_plot")]] <-
-          renderGirafe(metamet:::ggiraph_plot(
-            i,
-            scale_ref = input$scale_ref,
-            point_size = input$point_size,
-            vars_to_show = input[[paste0(i, "_replicates")]]
-          ))
+          renderGirafe({
+            if (input$scale_ref) {
+              dt <- mm_qry$dt[name_icos == i]
+
+              valid <- !is.na(dt$value) & !is.na(dt$ref)
+
+              cat("\n--- SCALE_REF DEBUG ---\n")
+              cat("Variable:", i, "\n")
+              cat("Valid points:", sum(valid), "\n")
+              cat("Variance of ref:", var(dt$ref[valid], na.rm = TRUE), "\n")
+
+              if (sum(valid) >= 2 && var(dt$ref[valid], na.rm = TRUE) > 0) {
+                m <- lm(value[valid] ~ ref[valid], data = dt)
+
+                cat("Regression coefficients:\n")
+                print(coef(m))
+
+                cat("Intercept (baseline shift):", coef(m)[1], "\n")
+                cat("Slope:", coef(m)[2], "\n")
+
+                scaled_preview <- head(coef(m)[1] + coef(m)[2] * dt$ref[valid])
+                cat("Scaled ref preview:", scaled_preview, "\n")
+              } else {
+                cat(
+                  "Regression not applied (insufficient valid points or zero variance).\n"
+                )
+              }
+
+              cat("--- END DEBUG ---\n\n")
+            }
+
+            metamet:::ggiraph_plot(
+              i,
+              scale_ref = input$scale_ref,
+              point_size = input$point_size,
+              vars_to_show = input[[paste0(i, "_replicates")]]
+            )
+          })
       })
     )
 

@@ -203,6 +203,11 @@ ui <- dashboardPage(
                 "finished_check",
                 label = "Mark variable as reviewed"
               ),
+              actionButton(
+                "revert_var",
+                label = "Revert all imputation for this variable",
+                class = "btn btn-warning"
+              ),
               tags$br(),
               tags$br(),
               # inactive for now
@@ -441,6 +446,8 @@ server <- function(input, output, session) {
   v_names_checklist <- reactiveValues()
   v_missing_comments <- reactiveValues()
   comments <- reactiveValues()
+  orig_var_data <- reactiveValues()
+  orig_qc_data <- reactiveValues()
 
   # Create a reactive element with the earliest start date
   first_start_date <- reactive({
@@ -619,6 +626,15 @@ server <- function(input, output, session) {
 
     if (!"qc_orig" %in% names(mm_qry$dt)) {
       mm_qry$dt[, qc_orig := qc]
+    }
+
+    # Store original data for revert functionality
+    for (var in uploaded()$v_names) {
+      orig_var_data[[var]] <- data.table::copy(mm_qry$dt[name_icos == var])
+      orig_qc_data[[var]] <- data.table::copy(mm_qry$dt[
+        name_icos == var,
+        .(row_name, qc)
+      ])
     }
 
     # Add a tab to the plotting panel for each variable that has been selected by the user.
@@ -841,6 +857,59 @@ server <- function(input, output, session) {
   observeEvent(input$finished_check, {
     # Insert validation flag for date range here
     v_names_checklist[[input$plotTabs]] <- TRUE
+  })
+
+  # Revert all imputation for a variable----
+  observeEvent(input$revert_var, {
+    req(mm_qry)
+
+    var <- input$plotTabs
+
+    if (is.null(orig_var_data[[var]])) {
+      shinyjs::alert("No original data stored for this variable.")
+      return()
+    }
+
+    # Get original data and QC for this variable
+    original_rows <- data.table::copy(orig_var_data[[var]])
+    original_qc <- data.table::copy(orig_qc_data[[var]])
+
+    # Remove the variable from current mm_qry
+    mm_qry$dt <<- mm_qry$dt[name_icos != var]
+
+    # Merge original QC back into the rows
+    original_rows <- merge(
+      original_rows,
+      original_qc[, .(row_name, qc_reverted = qc)],
+      by = "row_name"
+    )
+    original_rows[, qc := qc_reverted][, qc_reverted := NULL]
+
+    # Append reverted data back
+    mm_qry$dt <<- rbind(mm_qry$dt, original_rows, use.names = TRUE, fill = TRUE)
+
+    # Re-key the data table
+    data.table::setkeyv(mm_qry$dt, c("name_icos", "site", "TIMESTAMP"))
+
+    # Reset comments and reviewed flag for this variable
+    comments[[var]] <- ""
+    v_names_checklist[[var]] <- FALSE
+
+    # Re-render the plot
+    output[[paste0(var, "_interactive_plot")]] <- renderGirafe({
+      req(mm_qry)
+      metamet:::ggiraph_plot(
+        input_variable = var,
+        scale_ref = input$scale_ref,
+        point_size = input$point_size,
+        vars_to_show = input[[paste0(var, "_replicates")]]
+      )
+    })
+
+    showNotification(
+      paste("All imputation for", var, "has been reverted to original values."),
+      type = "message"
+    )
   })
 
   # dynamic comment box for each variable that has been imputed

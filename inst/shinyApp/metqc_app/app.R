@@ -9,6 +9,9 @@ library(ggiraph)
 
 source("mod_metadata_maker.R", local = TRUE)
 source("mod_machine_faults.R", local = TRUE)
+source("mod_qc_propagation.R", local = TRUE)
+source("mod_download.R", local = TRUE)
+source("mod_time_average.R", local = TRUE)
 
 # Set the gap-filling methods and codes----
 gf_choices <- setNames(df_method$method, df_method$method_longname)
@@ -266,21 +269,14 @@ ui <- dashboardPage(
       tabItem(
         tabName = 'download',
         fluidRow(
-          box(
-            id = 'download_box',
-            title = 'Data download',
-            status = "success",
-            solidHeader = TRUE,
-            selectInput(
-              'download_file',
-              'Data to download:',
-              choices = c(
-                'Level 1' = 'lev1',
-                'Level 2' = 'lev2',
-                'CEDA' = 'ceda'
-              )
-            ),
-            downloadButton('download_data', label = 'Download')
+          column(
+            width = 6,
+            box(
+              title = 'Data download',
+              status = "success",
+              solidHeader = TRUE,
+              mod_download_ui("download")
+            )
           )
         )
       ),
@@ -352,6 +348,50 @@ server <- function(input, output, session) {
     id = "machine_faults",
     mm_qry = mm_qry,
     username = username
+  )
+
+  # Reactive wrapper for the non-reactive global `mm_qry` so modules can observe it
+  mm_qry_rv <- reactiveVal(NULL)
+
+  # Wire module servers: time averaging and download. The averaging module returns
+  # a reactive metamet object (averaged or raw) which we pass to the download module.
+  averaged_mm <- mod_time_average_server(
+    "time_avg",
+    mm_qry_in = reactive({
+      mm_qry_rv()
+    }),
+    daterange_reactive = df_daterange
+  )
+
+  mod_download_server(
+    "download",
+    mm_final = averaged_mm
+  )
+
+  # Wire QC propagation module so it can react to save trigger. For now pass
+  # a simple `time_avg` reactive that returns "none" so propagation uses raw rows.
+  mod_qc_propagation_server(
+    id = "qc_propagation",
+    mm_qry = reactive({
+      mm_qry_rv()
+    }),
+    mm_qry_raw = reactive({
+      uploaded()$mm
+    }),
+    v_names = reactive({
+      uploaded()$v_names
+    }),
+    time_avg = reactive({
+      "none"
+    }),
+    username = username,
+    fname = reactive({
+      uploaded()$fname
+    }),
+    save_trigger = reactive({
+      input$submitchanges
+    }),
+    save_files = TRUE
   )
 
   observeEvent(input$batch_invalidate, {
@@ -634,6 +674,8 @@ server <- function(input, output, session) {
       start_date = df_daterange()$start_date,
       end_date = df_daterange()$end_date
     )
+    # update reactive wrapper so modules can see the current query object
+    mm_qry_rv(mm_qry)
     attr(mm_qry, "format") <- "long"
     data.table::setkeyv(mm_qry$dt, c("name_icos", "site", "TIMESTAMP"))
     mm_qry$dt[, row_name := as.character(seq_len(.N))]
@@ -821,6 +863,9 @@ server <- function(input, output, session) {
         )
       }
 
+      # update reactive wrapper after imputation so modules (download/etc.) see changes
+      mm_qry_rv(mm_qry)
+
       # Re-plotting plot after imputation is confirmed to illustrate changes
       shinyjs::show("plotted_data")
       enable("reset")
@@ -907,14 +952,16 @@ server <- function(input, output, session) {
   # dynamic comment box for each variable that has been imputed
   output$comment_box <- renderUI({
     req(input$plotTabs)
-    var <- input$plotTabs
 
-    # Load existing comment if present
+    # Hide comment box for revert method
+    if (input$select_imputation == "revert") {
+      return(NULL)
+    }
+    var <- input$plotTabs
     existing <- comments[[var]]
     if (is.null(existing)) {
       existing <- ""
     }
-
     textAreaInput(
       "comment",
       label = paste0("Reason for imputation for ", var, " (optional)"),

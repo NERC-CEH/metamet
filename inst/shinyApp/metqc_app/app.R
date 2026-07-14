@@ -75,6 +75,21 @@ ui <- dashboardPage(
       tabItem(
         tabName = "dashboard",
         uiOutput("loaded_file_banner"),
+        tags$script(
+          "
+    Shiny.addCustomMessageHandler('trigger_faults_modal', function(message) {
+      Shiny.setInputValue('machine_faults-show_faults_modal', Math.random());
+    });
+  "
+        ),
+
+        tags$script(
+          "
+    Shiny.addCustomMessageHandler('reset_girafe_selection', function(tab) {
+      Shiny.setInputValue(tab + '_interactive_plot_selected', null, {priority: 'event'});
+    });
+  "
+        ),
         tags$style(HTML(
           "
         /* Greys out the first 2 disabled sidebar menu items */
@@ -674,49 +689,24 @@ server <- function(input, output, session) {
       do.call(tabsetPanel, c(my_tabs, id = "plotTabs"))
     })
 
-    observe(
-      lapply(paste(uploaded()$v_names), function(i) {
-        output[[paste0(i, "_interactive_plot")]] <-
-          renderGirafe({
-            if (input$scale_ref) {
-              dt <- mm_qry$dt[name_icos == i]
+    # JS reset every time the user switches variable
+    observeEvent(input$plotTabs, {
+      session$sendCustomMessage("reset_girafe_selection", input$plotTabs)
+    })
 
-              valid <- !is.na(dt$value) & !is.na(dt$ref)
-
-              cat("\n--- SCALE_REF DEBUG ---\n")
-              cat("Variable:", i, "\n")
-              cat("Valid points:", sum(valid), "\n")
-              cat("Variance of ref:", var(dt$ref[valid], na.rm = TRUE), "\n")
-
-              if (sum(valid) >= 2 && var(dt$ref[valid], na.rm = TRUE) > 0) {
-                m <- lm(value[valid] ~ ref[valid], data = dt)
-
-                cat("Regression coefficients:\n")
-                print(coef(m))
-
-                cat("Intercept (baseline shift):", coef(m)[1], "\n")
-                cat("Slope:", coef(m)[2], "\n")
-
-                scaled_preview <- head(coef(m)[1] + coef(m)[2] * dt$ref[valid])
-                cat("Scaled ref preview:", scaled_preview, "\n")
-              } else {
-                cat(
-                  "Regression not applied (insufficient valid points or zero variance).\n"
-                )
-              }
-
-              cat("--- END DEBUG ---\n\n")
-            }
-
-            metamet:::ggiraph_plot(
-              i,
-              scale_ref = input$scale_ref,
-              point_size = input$point_size,
-              vars_to_show = input[[paste0(i, "_replicates")]]
-            )
-          })
+    for (i in uploaded()$v_names) {
+      local({
+        varname <- i
+        output[[paste0(varname, "_interactive_plot")]] <- renderGirafe({
+          metamet:::ggiraph_plot(
+            varname,
+            scale_ref = input$scale_ref,
+            point_size = input$point_size,
+            vars_to_show = input[[paste0(varname, "_replicates")]]
+          )
+        })
       })
-    )
+    }
 
     enable('compare_vars')
   })
@@ -765,23 +755,25 @@ server <- function(input, output, session) {
     )
   })
 
-  # Creating reactive variables-----
+  # Creating reactive variables
   selected_state <- reactive({
     sel <- input[[paste0(input$plotTabs, "_interactive_plot_selected")]]
     if (is.null(sel)) {
       return(NULL)
     }
-
-    # sel is row index of the plot subset
-    plot_dt <- mm_qry$dt[name_icos == input$plotTabs]
-
-    # convert plot row index → dt row_name
-    dt_row_names <- plot_dt$row_name[as.numeric(sel)]
-
+    # sel already contains row_name values from data_id
+    dt_row_names <- as.character(sel)
+    message(
+      ">>> selected_state() for ",
+      input$plotTabs,
+      ": ",
+      paste(sel, collapse = ", ")
+    )
+    message(">>> row_names used: ", paste(dt_row_names, collapse = ", "))
     return(dt_row_names)
   })
 
-  # Impute button functionality----
+  # Impute button functionality
   observeEvent(input$impute, {
     if (is.null(selected_state())) {
       shinyjs::alert("Please select a point to impute.")

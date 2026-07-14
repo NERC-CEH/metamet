@@ -155,6 +155,15 @@ impute <- function(
   # this line not needed if we prefix with mm$ throughout
   dt <- mm$dt
 
+  # ensure qc_orig exists inside impute()
+  if (!"qc_orig" %in% names(dt)) {
+    dt[, qc_orig := qc]
+  }
+  # ensure value_orig exists inside impute() so we can revert selected points
+  if (!"value_orig" %in% names(dt)) {
+    dt[, value_orig := value]
+  }
+
   for (y in v_y) {
     print(paste("Getting ready to impute", y))
     if (use_method_from_meta) {
@@ -212,6 +221,20 @@ impute <- function(
       if (!is.null(comment) && nzchar(comment)) {
         dt[y == name_icos & is_selected == TRUE, comment := ..comment]
       }
+      next # skip model-fitting block
+    }
+    # revert selected points to original values
+    if (method == "revert") {
+      # build lookup table of original values using the stored `value_orig`
+      orig_dt <- dt[
+        name_icos == y & row_name %in% row_selected,
+        .(row_name, value_orig = value_orig, qc_orig = qc_orig)
+      ]
+      # restore original values using a join
+      dt[orig_dt, on = .(row_name), `:=`(value = value_orig, qc = qc_orig)]
+      # clear comment
+      dt[name_icos == y & row_name %in% row_selected, comment := NA_character_]
+      next
     } else {
       # model-fitting methods: fit a separate model per replicate (var_name)
       v_var_names_selected <- unique(dt[
@@ -408,6 +431,7 @@ impute <- function(
   if (length(drop_cols)) {
     dt[, (drop_cols) := NULL]
   }
-
+  # write updated dt back into mm
+  mm$dt <- dt
   return(mm)
 }

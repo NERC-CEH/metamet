@@ -13,7 +13,8 @@ df_method <- data.frame(
     "nightzero",
     "noneg",
     "zero",
-    "era5"
+    "era5",
+    "revert"
   ),
   method_longname = c(
     "Original observation (raw data)",
@@ -23,9 +24,10 @@ df_method <- data.frame(
     "Night-time zero",
     "No negative values",
     "All zeros",
-    "Regression with ERA5 covariate"
+    "Regression with ERA5 covariate",
+    "Revert selected points"
   ),
-  qc = c(0, 1, 2, 3, 4, 5, 6, 7) # 0 = raw, 1 = missing, >1 = missing but imputed
+  qc = c(0, 1, 2, 3, 4, 5, 6, 7, 8) # 0 = raw, 1 = missing, >1 = missing but imputed
 )
 
 df_method$method_longname <- factor(
@@ -38,7 +40,8 @@ df_method$method_longname <- factor(
     "Night-time zero",
     "No negative values",
     "All zeros",
-    "Regression with ERA5 covariate"
+    "Regression with ERA5 covariate",
+    "Revert selected points"
   )
 )
 

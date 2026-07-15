@@ -9,6 +9,8 @@ data-raw/*
 tests/testthat/*.png
 .positai
 .ignore/
+.vs
+.vscode
 .claude/
 tests/testthat/Rplots.pdf
 inst/extdata/mm_amo_ebu_whm_2023_qc_by_*

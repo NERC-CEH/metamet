@@ -27,7 +27,9 @@ mod_time_average_server <- function(id, mm_qry_in, daterange_reactive) {
 
       mm_raw <- mm_qry_in()
 
-      if (input$time_avg == "none") {
+      # input$time_avg can be NULL during initialization; guard the check so
+      # `if` never receives a logical(0) condition which triggers the error.
+      if (is.null(input$time_avg) || input$time_avg == "none") {
         return(mm_raw)
       }
 

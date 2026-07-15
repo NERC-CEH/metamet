@@ -137,10 +137,10 @@ mod_download_server <- function(id, mm_final) {
             # -------------------------------------------------------
             if (lev == "lev1") {
               df_out <- mm_avg$dt
-              prefix <- "qa_qc_data"
+              prefix <- "long"
             } else if (lev == "ceda") {
               df_out <- metamet:::format_for_ceda(mm_avg)
-              prefix <- "ceda"
+              prefix <- "wide"
             }
 
             if (is.null(df_out)) {

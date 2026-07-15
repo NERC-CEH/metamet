@@ -10,6 +10,7 @@ run_shiny <- function() {
       "shiny",
       "shinydashboard",
       "shinyjs",
+      "shinyBS",
       "shinyFiles",
       "shinyvalidate",
       "shinycssloaders",

@@ -196,6 +196,23 @@ impute <- function(
     if (method == "noneg") {
       # only previously selected values which are negative stay selected
       dt[, is_selected := y == name_icos & is_selected & value < 0]
+
+      # If nothing remains selected for this variable, inform the user.
+      n_sel <- dt[name_icos == y & is_selected == TRUE, .N]
+      if (n_sel == 0) {
+        msg <- paste0(
+          "No negative values selected for '",
+          y,
+          "'. No values were imputed for this variable."
+        )
+
+        # show a UI notification or console message.
+        if ("shiny" %in% loadedNamespaces()) {
+          try(shiny::showNotification(msg, type = "warning"), silent = TRUE)
+        } else {
+          message(msg)
+        }
+      }
     }
     if (method == "nightzero") {
       # Pass only a date column to cutData so that dt is never reassigned

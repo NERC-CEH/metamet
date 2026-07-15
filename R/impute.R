@@ -295,21 +295,23 @@ impute <- function(
           dt[is_selected & name_icos == y & var_name == vn, value := pred]
           dt[, pred := NULL]
 
-          # DEBUGGING
+          # DEBUGGING #########################
           message("DEBUG: unique name_icos:")
           message(paste(unique(dt$name_icos), collapse = ", "))
 
           message("DEBUG: covariate x = ", x)
-          print(dt[name_icos == x][1:20])
-
+          # Guard the covariate debug print so we don't compare to length-zero RHS
+          if (!is.null(x) && nzchar(x) && x %in% dt$name_icos) {
+            print(dt[name_icos == x][1:20])
+          } else {
+            message("DEBUG: covariate x not provided or not present in data; skipping covariate debug print")
+          }
           message("DEBUG: variable y = ", y)
           print(dt[name_icos == y][1:20])
-
           message("DEBUG: row_selected:")
           print(head(row_selected, 20))
+          ####################################
         } else if (method == "regn" || method == "era5") {
-          #browser() # debugging
-
           # prevent regressing a variable against itself
           if (method == "regn" && identical(y, x)) {
             stop(
@@ -321,23 +323,19 @@ impute <- function(
               call. = FALSE
             )
           }
-
           # extract y values for this replicate
           y_dt <- dt[
             name_icos == y & var_name == vn,
             .(TIMESTAMP, y = value, is_selected)
           ]
-
           # extract ALL covariate values (all replicates)
           if (method == "era5") {
             x_dt <- dt[name_icos == y & var_name == vn, .(TIMESTAMP, x = ref)]
           } else {
             x_dt <- dt[name_icos == x, .(TIMESTAMP, x = value)]
           }
-
           # merge by timestamp
           dtt <- merge(y_dt, x_dt, by = "TIMESTAMP", all.x = TRUE)
-
           # diagnostics
           message(
             "Covariate check for ",
@@ -350,7 +348,6 @@ impute <- function(
             sum(!is.na(dtt$x)),
             " non-missing values."
           )
-
           message(
             "Regression table for ",
             y,
@@ -364,15 +361,12 @@ impute <- function(
             sum(dtt$is_selected),
             " selected points."
           )
-
           # remove selected points from fitting
           dtt[is_selected == TRUE, y := NA]
-
           # count usable regression points
           n_fit <- sum(!is.na(dtt$y))
           n_x <- sum(!is.na(dtt$x))
           n_sel <- sum(dtt$is_selected)
-
           message(
             "Regression data for ",
             y,
@@ -396,16 +390,12 @@ impute <- function(
             )
             next
           }
-
           # fit regression
           m <- lm(y ~ x, data = dtt, na.action = na.exclude)
-
           # predict
           v_pred <- predict(m, newdata = dtt)
-
           # Extract predicted values only for selected timestamps
           pred_dt <- dtt[is_selected == TRUE, .(TIMESTAMP, pred = v_pred)]
-
           # Assign predictions by TIMESTAMP
           dt[
             name_icos == y & var_name == vn & TIMESTAMP %in% pred_dt$TIMESTAMP,

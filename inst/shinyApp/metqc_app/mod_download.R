@@ -136,10 +136,12 @@ mod_download_server <- function(id, mm_final) {
             # 2. EXTRACT LEVEL
             # -------------------------------------------------------
             if (lev == "lev1") {
-              df_out <- mm_avg$dt
+              # copy so we do not modify the app's in-memory data.table by reference
+              df_out <- data.table::copy(mm_avg$dt)
               prefix <- "long"
             } else if (lev == "ceda") {
-              df_out <- metamet:::format_for_ceda(mm_avg)
+              # format_for_ceda returns a data.table; copy to avoid modifying mm_avg
+              df_out <- data.table::copy(metamet:::format_for_ceda(mm_avg))
               prefix <- "wide"
             }
 

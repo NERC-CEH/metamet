@@ -336,6 +336,11 @@ mod_download_server <- function(id, mm_final) {
             if (avg == "1 month") {
               df_out[, TIMESTAMP := format(TIMESTAMP, "%Y-%m")]
             }
+            # formats timestamp for daily/weekly avg to ISO date (YYYY-MM-DD)
+            if (avg %in% c("1 day", "1 week")) {
+              # Convert TIMESTAMP to POSIXct in GMT and format as ISO date to avoid locale-specific formats
+              df_out[, TIMESTAMP := format(as.POSIXct(TIMESTAMP, tz = "GMT"), "%Y-%m-%d")]
+            }
 
             # -------------------------------------------------------
             # 4. WRITE FILES (include averaging in filename)

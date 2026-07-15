@@ -173,6 +173,9 @@ ui <- dashboardPage(
                 step = 1
               )
             ),
+            mod_time_average_ui("timeavg"),
+            actionButton("retrieve_data", "Retrieve from database"),
+            actionButton("compare_vars", "Compare variables"),
             tags$script(
               "
             Shiny.addCustomMessageHandler('trigger_faults_modal', function(message) {
@@ -180,8 +183,6 @@ ui <- dashboardPage(
             });
             "
             ),
-            actionButton("retrieve_data", "Retrieve from database"),
-            actionButton("compare_vars", "Compare variables")
           )
         ),
         hidden(
@@ -971,51 +972,6 @@ server <- function(input, output, session) {
       rows = 3
     )
   })
-
-  output$download_data <- downloadHandler(
-    filename = function() {
-      if (input$download_file == 'lev1') {
-        paste("level_1-", Sys.Date(), ".zip", sep = "")
-      } else if (input$download_file == 'lev2') {
-        paste("level_2-", Sys.Date(), ".zip", sep = "")
-      } else if (input$download_file == 'ceda') {
-        paste("ceda-", Sys.Date(), ".zip", sep = "")
-      }
-    },
-    content = function(file) {
-      if (input$download_file == 'lev2') {
-        runjs(
-          'document.getElementById("download_data").textContent="Preparing download...";'
-        )
-        shinyjs::disable("download_data")
-        tmpdir <- tempdir()
-        setwd(tempdir())
-        fs <- c('level_2-data.csv', 'level_2-qc.csv')
-        data.table::fwrite(mm$dt, 'level_2-data.csv')
-        data.table::fwrite(mm$dt_qc, 'level_2-qc.csv')
-        zip(zipfile = file, files = fs)
-        runjs(
-          'document.getElementById("download_data").textContent="Download";'
-        )
-        shinyjs::enable("download_data")
-      } else if (input$download_file == 'ceda') {
-        runjs(
-          'document.getElementById("download_data").textContent="Preparing download...";'
-        )
-        shinyjs::disable("download_data")
-        tmpdir <- tempdir()
-        setwd(tempdir())
-        fs <- c('ceda-data.csv')
-        df_ceda <- metamet:::format_for_ceda(mm)
-        data.table::fwrite(df_ceda, 'ceda-data.csv')
-        zip(zipfile = file, files = fs)
-        runjs(
-          'document.getElementById("download_data").textContent="Download";'
-        )
-        shinyjs::enable("download_data")
-      }
-    }
-  )
 
   # Writing validated data to file---- From main Dashboard
   observeEvent(input$submitchanges, {

@@ -13,8 +13,12 @@ mod_download_ui <- function(id) {
     checkboxGroupInput(
       ns("download_formats"),
       "Select formats:",
-      choices = c("CSV" = "csv", "RDS" = "rds"),
-      selected = c("csv", "rds")
+      choices = c("RDS" = "rds", "CSV" = "csv"),
+      selected = c("rds")
+    ),
+    tags$div(
+      style = "margin-top:-10px; margin-left:5px; color:#666; font-size:0.9em;",
+      "RDS (recommended for reloading your QC’d data back into the app)."
     ),
     uiOutput(ns("format_warning")),
 

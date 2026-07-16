@@ -11,31 +11,28 @@
 ##' @noRd
 format_for_ceda <- function(
   mm,
-  v_names = c(
-    "TA_4_1_1",
-    "RH_4_1_1",
-    "PA_4_1_1",
-    "RG_4_1_0",
-    "PPFD_IN_4_1_1",
-    "RN_5_1_1",
-    "P_12_1_1",
-    "TS",
-    "G",
-    "SWC",
-    "WS_6_1_1",
-    "WD_6_1_1",
-    "D_SNOW",
-    "WTD"
-  )
+  v_names = NULL # if NULL, derive from mm$dt
 ) {
   mm <- .ensure_wide(mm)
 
   v_time <- unique(mm$dt_meta[type == "time", name_dt])
 
+  # derive variable names dynamically if not supplied
+  dt_cols <- names(mm$dt)
+
+  if (is.null(v_names)) {
+    if ("var_name" %in% dt_cols && "name_icos" %in% dt_cols) {
+      # LONG format
+      v_names <- unique(mm$dt$name_icos)
+    } else {
+      # WIDE format: variables are column names except site + time cols
+      v_names <- setdiff(dt_cols, c("site", v_time))
+    }
+  }
+
   # Only keep v_names columns that actually exist in dt
   v_names_present <- intersect(v_names, names(mm$dt))
   by_cols <- c("site", v_time)
-
   dt <- mm$dt[, c(by_cols, v_names_present), with = FALSE]
 
   if (!is.null(mm$dt_qc)) {

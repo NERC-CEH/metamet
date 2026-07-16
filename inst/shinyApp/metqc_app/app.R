@@ -173,7 +173,8 @@ ui <- dashboardPage(
                 step = 1
               )
             ),
-            mod_time_average_ui("timeavg"),
+            # deactivated until avg module is complete
+            #mod_time_average_ui("timeavg"),
             actionButton("retrieve_data", "Retrieve from database"),
             actionButton("compare_vars", "Compare variables"),
             tags$script(
@@ -658,6 +659,13 @@ server <- function(input, output, session) {
     }
   })
 
+  # call time average mod
+  mm_timeavg <- mod_time_average_server(
+    id = "timeavg",
+    mm_qry_in = reactive(mm_qry_raw),
+    daterange_reactive = df_daterange
+  )
+
   # Data retrieval functionality-----
   observeEvent(input$retrieve_data, {
     for (i in seq_along(uploaded()$v_names)) {
@@ -675,6 +683,7 @@ server <- function(input, output, session) {
       start_date = df_daterange()$start_date,
       end_date = df_daterange()$end_date
     )
+
     # update reactive wrapper so modules can see the current query object
     mm_qry_rv(mm_qry)
     attr(mm_qry, "format") <- "long"

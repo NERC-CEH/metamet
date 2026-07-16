@@ -142,6 +142,43 @@ mod_download_server <- function(id, mm_final) {
             } else if (lev == "ceda") {
               # format_for_ceda returns a data.table; copy to avoid modifying mm_avg
               df_out <- data.table::copy(metamet:::format_for_ceda(mm_avg))
+              # --- DEBUG: inspect mm_avg dt / dt_qc when creating CEDA wide output ---
+              cat("DEBUG: download -> CEDA debug\n")
+              if (!is.null(mm_avg$dt_qc)) {
+                cat(
+                  "names(mm_avg$dt_qc):",
+                  paste(names(mm_avg$dt_qc), collapse = ", "),
+                  "\n"
+                )
+                cat(
+                  "anyDuplicated(names(mm_avg$dt_qc)):",
+                  anyDuplicated(names(mm_avg$dt_qc)),
+                  "\n"
+                )
+              } else {
+                cat("mm_avg$dt_qc is NULL\n")
+              }
+              cat(
+                "names(mm_avg$dt):",
+                paste(names(mm_avg$dt), collapse = ", "),
+                "\n"
+              )
+              if (!is.null(mm_avg$dt_meta)) {
+                cat(
+                  "dt_meta$name_dt:",
+                  paste(mm_avg$dt_meta$name_dt, collapse = ", "),
+                  "\n"
+                )
+                cat(
+                  "time variable (dt_meta[type=='time',name_dt]):",
+                  paste(
+                    unique(mm_avg$dt_meta[type == 'time', name_dt]),
+                    collapse = ", "
+                  ),
+                  "\n"
+                )
+              }
+              # --- end DEBUG ---
               prefix <- "wide"
             }
 
@@ -339,7 +376,12 @@ mod_download_server <- function(id, mm_final) {
             # formats timestamp for daily/weekly avg to ISO date (YYYY-MM-DD)
             if (avg %in% c("1 day", "1 week")) {
               # Convert TIMESTAMP to POSIXct in GMT and format as ISO date to avoid locale-specific formats
-              df_out[, TIMESTAMP := format(as.POSIXct(TIMESTAMP, tz = "GMT"), "%Y-%m-%d")]
+              df_out[,
+                TIMESTAMP := format(
+                  as.POSIXct(TIMESTAMP, tz = "GMT"),
+                  "%Y-%m-%d"
+                )
+              ]
             }
 
             # -------------------------------------------------------

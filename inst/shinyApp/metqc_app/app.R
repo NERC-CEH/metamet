@@ -7,15 +7,8 @@ library(shinyFiles)
 library(shinycssloaders)
 library(ggiraph)
 
-# Source module files using absolute paths
-source(system.file(
-  "shinyApp/metqc_app/mod_metadata_maker.R",
-  package = "metamet"
-))
-source(system.file(
-  "shinyApp/metqc_app/mod_machine_faults.R",
-  package = "metamet"
-))
+source("mod_metadata_maker.R", local = TRUE)
+source("mod_machine_faults.R", local = TRUE)
 
 # Set the gap-filling methods and codes----
 gf_choices <- setNames(df_method$method, df_method$method_longname)
@@ -54,6 +47,11 @@ ui <- dashboardPage(
       ),
       menuItem(
         "Save Processed Data",
+        tabName = "download",
+        icon = icon('download')
+      ),
+      menuItem(
+        "Download processed data",
         tabName = "download",
         icon = icon('download')
       ),

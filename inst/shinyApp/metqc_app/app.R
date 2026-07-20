@@ -3,7 +3,6 @@ library(shinydashboard)
 library(shinyjs)
 library(shinyvalidate)
 library(shinyFiles)
-library(shinycssloaders)
 library(ggiraph)
 
 source("mod_metadata_maker.R", local = TRUE)
@@ -44,11 +43,6 @@ ui <- dashboardPage(
         icon = icon('database')
       ),
       menuItem(
-        "Save Processed Data",
-        tabName = "download",
-        icon = icon('download')
-      ),
-      menuItem(
         "Download processed data",
         tabName = "download",
         icon = icon('download')
@@ -77,26 +71,6 @@ ui <- dashboardPage(
     tabItems(
       tabItem(
         tabName = "dashboard",
-        uiOutput("loaded_file_banner"),
-        tags$style(HTML(
-          "
-        /* Greys out the first 2 disabled sidebar menu items */
-        .sidebar-menu a.disabled {
-          color: #999 !important;
-          background-color: #e6e6e6 !important;
-          cursor: not-allowed !important;
-          pointer-events: none !important;
-          opacity: 0.6 !important;
-        }
-
-        /* also removes the hover effect */
-        .sidebar-menu a.disabled:hover {
-          background-color: #e6e6e6 !important;
-          color: #999 !important;
-        }
-"
-        )),
-        br(),
         fluidRow(
           box(
             title = "Data Selection",
@@ -194,7 +168,7 @@ ui <- dashboardPage(
               actionButton("impute", label = "Impute selection"),
               actionButton(
                 "finished_check",
-                label = "Mark variable as checked for date range"
+                label = "Finished checking variable for date range."
               ),
               checkboxGroupInput(
                 "qc_tokeep",
@@ -203,7 +177,8 @@ ui <- dashboardPage(
                 choiceValues = df_method$qc
               ),
               uiOutput("impute_extra_info"),
-              actionButton("reset", label = "Restart app")
+              actionButton("reset", label = "Restart app"),
+              actionButton("submitchanges", "Save changes")
             ),
           )
         ),
@@ -389,7 +364,6 @@ server <- function(input, output, session) {
   observeEvent(input$retrieve_data, label = "validator for dates", {
     if (!iv$is_valid()) {
       showModal(modalDialog("Please fill in both dates.", easyClose = TRUE))
-
       return()
     }
 
@@ -416,57 +390,6 @@ server <- function(input, output, session) {
   # Create a reactive element with the latest end date
   last_end_date <- reactive({
     max(as.Date(df_proc$end_date))
-  })
-
-  # shows loaded file in data selection tab and allows users to remove it
-  output$loaded_file_banner <- renderUI({
-    req(uploaded())
-
-    tagList(
-      box(
-        width = 12,
-        status = "success",
-        solidHeader = TRUE,
-        title = tags$span(icon("file"), "Loaded file"),
-        div(
-          style = "font-size:16px; font-weight:600; margin-bottom:10px;",
-          basename(uploaded()$fname)
-        ),
-        actionButton(
-          "remove_file",
-          "Remove file and start again",
-          icon = icon("trash"),
-          class = "btn btn-danger"
-        )
-      )
-    )
-  })
-
-  observeEvent(input$remove_file, {
-    # clears the reactive values
-    uploaded <- NULL
-    mm_qry <<- NULL
-
-    # reset the UI
-    shinyjs::hide("extracted_data")
-
-    # Clear shinyFiles selection
-    shinyjs::reset("file")
-
-    # Force status text to reset
-    output$status <- renderText("No file selected yet.")
-
-    # re enable the first two tabs
-    shinyjs::enable(selector = "a[data-value='metadata_maker']")
-    shinyjs::enable(selector = "a[data-value='upload']")
-
-    # Send user back to upload tab
-    updateTabItems(session, "tabs", "upload")
-
-    showNotification(
-      "Metamet file removed. You can now load a new one.",
-      type = "message"
-    )
   })
 
   # Create a date input for the user to select start date
@@ -561,9 +484,6 @@ server <- function(input, output, session) {
   observeEvent(input$retrieve_data, {
     for (i in seq_along(uploaded()$v_names)) {
       v_names_checklist[[uploaded()$v_names[i]]] <- FALSE
-      # disable the first two tabs after data retrieval
-      shinyjs::disable(selector = "a[data-value='metadata_maker']")
-      shinyjs::disable(selector = "a[data-value='upload']")
     }
 
     # enabling previously disabled buttons
@@ -609,11 +529,7 @@ server <- function(input, output, session) {
               inline = TRUE
             )
           },
-          #loading progress bar for plots
-          shinycssloaders::withSpinner(
-            girafeOutput(paste0(i, "_interactive_plot")),
-            type = 6
-          )
+          girafeOutput(paste0(i, "_interactive_plot")),
         )
       })
       do.call(tabsetPanel, c(my_tabs, id = "plotTabs"))

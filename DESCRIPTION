@@ -43,6 +43,7 @@ Imports:
     dplyr,
     utils,
     here,
-    units
+    units,
+    withr
 Config/testthat/edition: 3
 URL: https://nerc-ceh.github.io/metamet/

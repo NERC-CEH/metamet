@@ -49,11 +49,24 @@ ui <- dashboardPage(
       ),
       menuItem(
         "Help and Documentation",
-        tabName = "information",
         icon = icon('info'),
-        menuSubItem('Gap-fill methods', tabName = 'gapfill_guide'),
-        menuSubItem('App guide', tabName = 'app_guide'),
-        menuSubItem('Data process guide', tabName = 'data_guide')
+        startExpanded = FALSE,
+        tags$li(
+          actionButton(
+            "open_app_guide",
+            tagList(icon("file-alt"), "App user guide"),
+            class = "btn-link",
+            style = "color:white; background:none; border:none; text-align:left; width:100%; padding:5px 5px 5px 15px;"
+          )
+        ),
+        tags$li(
+          actionButton(
+            "open_gapfill_guide",
+            tagList(icon("book"), "Gap-fill methods"),
+            class = "btn-link",
+            style = "color:white; background:none; border:none; text-align:left; width:100%; padding:5px 5px 5px 15px;"
+          )
+        )
       )
     ),
     tags$ul(
@@ -241,20 +254,8 @@ ui <- dashboardPage(
       tabItem(
         tabName = "information",
       ),
-      tabItem(
-        tabName = "gapfill_guide"
-        # includeMarkdown(here::here("vignettes/gap_fill_methods.md"))
-      ),
-      tabItem(
-        tabName = "app_guide"
-        # includeMarkdown(here::here("vignettes/app_user_guide.md"))
-      ) # ,
-      # tabItem(
-      #   tabName = "data_guide",
-      #   includeHTML(
-      #     here::here("vignettes/metdb_shiny_version.html")
-      #   )
-      # )
+      tabItem(tabName = "app_guide"),
+      tabItem(tabName = "gapfill_guide")
     )
   )
 )
@@ -404,6 +405,18 @@ server <- function(input, output, session) {
 
   observeEvent(input$stop_app, {
     stopApp()
+  })
+
+  observeEvent(input$open_app_guide, {
+    browseURL(
+      "https://nerc-ceh.github.io/metamet/articles/app_user_guide.html"
+    )
+  })
+
+  observeEvent(input$open_gapfill_guide, {
+    browseURL(
+      "https://nerc-ceh.github.io/metamet/articles/gap_fill_methods.html"
+    )
   })
 
   session$onSessionEnded(function() {

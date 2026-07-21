@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>metqc app User Guide • metamet</title>
+<title>MetQC App User Guide • metamet</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -15,7 +15,7 @@
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="metqc app User Guide">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="MetQC App User Guide">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -45,7 +45,7 @@
     <li><a class="dropdown-item" href="../articles/changing_names.html">Change the naming convention of measurement variables</a></li>
     <li><a class="dropdown-item" href="../articles/gap_fill_methods.html">Imputing missing data</a></li>
     <li><a class="dropdown-item" href="../articles/openairmaps.html">Using Openair Mapping Functions</a></li>
-    <li><a class="dropdown-item" href="../articles/app_user_guide.html">metqc app User Guide</a></li>
+    <li><a class="dropdown-item" href="../articles/app_user_guide.html">MetQC App User Guide</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -66,10 +66,10 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>metqc app User Guide</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>MetQC App User Guide</h1>
                         <h4 data-toc-skip class="author">Peter Levy</h4>
             
-            <h4 data-toc-skip class="date">18/02/2026</h4>
+            <h4 data-toc-skip class="date">2026-07-21</h4>
       
 
       <div class="d-none name"><code>app_user_guide.Rmd</code></div>
@@ -77,174 +77,414 @@
 
     
     
-<!--
-%\VignetteEngine{knitr::rmarkdown}
-%\VignetteIndexEntry{manuscript}
--->
-<p>This document aims to explain how to use the MetQC app. We will go
-through common tasks and outline how they can be undertaken within the
-app and touch on what is going on ‘behind the scenes’.</p>
-<p>All users are required select their username upon entering the app
-(Figure 1). This is important as any changes made to the data (e.g. QC
-checks or data flags can then be associated with you). Simply select
-your username from the drop down list and click ‘OK’.</p>
-<div class="section level3">
-<h3 id="app-start-up">App start-up<a class="anchor" aria-label="anchor" href="#app-start-up"></a>
-</h3>
-<p><img src="select_user.png" width="600"></p>
-<p><em>Figure 1: Users will need to select a user from the drop down
-list on app launch.</em></p>
+<p>This document explains how to use the MetQC Shiny app bundled with
+the <code>metamet</code> package. It covers every tab in the app, all
+major controls, and includes a step-by-step FAQ for common tasks.</p>
+<hr>
+<div class="section level2">
+<h2 id="prerequisites">Prerequisites<a class="anchor" aria-label="anchor" href="#prerequisites"></a>
+</h2>
+<p>The app requires a set of optional packages that are not installed
+automatically. Install them before launching:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Recommended: install metamet plus all optional dependencies in one step</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"pak"</span><span class="op">)</span></span>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"NERC-CEH/metamet"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co"># Or install the app packages individually</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="st">"shiny"</span>, <span class="st">"shinydashboard"</span>, <span class="st">"shinyjs"</span>, <span class="st">"shinyFiles"</span>,</span>
+<span>  <span class="st">"shinyvalidate"</span>, <span class="st">"shinycssloaders"</span>, <span class="st">"ggiraph"</span>, <span class="st">"glue"</span></span>
+<span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>Launch the app from R:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">metamet</span><span class="fu">::</span><span class="fu"><a href="../reference/run_shiny.html">run_shiny</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>The app opens in your default web browser. It will stop automatically
+when you close the browser tab or click <strong>Stop App</strong> in the
+left sidebar.</p>
+<hr>
 </div>
-<div class="section level3">
-<h3 id="app-dashboard">App dashboard<a class="anchor" aria-label="anchor" href="#app-dashboard"></a>
-</h3>
-<p>Once the user has been selected, the app’s dashboard (or home screen)
-(Figure 2) will load. Data validation is undertaken on the dashboard tab
-while other tasks (e.g. data download and adding data flags) are
-accessible on the left menu.</p>
-<!---![](dashboard_home.png)--->
-<p><img src="dashboard_home.png" width="600"></p>
-<p><em>Figure 2: The MetQC app dashboard</em></p>
-<!---![](dashboard_loaded.png)--->
-<p><img src="dashboard_loaded.png" width="600"></p>
-<p><em>Figure 3: The MetQC app dashboard after data has been
-retrieved.</em></p>
-<!---![](lasso_buttons.png)--->
-<p><img src="lasso_buttons.png" width="600"></p>
-<p><em>Figure 4: The plot buttons made visible (red box on right) by
-moving the mouse over the plot window.</em></p>
+<div class="section level2">
+<h2 id="app-layout">App layout<a class="anchor" aria-label="anchor" href="#app-layout"></a>
+</h2>
+<p>The left sidebar contains five items:</p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr class="header">
+<th>Sidebar item</th>
+<th>Purpose</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Create new Metamet object</td>
+<td>Six-step wizard to build a <code>.rds</code> from raw data
+files</td>
+</tr>
+<tr class="even">
+<td>Open existing Metamet object</td>
+<td>Browse and load an existing <code>.rds</code>
+</td>
+</tr>
+<tr class="odd">
+<td>Select date range and QA/QC</td>
+<td>Main dashboard for interactive data validation</td>
+</tr>
+<tr class="even">
+<td>Download processed data</td>
+<td>Export processed data as CSV or ZIP</td>
+</tr>
+<tr class="odd">
+<td>Help and Documentation</td>
+<td>Links to gap-fill methods and this guide</td>
+</tr>
+</tbody>
+</table>
+<p>Your system username (from <code>Sys.info()[["user"]]</code>) is used
+automatically to label any changes you make. It is not currently
+configurable within the app.</p>
+<hr>
 </div>
+<div class="section level2">
+<h2 id="tab-1-create-new-metamet-object">Tab 1 — Create new Metamet object<a class="anchor" aria-label="anchor" href="#tab-1-create-new-metamet-object"></a>
+</h2>
+<p>This six-step wizard takes you from a raw data file to a saved
+<code>metamet</code> <code>.rds</code> file ready for QA/QC. Each step
+must be completed in order; use the <strong>Back</strong> and
+<strong>Continue</strong> buttons to navigate.</p>
 <div class="section level3">
-<h3 id="flagging-data">Flagging data<a class="anchor" aria-label="anchor" href="#flagging-data"></a>
+<h3 id="step-1-load-data-file">Step 1: Load data file<a class="anchor" aria-label="anchor" href="#step-1-load-data-file"></a>
 </h3>
-<!---![](flags_v2a.png)--->
-<p><img src="flags_v2a.png" width="600"></p>
-<p><em>Figure 5: Data can be flagged on the ‘Data flags’ tab. By default
-whole days are flagged.</em></p>
-<!---![](flags.png)--->
-<p><img src="flags_v2b.png" width="600"></p>
-<p><em>Figure 6: The data flags tab. By setting ‘Flag the entire day?’
-to ‘No’ allows for start and end hours to be added.</em></p>
-</div>
-<div class="section level3">
-<h3 id="downloading-data">Downloading data<a class="anchor" aria-label="anchor" href="#downloading-data"></a>
-</h3>
-<p><img src="download.png" width="600"></p>
-<p><em>Figure 6: All data (level 1, 2 and the data flags) can be
-downloaded on the ‘Download’ tab. Level 1 and 2 data is downloaded as a
-.zip file which contains two .csv files of the data and the data qc
-codes. Data flag data is downloaded as a single .csv file.</em></p>
-</div>
-<div class="section level3">
-<h3 id="finding-more-information">Finding more information<a class="anchor" aria-label="anchor" href="#finding-more-information"></a>
-</h3>
-<p><img src="info.png" width="600"></p>
-<p><em>Figure 6: Further information, including the app’s user guide,
-details of the gap-filling methods and the underlying data process, can
-be found on the ‘Information’ tab.</em></p>
-<p><br><br> #### Q: How do I validate data? A: <br> 1. Select your
-start and end validation dates from the ‘Data selection’ box on the
-Dashboard. <br> 2. Click ‘Retrieve from database’. The dashboard should
-now update as data is retrieved. <br> 3. At any time, after importing
-data, you can compare variables by clicking on the ‘Compare variables’
-(also in the ‘Data selection’ box). <br> 4. The ‘Validation Calendar’
-(top right Figure 3) shows the validation history for the data you have
-imported. The colours of the calendar correspond to the user who
-validated the data. If any data has been flagged on a given day the user
-is set to ‘data flagged’. ‘auto’ is also listed as a user in this case.
-<br> 5. The ‘Extracted Data’ box (Figure 3) is the interface where data
-are checked. Each variable has it’s own tab, which can be accessed by
-clicking on the variable name at the top of the box. <br> - The plot
-shows the data extracted (for the selected variable). point colours show
-the current qc label. Hovering the mouse over points displays the data
-point timestamp and measurement value. <br> 6. If the data for the
-selected variable looks correct, clicking the ‘Finished checking
-variable for date range’ button will flag this tab as complete. The tab
-(top of the ‘Extracted Data’) box will become grey and a different
-variable can then be validated. <br> 7. If data looks unreliable, data
-can be imputed to correct this. <br> - When the mouse is over the plot
-window the plot buttons will appear in the top right of the plot window
-(Figure 4). The left most button of these (‘lasso selection’) allows for
-point in the graph to be selected. Upon selection these will change
-colour (go red) to indicate their selection. Use this feature to select
-the unreliable looking data points. <br> - Select the ‘Gap-Filling
-Method’ from the drop down menu below the graph. Additional details of
-these methods can be found in the ‘Information’ tab. <br> - Data can be
-excluded form imputation by using the tick boxes lower down. <br> -
-Click ‘Impute selection’ box to impute the data selected (minus data
-highlighted by ticking the tick boxes at the bottom of the page) using
-the gap-filling method selected. <br> - The graph will update to show
-the edited data. <br> - This process can be repeated as required and the
-‘Finished checking variable for date range’ button can be pressed when
-complete. <br> 8. When you have finished data validation the ‘Submit
-changes’ button can be pressed to save your changes. <strong>Any unsaved
-changes will be lost when a new date range is selected</strong>. All
-changes are now submitted to the cloud. At any point the app can be
-restarted by using the ‘Restart app’ button at the bottom of the page.
-<br></p>
-<div class="section level4">
-<h4 id="q-how-do-i-flag-a-period-of-time-when-i-know-data-could-be-unreliable-e-g--broken-sensor">Q: How do I flag a period of time when I know data could be
-unreliable? (e.g. broken sensor)<a class="anchor" aria-label="anchor" href="#q-how-do-i-flag-a-period-of-time-when-i-know-data-could-be-unreliable-e-g--broken-sensor"></a>
-</h4>
-<p>A: <br> 1. Once you’ve selected your username on app start-up, click
-on the ‘Flags’ tab on the left of the app. <br> 2. New data flags can be
-added by setting the start and end date of the period of concern, the
-variable and a brief description of why the time period is being flagged
-(e.g. damaged sensor). Then click ‘Add Flag’. By default, whole days are
-flagged but by setting ‘Flag the entire day?’ to ‘No’ enables further
-inputs which can record the start and end times (Hours). Hours are all
-in 24 hours format (i.e. 2pm = 14) and can be recorded in local time
-(GMT/BST). <br> 3. Your new flag will then appear in the data flags
-table below. Check this looks correct. Times are converted to UTC/GMT
-so, depending on the time of year, the hours may change from those input
-by the user. A new qc code (to highlight the flag) and your username
-will be added automatically. <br> 4. If the data flag looks correct,
-click ‘Save’ to save the table. This also updates the qc codes in the
-data - allowing others to see the that the data has been flagged. You
-will then be asked if you’d like to apply these changes to the data.
-This process resets the app and only needs to be done if you would like
-to view or edit data in the ‘Dashboard’ tab after adding your flags.
-<br> 5. If the data flag does not look correct click ‘Reset’ to undo
-your changes. If you have saved changes which you later realise are
-incorrect, we can revert the data to a previous version. Only a small
-number of versions are stored, so let us know before more changes are
-saved. <br></p>
+<p>Select the format of your raw data file:</p>
 <ul>
-<li>Currently, data flags cannot be added for future dates. This is
-something that will may change, based on demand. <br>
-</li>
-<li>When flagging an entire day the validation calendar will show the
-flagged day and the following data as being flagged. This is because the
-period midnight to midnight is flagged. This can be changed in the
-future, if this is causing a problem. <br>
-</li>
+<li>
+<strong>Plain CSV</strong> — a standard CSV file with a header
+row.</li>
+<li>
+<strong>Campbell TOA5</strong> — data logger output in TOA5 (ASCII)
+format.</li>
+<li>
+<strong>Old Campbell (.dat + .dld)</strong> — older Campbell files;
+you will be prompted to select both the <code>.dat</code> data file and
+the <code>.dld</code> metadata file.</li>
+<li>
+<strong>CEDA BADC-CSV</strong> — the BADC-CSV format used by CEDA
+data archives.</li>
 </ul>
+<p>Click <strong>Select data file</strong>, browse to your file, then
+click <strong>Load &amp; preview</strong>. A preview table will appear.
+If the file contains multiple tables (Campbell TOA5), a drop-down lets
+you choose which table to use. Select the column that contains the
+timestamp, then click <strong>Continue</strong>.</p>
+</div>
+<div class="section level3">
+<h3 id="step-2-site-information">Step 2: Site information<a class="anchor" aria-label="anchor" href="#step-2-site-information"></a>
+</h3>
+<p>Provide site-level metadata. You can either:</p>
+<ul>
+<li>
+<strong>Enter manually</strong> — fill in the Site ID, site name,
+latitude, longitude, elevation, and the date range over which this
+metadata applies.</li>
+<li>
+<strong>Load from CSV file</strong> — select an existing
+<code>dt_site</code> CSV and choose the row corresponding to your
+site.</li>
+</ul>
+<p>Click <strong>Continue to variable mapping</strong> when ready.</p>
+</div>
+<div class="section level3">
+<h3 id="step-3-map-data-columns-to-icos-variable-names">Step 3: Map data columns to ICOS variable names<a class="anchor" aria-label="anchor" href="#step-3-map-data-columns-to-icos-variable-names"></a>
+</h3>
+<p>Each column in your data file must be mapped to a standard variable
+name. You can:</p>
+<ul>
+<li>
+<strong>Map manually</strong> — for each data column, select the
+matching ICOS variable from a drop-down list. Columns not mapped to any
+variable can be left as <em>— skip —</em>.</li>
+<li>
+<strong>Load dt_meta from CSV file</strong> — if you already have a
+<code>dt_meta</code> metadata file, load it here and the mappings will
+be applied automatically.</li>
+</ul>
+<p>Click <strong>Continue</strong> when all required columns are
+mapped.</p>
+</div>
+<div class="section level3">
+<h3 id="step-4-set-units-and-qc-ranges-optional">Step 4: Set units and QC ranges <em>(optional)</em><a class="anchor" aria-label="anchor" href="#step-4-set-units-and-qc-ranges-optional"></a>
+</h3>
+<p>For each mapped variable you can set:</p>
+<ul>
+<li>
+<strong>Units</strong> — the physical units of the raw data.</li>
+<li>
+<strong>Valid range</strong> — minimum and maximum acceptable values
+for automatic range checking.</li>
+<li>
+<strong>Imputation method</strong> — the default gap-filling
+algorithm to apply to this variable.</li>
+</ul>
+<p>This step can be skipped; settings can be refined later. Click
+<strong>Continue</strong>.</p>
+</div>
+<div class="section level3">
+<h3 id="step-5-era5-reference-data-optional">Step 5: ERA5 reference data <em>(optional)</em><a class="anchor" aria-label="anchor" href="#step-5-era5-reference-data-optional"></a>
+</h3>
+<p>Attach ERA5 reanalysis data as a reference dataset
+(<code>dt_ref</code>). Select an ERA5 CSV file (as exported by
+<code><a href="../reference/add_era5.html">add_era5()</a></code>). The reference data will be plotted alongside
+observations in the QA/QC dashboard. Click <strong>Continue</strong> (or
+skip).</p>
+</div>
+<div class="section level3">
+<h3 id="step-6-review-and-save">Step 6: Review and save<a class="anchor" aria-label="anchor" href="#step-6-review-and-save"></a>
+</h3>
+<p>A summary of the object is displayed. Click <strong>Download as
+.rds</strong> to save the <code>metamet</code> object to a file. This
+file is the input for the QA/QC dashboard.</p>
+<hr>
+</div>
+</div>
+<div class="section level2">
+<h2 id="tab-2-open-existing-metamet-object">Tab 2 — Open existing Metamet object<a class="anchor" aria-label="anchor" href="#tab-2-open-existing-metamet-object"></a>
+</h2>
+<p>Click <strong>Browse for .rds file</strong>, navigate to a previously
+saved <code>metamet</code> <code>.rds</code> file, and select it. The
+file is loaded and the app switches automatically to the <strong>Select
+date range and QA/QC</strong> tab. A notification confirms the file name
+that was loaded.</p>
+<p>The <code>.rds</code> file must be a <code>metamet</code> object in
+long format (or wide format — the app reshapes it automatically).</p>
+<hr>
+</div>
+<div class="section level2">
+<h2 id="tab-3-select-date-range-and-qaqc">Tab 3 — Select date range and QA/QC<a class="anchor" aria-label="anchor" href="#tab-3-select-date-range-and-qaqc"></a>
+</h2>
+<p>This is the main validation interface.</p>
+<div class="section level3">
+<h3 id="selecting-a-date-range">Selecting a date range<a class="anchor" aria-label="anchor" href="#selecting-a-date-range"></a>
+</h3>
+<p>The <strong>Data Selection</strong> box contains:</p>
+<ul>
+<li>
+<strong>Start date / End date</strong> — date pickers pre-filled
+with the earliest and latest timestamps in the loaded file.</li>
+<li>
+<strong>Hour / Minute</strong> — fine-tune the start and end times
+within the selected days.</li>
+</ul>
+<p>Click <strong>Retrieve from database</strong> to extract the chosen
+time window. The <em>Extracted Data</em> panel appears below.</p>
+<p>After retrieval, the <strong>Compare variables</strong> button
+becomes active. Click it to open a scatter-plot modal comparing any two
+variables in the extracted window.</p>
+</div>
+<div class="section level3">
+<h3 id="extracted-data-panel">Extracted data panel<a class="anchor" aria-label="anchor" href="#extracted-data-panel"></a>
+</h3>
+<p>The panel contains one tab per variable. Each tab shows:</p>
+<ul>
+<li>
+<strong>Replicate checkboxes</strong> <em>(if the variable has
+multiple replicates)</em> — tick/untick individual sensor replicates to
+show or hide them on the plot.</li>
+<li>
+<strong>Interactive plot</strong> — a time-series plot produced by
+<code>ggiraph</code>. Point colours indicate the current QC code (grey =
+valid, coloured = imputed or flagged). Hover over a point to see its
+timestamp and value.</li>
+<li>
+<strong>Rescale reference to observations</strong> checkbox — when
+ERA5 reference data is present, tick this to rescale the ERA5 values to
+the observation range before plotting.</li>
+<li>
+<strong>Point size</strong> slider — adjust the visual size of
+plotted points (0.5 – 8).</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="imputing-gap-filling-data">Imputing (gap-filling) data<a class="anchor" aria-label="anchor" href="#imputing-gap-filling-data"></a>
+</h3>
+<ol style="list-style-type: decimal">
+<li>Move the mouse over the plot area. A toolbar appears in the
+top-right corner of the plot. Click the <strong>lasso selection</strong>
+button (the left-most icon).</li>
+<li>Draw a lasso around the data points you want to replace. Selected
+points turn red.</li>
+<li>Choose a <strong>Gap-Filling Method</strong> from the drop-down
+below the plot. Available methods are described in the <em>Help and
+Documentation</em> tab (and in the <code>gap_fill_methods</code>
+vignette):
+<ul>
+<li>
+<strong>Time interpolation</strong> — GAM spline through time; a
+smoothness slider appears.</li>
+<li>
+<strong>Regression</strong> — linear regression against another
+variable; a covariate drop-down appears.</li>
+<li>
+<strong>ERA5</strong> — substitute values from the reference
+dataset.</li>
+<li>
+<strong>Zero</strong> — set selected values to zero.</li>
+<li>
+<strong>Non-negative</strong> — set negative values to zero.</li>
+<li>
+<strong>Night zero</strong> — set night-time values to zero.</li>
+</ul>
+</li>
+<li>
+<em>(Optional)</em> Type a brief <strong>reason for
+imputation</strong> in the comment box.</li>
+<li>Use the <strong>Do not alter data estimated by</strong> checkboxes
+to protect any previously imputed points from being overwritten.</li>
+<li>Click <strong>Impute selection</strong>. The plot updates
+immediately.</li>
+<li>Repeat steps 1–6 as needed for the same or other variables.</li>
+<li>When a variable looks correct, click <strong>Finished checking
+variable for date range</strong>. The variable’s tab turns grey to
+indicate it has been signed off.</li>
+</ol>
+</div>
+<div class="section level3">
+<h3 id="saving-changes">Saving changes<a class="anchor" aria-label="anchor" href="#saving-changes"></a>
+</h3>
+<p>Click <strong>Save changes</strong> when you are satisfied with all
+variables in the selected date range.</p>
+<blockquote>
+<p><strong>Important:</strong> unsaved changes are lost if you click
+<em>Retrieve from database</em> again for a new date range. Always save
+before moving to a new window.</p>
+</blockquote>
+<p>The app writes two new files next to the source
+<code>.rds</code>:</p>
+<ul>
+<li>
+<code>&lt;original_name&gt;_qc_by_&lt;username&gt;_on_&lt;date&gt;.rds</code>
+— full <code>metamet</code> object with updated QC codes and imputed
+values.</li>
+<li>
+<code>&lt;original_name&gt;_qc_by_&lt;username&gt;_on_&lt;date&gt;_ceda.rds</code>
+— CEDA-formatted output.</li>
+</ul>
+<p>A notification confirms the files were created.</p>
+<p>Click <strong>Restart app</strong> at any time to reload the app and
+start fresh.</p>
+<hr>
+</div>
+</div>
+<div class="section level2">
+<h2 id="tab-4-download-processed-data">Tab 4 — Download processed data<a class="anchor" aria-label="anchor" href="#tab-4-download-processed-data"></a>
+</h2>
+<p>Select the format from the drop-down:</p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th>Option</th>
+<th>Output</th>
+<th>Contents</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Level 1</td>
+<td>
+<code>.zip</code> containing two <code>.csv</code> files</td>
+<td>Raw data (<code>dt</code>) and QC codes (<code>dt_qc</code>)</td>
+</tr>
+<tr class="even">
+<td>Level 2</td>
+<td>
+<code>.zip</code> containing two <code>.csv</code> files</td>
+<td>QC-processed data and updated QC codes</td>
+</tr>
+<tr class="odd">
+<td>CEDA</td>
+<td>Single <code>.csv</code> file</td>
+<td>CEDA BADC-CSV formatted output</td>
+</tr>
+</tbody>
+</table>
+<p>Click <strong>Download</strong> to save the file.</p>
+<hr>
+</div>
+<div class="section level2">
+<h2 id="tab-5-help-and-documentation">Tab 5 — Help and Documentation<a class="anchor" aria-label="anchor" href="#tab-5-help-and-documentation"></a>
+</h2>
+<p>Sub-items link to:</p>
+<ul>
+<li>
+<strong>Gap-fill methods</strong> — descriptions of each imputation
+algorithm.</li>
+<li>
+<strong>App guide</strong> — this document.</li>
+<li>
+<strong>Data process guide</strong> — overview of the data
+processing pipeline.</li>
+</ul>
+<hr>
+</div>
+<div class="section level2">
+<h2 id="frequently-asked-questions">Frequently asked questions<a class="anchor" aria-label="anchor" href="#frequently-asked-questions"></a>
+</h2>
+<div class="section level4">
+<h4 id="q-how-do-i-validate-data-step-by-step">Q: How do I validate data step by step?<a class="anchor" aria-label="anchor" href="#q-how-do-i-validate-data-step-by-step"></a>
+</h4>
+<ol style="list-style-type: decimal">
+<li>Load a <code>.rds</code> file via <em>Open existing Metamet
+object</em> (or create one first).</li>
+<li>On the <em>Select date range and QA/QC</em> tab, choose your start
+and end date/time.</li>
+<li>Click <strong>Retrieve from database</strong>.</li>
+<li>Work through each variable tab: inspect the plot, impute suspect
+points as needed, and click <strong>Finished checking variable</strong>
+to sign off.</li>
+<li>Click <strong>Save changes</strong> to write the output files.</li>
+</ol>
+</div>
+<div class="section level4">
+<h4 id="q-how-do-i-change-the-username-the-app-uses">Q: How do I change the username the app uses?<a class="anchor" aria-label="anchor" href="#q-how-do-i-change-the-username-the-app-uses"></a>
+</h4>
+<p>The username is read automatically from your operating system account
+(<code>Sys.info()[["user"]]</code>) and is not currently configurable
+within the app.</p>
 </div>
 <div class="section level4">
 <h4 id="q-i-want-to-download-the-data">Q: I want to download the data<a class="anchor" aria-label="anchor" href="#q-i-want-to-download-the-data"></a>
 </h4>
-<p>A: <br> 1. Once you’ve selected your username on app start-up, click
-on the ‘Download’ tab on the left of the app.<br> 2. Select the data you
-would like to download form the drop down menu. <br> 3. Click download
-to download the data. <br> - Level 1 and 2 data are downloaded as .zip
-files which contain both the data itself and the qc data in two .csv
-files. <br> - Data flags data is downloaded as a single .csv file.
-<br></p>
+<p>Click the <em>Download processed data</em> tab in the left sidebar.
+Choose Level 1, Level 2, or CEDA from the drop-down and click
+<strong>Download</strong>.</p>
+<p>Level 1 and Level 2 outputs are <code>.zip</code> archives containing
+a data CSV and a QC CSV. CEDA output is a single BADC-CSV file.</p>
 </div>
 <div class="section level4">
-<h4 id="q-i-selected-the-wrong-user-when-the-app-started">Q: I selected the wrong user when the app started<a class="anchor" aria-label="anchor" href="#q-i-selected-the-wrong-user-when-the-app-started"></a>
+<h4 id="q-how-do-i-create-a-metamet-object-from-scratch-new-site-new-year">Q: How do I create a metamet object from scratch (new site / new
+year)?<a class="anchor" aria-label="anchor" href="#q-how-do-i-create-a-metamet-object-from-scratch-new-site-new-year"></a>
 </h4>
-<p>A: You can change the current user by clicking on ‘Current user: …’
-in the top right corner of the app. This will not update the user for
-any previously added data flags. <br></p>
+<p>Use the <em>Create new Metamet object</em> wizard (first item in the
+sidebar). Work through the six steps to load your raw data, enter site
+information, map variables, set QC ranges, attach ERA5 data, and
+download the <code>.rds</code>.</p>
 </div>
 <div class="section level4">
-<h4 id="q-my-question-isnt-listed-here-ive-noticed-a-mistake-or-can-the-app-do-x-y-z-in-the-future">Q: My question isn’t listed here, I’ve noticed a mistake or Can the
-app do X, Y, Z in the future?<a class="anchor" aria-label="anchor" href="#q-my-question-isnt-listed-here-ive-noticed-a-mistake-or-can-the-app-do-x-y-z-in-the-future"></a>
+<h4 id="q-the-app-is-slow-or-has-frozen-what-should-i-do">Q: The app is slow or has frozen — what should I do?<a class="anchor" aria-label="anchor" href="#q-the-app-is-slow-or-has-frozen-what-should-i-do"></a>
 </h4>
-<p>A: Either post in the Teams channel, log a GitHub issue or email Pete
-(<a href="mailto:pleav@ceh.ac.uk" class="email">pleav@ceh.ac.uk</a>) or
-Will (<a href="mailto:wilfinc@ceh.ac.uk" class="email">wilfinc@ceh.ac.uk</a>).</p>
+<p>Click <strong>Restart app</strong> (visible in the <em>Extracted
+Data</em> panel after data retrieval) or close the browser tab and
+re-run <code><a href="../reference/run_shiny.html">metamet::run_shiny()</a></code>.</p>
+</div>
+<div class="section level4">
+<h4 id="q-my-question-is-not-listed-here-i-have-noticed-a-mistake-or-i-would-like-a-new-feature">Q: My question is not listed here, I have noticed a mistake, or I
+would like a new feature<a class="anchor" aria-label="anchor" href="#q-my-question-is-not-listed-here-i-have-noticed-a-mistake-or-i-would-like-a-new-feature"></a>
+</h4>
+<p>log a <a href="https://github.com/NERC-CEH/metamet/issues" class="external-link">GitHub
+issue</a>, or email Pete (<a href="mailto:plevy@ceh.ac.uk" class="email">plevy@ceh.ac.uk</a>) or Will (<a href="mailto:wilfinc@ceh.ac.uk" class="email">wilfinc@ceh.ac.uk</a>).</p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

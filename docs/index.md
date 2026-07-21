@@ -3,7 +3,7 @@
 # metamet
 
 `metamet` is an R package which attempts to solve many of the problems
-encountered in working with meteorological observation data. It provide
+encountered in working with meteorological observation data. It provides
 a system for:
 
 - standardising metadata
@@ -23,18 +23,71 @@ It does this by defining:
 2.  methods/functions for converting data between formats, combining
     data from different sources, quality control and gap-filling.
 
-## Installation
+## Getting started with the Shiny app
 
-You can install the development version of metamet from
-[GitHub](https://github.com/NERC-CEH/metamet) with:
+`metamet` includes an interactive Shiny application for manual QA/QC and
+gap-filling of meteorological data. The app lets you build a `metamet`
+object from raw data files, inspect and correct observations
+interactively, and export the processed data.
+
+### Install app dependencies
+
+The app requires several additional packages that are not installed by
+default. Include them all at once with `pak`:
 
 ``` r
 
-install.packages("pak")
-pak::pak("NERC-CEH/metamet")
+pak::pak("NERC-CEH/metamet", dependencies = TRUE)
 ```
 
-## Example
+Or install them individually:
+
+``` r
+
+install.packages(c(
+  "shiny", "shinydashboard", "shinyjs", "shinyFiles",
+  "shinyvalidate", "shinycssloaders", "ggiraph", "glue"
+))
+```
+
+### Launch the app
+
+``` r
+
+metamet::run_shiny()
+```
+
+### App workflow overview
+
+The app guides you through a four-stage workflow:
+
+1.  **Create or open a `metamet` object** – Use the *Create new Metamet
+    object* wizard to import a raw data file (CSV, Campbell TOA5, old
+    Campbell `.dat`/`.dld`, or CEDA BADC-CSV), map variables to ICOS
+    names, set QC ranges, and optionally attach ERA5 reference data. The
+    wizard saves the result as a `.rds` file. Alternatively, use *Open
+    existing Metamet object* to load a previously saved `.rds`.
+
+2.  **Select date range and QA/QC** – Choose a start and end date/time,
+    click *Retrieve from database*, then inspect each variable in its
+    own interactive plot tab. Select suspect data points with the lasso
+    tool, pick a gap-filling method (time interpolation, regression,
+    ERA5 substitution, or others), add an optional comment explaining
+    the change, and click *Impute selection*. Click *Finished checking
+    variable* when a variable is signed off.
+
+3.  **Save changes** – Click *Save changes* to write a new `.rds` file
+    (named with your system username and today’s date) plus a
+    CEDA-formatted output in the same directory as the source file.
+
+4.  **Download processed data** – Export Level 1, Level 2, or
+    CEDA-formatted data as `.csv` (or `.zip` for Level 1/2) from the
+    *Download processed data* tab.
+
+For a detailed walkthrough see the [App User
+Guide](https://nerc-ceh.github.io/metamet/articles/app_user_guide.html).
+
+## Basic metamet workflow - create a metamet object without the app
 
 Basic usage is to first create `metamet` objects from files or
 pre-existing data frames or data tables. Because all the metadata
@@ -49,10 +102,6 @@ be processed relatively easily so as to:
 ``` r
 
 library(metamet)
-#> Loading required package: data.table
-#> data.table 1.17.8 using 7 threads (see ?getDTthreads).  Latest news: r-datatable.com
-#> Loading required package: ggplot2
-#> Warning: package 'ggplot2' was built under R version 4.5.2
 fname_dt <- testthat::test_path("data-raw/UK-AMO/UK-AMO_BM_dt_2026.csv")
 fname_meta <- testthat::test_path("data-raw/dt_meta.xlsx")
 fname_site <- testthat::test_path("data-raw/dt_site.csv")
@@ -64,47 +113,13 @@ mm <- metamet(
   site_id = "UK-AMO"
 )
 #> Loading file: tests/testthat/data-raw/UK-AMO/UK-AMO_BM_dt_2026.csv
-#> Reading data table ...
+#> Error in `read_obs_autodetect()`:
+#> ! file.exists(path) is not TRUE
 
 # print the outline strucutre:
 mm
-#> metamet object
-#> -------------
-#> Data table (dt) - first 6 cols:
-#>                    DATECT       TS      SWC          G         WTD WTD_4_1_1
-#>                    <POSc>    <num>    <num>      <num>       <num>     <num>
-#>    1: 2026-01-01 00:30:00 4.704447 66.78342 -5.2438167  0.03166667        NA
-#>    2: 2026-01-01 01:00:00 4.710880 66.78225 -5.1350167  0.03091667        NA
-#>    3: 2026-01-01 01:30:00 4.716867 66.78408 -5.0469667  0.02978333        NA
-#>    4: 2026-01-01 02:00:00 4.722013 66.78121 -4.9933833  0.02945000        NA
-#>    5: 2026-01-01 02:30:00 4.726623 66.78179 -4.9702167  0.02666667        NA
-#>   ---                                                                       
-#> 1484: 2026-01-31 22:00:00 4.702524 53.85774 -0.9039389 -0.18318600  -0.60073
-#> 1485: 2026-01-31 22:30:00 4.743937 53.84866 -0.9908333 -0.18335267  -0.60073
-#> 1486: 2026-01-31 23:00:00 4.773235 53.84151 -1.0347333 -0.18363933  -0.60073
-#> 1487: 2026-01-31 23:30:00 4.783013 53.83243 -1.0497611 -0.18391933  -0.60073
-#> 1488: 2026-02-01 00:00:00 4.785532 53.82335 -1.0490556 -0.18402600  -0.60073
-#> 
-#> Metadata (dt_meta) - first 6 cols:
-#>      site start_date   end_date name_dt name_local long_name_local
-#>    <char>     <POSc>     <POSc>  <char>     <char>          <char>
-#> 1: UK-AMO 1995-01-01 2030-01-01    site       site            site
-#> 2: UK-AMO 1995-01-01 2030-01-01  D_SNOW     D_SNOW      Snow depth
-#> 3: UK-AMO 1995-01-01 2030-01-01  DATECT     DATECT       timestamp
-#> 4: UK-AMO 1995-01-01 2030-01-01       G          G  Soil heat flux
-#> 5: UK-AMO 1995-01-01 2030-01-01 G_4_1_1    G_4_1_1  Soil heat flux
-#> 6: UK-AMO 1995-01-01 2030-01-01 G_4_1_2    G_4_1_2  Soil heat flux
-#> 
-#> Site information (dt_site):
-#>      site        long_name    lon     lat  elev
-#>    <char>           <char>  <num>   <num> <int>
-#> 1: UK-AMO Auchencorth Moss -3.243 55.7923   120
-#> 
-#> QC information (dt_qc) - first 6 cols:
-#> NULL
-#> 
-#> Reference data (dt_ref) - first 6 cols:
-#> NULL
+#> Error:
+#> ! object 'mm' not found
 ```
 
 A typical workflow would go on to perform tasks such as adding reference

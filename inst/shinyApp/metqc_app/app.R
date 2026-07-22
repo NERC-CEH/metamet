@@ -9,10 +9,10 @@ source(
   system.file("shinyApp/metqc_app/mod_metadata_maker.R", package = "metamet"),
   local = TRUE
 )
-source(
-  system.file("shinyApp/metqc_app/mod_machine_faults.R", package = "metamet"),
-  local = TRUE
-)
+#source(
+#  system.file("shinyApp/metqc_app/mod_machine_faults.R", package = "metamet"),
+#  local = TRUE
+#)
 source(
   system.file("shinyApp/metqc_app/mod_qc_propagation.R", package = "metamet"),
   local = TRUE
@@ -358,11 +358,11 @@ server <- function(input, output, session) {
     default_root = default_root
   )
 
-  mod_machine_faults_server(
-    id = "machine_faults",
-    mm_qry = mm_qry,
-    username = username
-  )
+  #mod_machine_faults_server(
+  #  id = "machine_faults",
+  #  mm_qry = mm_qry,
+  #  username = username
+  #)
 
   # Reactive wrapper for the non-reactive global `mm_qry` so modules can observe it
   mm_qry_rv <- reactiveVal(NULL)

@@ -1,10 +1,10 @@
 ##' Impute missing values in meteorological data
-##'
+##
 ##' Imputes missing or flagged values in one or more variables of a \code{metamet} object
 ##' using various methods. The function supports regression-based imputation, time-series
 ##' smoothing (GAM), substitution from reference data (ERA5), and physical constraints.
 ##' All imputed values are flagged in the quality control (QC) table.
-##'
+##
 ##' @param v_y Character vector of variable names (as quoted strings) to impute.
 ##'   If \code{NULL} (default), all variables in the data table except site and time
 ##'   are selected for imputation.
@@ -47,10 +47,10 @@
 ##' @param plot_graph Logical. If \code{TRUE} (default), generates diagnostic plots
 ##'   showing observations, reference data (if available), and QC flags. Saves PNG files
 ##'   to the \code{output/} directory with naming convention \code{plot_<variable>_<method>.png}.
-##'
+##
 ##' @return The input \code{metamet} object \code{mm}, invisibly returned with updated
 ##'   \code{dt} (imputed values) and \code{dt_qc} (new QC codes for imputed points).
-##'
+##
 ##' @details
 ##' **Imputation Process:**
 ##' The function iterates over each variable in \code{v_y}. For each variable:
@@ -164,6 +164,13 @@ impute <- function(
     dt[, value_orig := value]
   }
 
+  # Ensure there's a stable row identifier available for selection operations.
+  # If callers/tests have already provided `row_name`, leave it untouched.
+  if (!"row_name" %in% names(dt)) {
+    # make a character row id (unique across the table)
+    dt[, row_name := as.character(.I)]
+  }
+
   for (y in v_y) {
     print(paste("Getting ready to impute", y))
     if (use_method_from_meta) {
@@ -188,8 +195,21 @@ impute <- function(
 
     # start by marking nothing as selected
     dt[name_icos == y, is_selected := FALSE]
-    # mark only the rows the user actually selected
-    dt[name_icos == y & row_name %in% row_selected, is_selected := TRUE]
+
+    # localise selection parameter per-variable:
+    local_selected <- row_selected
+    # If the caller passed a single logical TRUE, interpret as "select all rows
+    # for this variable".
+    if (
+      length(local_selected) == 1L &&
+        is.logical(local_selected) &&
+        isTRUE(local_selected)
+    ) {
+      local_selected <- dt[name_icos == y, row_name]
+    }
+
+    # mark only the rows the user actually selected (uses row_name)
+    dt[name_icos == y & row_name %in% local_selected, is_selected := TRUE]
     # apply qc_tokeep filter
     dt[name_icos == y, is_selected := is_selected & (qc %!in% qc_tokeep)]
 
@@ -244,13 +264,16 @@ impute <- function(
     if (method == "revert") {
       # build lookup table of original values using the stored `value_orig`
       orig_dt <- dt[
-        name_icos == y & row_name %in% row_selected,
+        name_icos == y & row_name %in% local_selected,
         .(row_name, value_orig = value_orig, qc_orig = qc_orig)
       ]
       # restore original values using a join
       dt[orig_dt, on = .(row_name), `:=`(value = value_orig, qc = qc_orig)]
       # clear comment
-      dt[name_icos == y & row_name %in% row_selected, comment := NA_character_]
+      dt[
+        name_icos == y & row_name %in% local_selected,
+        comment := NA_character_
+      ]
       next
     } else {
       # model-fitting methods: fit a separate model per replicate (var_name)
@@ -304,7 +327,9 @@ impute <- function(
           if (!is.null(x) && nzchar(x) && x %in% dt$name_icos) {
             print(dt[name_icos == x][1:20])
           } else {
-            message("DEBUG: covariate x not provided or not present in data; skipping covariate debug print")
+            message(
+              "DEBUG: covariate x not provided or not present in data; skipping covariate debug print"
+            )
           }
           message("DEBUG: variable y = ", y)
           print(dt[name_icos == y][1:20])

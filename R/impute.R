@@ -304,7 +304,9 @@ impute <- function(
           if (!is.null(x) && nzchar(x) && x %in% dt$name_icos) {
             print(dt[name_icos == x][1:20])
           } else {
-            message("DEBUG: covariate x not provided or not present in data; skipping covariate debug print")
+            message(
+              "DEBUG: covariate x not provided or not present in data; skipping covariate debug print"
+            )
           }
           message("DEBUG: variable y = ", y)
           print(dt[name_icos == y][1:20])

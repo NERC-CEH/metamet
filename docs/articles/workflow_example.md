@@ -82,21 +82,21 @@ knitr::kable(dt_meta[site == "UK-WHM", ..v_col], format = "html")
 
 | site | name_dt | name_local | units_local | type | time_char_format | range_min | range_max | name_era5 | units_era5 | imputation_method |
 |:---|:---|:---|:---|:---|:---|---:|---:|:---|:---|:---|
-| UK-WHM | site | site | NA | site | NA | NA | NA | site | NA | era5 |
-| UK-WHM | Timestamp | Timestamp | NA | time | %d/%m/%Y %H:%M | NA | NA | time | NA | NA |
-| UK-WHM | Rain | Rain | mm | precipitation | NA | 0 | 50 | tp | mm | era5 |
-| UK-WHM | LWS | LWS | dimensionless | arbitrary | NA | -99999 | 99999 | rh | 1 | era5 |
-| UK-WHM | AirT | AirT | degree_C | temperature | NA | -40 | 50 | t2m | degree_C | era5 |
-| UK-WHM | RH | RH | percent | humidity | NA | 30 | 120 | rh | percent | era5 |
-| UK-WHM | PAR | PAR | micromol / m^2 / s | energy flux | NA | 0 | 2200 | ssrd | micromol / m^2 / s | era5 |
-| UK-WHM | Total_solar | Total_solar | W / m^2 | energy flux | NA | 0 | 1200 | ssrd | W / m^2 | era5 |
-| UK-WHM | Net_rad | Net_rad | W / m^2 | energy flux | NA | -500 | 1200 | rn | W / m^2 | era5 |
-| UK-WHM | WS | WS | m / s | wind speed | NA | 0 | 30 | ws | m / s | era5 |
-| UK-WHM | WD | WD | degree | wind direction | NA | 0 | 360 | wd | degree | era5 |
-| UK-WHM | Soil_VWC | Soil_VWC | percent | soil moisture | NA | 0 | 100 | swvl1 | percent | era5 |
-| UK-WHM | Soil_T1 | Soil_T1 | degree_C | temperature | NA | -20 | 50 | stl1 | degree_C | era5 |
-| UK-WHM | Soil_T2 | Soil_T2 | degree_C | temperature | NA | -20 | 50 | stl1 | degree_C | era5 |
-| UK-WHM | WTD | WTD | cm | height | NA | -10 | 10 | swvl1 | m | era5 |
+| UK-WHM | site | site |  | site |  | NA | NA | site |  | era5 |
+| UK-WHM | Timestamp | Timestamp |  | time | %d/%m/%Y %H:%M | NA | NA | time |  |  |
+| UK-WHM | Rain | Rain | mm | precipitation |  | 0 | 50 | tp | mm | era5 |
+| UK-WHM | LWS | LWS | 1 | arbitrary |  | -99999 | 99999 | rh | 1 | era5 |
+| UK-WHM | AirT | AirT | degC | temperature |  | -40 | 50 | t2m | degC | era5 |
+| UK-WHM | RH | RH | % | humidity |  | 30 | 120 | rh | % | era5 |
+| UK-WHM | PAR | PAR | umol/m^2/s | energy flux |  | 0 | 2200 | ssrd | umol/m^2/s | era5 |
+| UK-WHM | Total_solar | Total_solar | W/m^2 | energy flux |  | 0 | 1200 | ssrd | W/m^2 | era5 |
+| UK-WHM | Net_rad | Net_rad | W/m^2 | energy flux |  | -500 | 1200 | rn | W/m^2 | era5 |
+| UK-WHM | WS | WS | m/s | wind speed |  | 0 | 30 | ws | m/s | era5 |
+| UK-WHM | WD | WD | degree | wind direction |  | 0 | 360 | wd | degree | era5 |
+| UK-WHM | Soil_VWC | Soil_VWC | % | soil moisture |  | 0 | 100 | swvl1 | % | era5 |
+| UK-WHM | Soil_T1 | Soil_T1 | degC | temperature |  | -20 | 50 | stl1 | degC | era5 |
+| UK-WHM | Soil_T2 | Soil_T2 | degC | temperature |  | -20 | 50 | stl1 | degC | era5 |
+| UK-WHM | WTD | WTD | cm | height |  | -10 | 10 | swvl1 | m | era5 |
 
 ### Site data `dt_site`
 

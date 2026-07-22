@@ -48,7 +48,7 @@
     <li><a class="dropdown-item" href="articles/changing_names.html">Change the naming convention of measurement variables</a></li>
     <li><a class="dropdown-item" href="articles/gap_fill_methods.html">Imputing missing data</a></li>
     <li><a class="dropdown-item" href="articles/openairmaps.html">Using Openair Mapping Functions</a></li>
-    <li><a class="dropdown-item" href="articles/app_user_guide.html">metqc app User Guide</a></li>
+    <li><a class="dropdown-item" href="articles/app_user_guide.html">MetQC App User Guide</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -77,7 +77,7 @@
 </h1>
 <!-- badges: start -->
 <!-- badges: end -->
-<p><code>metamet</code> is an R package which attempts to solve many of the problems encountered in working with meteorological observation data. It provide a system for:</p>
+<p><code>metamet</code> is an R package which attempts to solve many of the problems encountered in working with meteorological observation data. It provides a system for:</p>
 <ul>
 <li>standardising metadata</li>
 <li>converting between file formats</li>
@@ -93,15 +93,43 @@
 <li>methods/functions for converting data between formats, combining data from different sources, quality control and gap-filling.</li>
 </ol>
 <div class="section level2">
-<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+<h2 id="getting-started-with-the-shiny-app">Getting started with the Shiny app<a class="anchor" aria-label="anchor" href="#getting-started-with-the-shiny-app"></a>
 </h2>
-<p>You can install the development version of metamet from <a href="https://github.com/NERC-CEH/metamet" class="external-link">GitHub</a> with:</p>
+<p><code>metamet</code> includes an interactive Shiny application for manual QA/QC and gap-filling of meteorological data. The app lets you build a <code>metamet</code> object from raw data files, inspect and correct observations interactively, and export the processed data.</p>
+<div class="section level3">
+<h3 id="install-app-dependencies">Install app dependencies<a class="anchor" aria-label="anchor" href="#install-app-dependencies"></a>
+</h3>
+<p>The app requires several additional packages that are not installed by default. Include them all at once with <code>pak</code>:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"pak"</span><span class="op">)</span></span>
-<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"NERC-CEH/metamet"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"NERC-CEH/metamet"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p>Or install them individually:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="st">"shiny"</span>, <span class="st">"shinydashboard"</span>, <span class="st">"shinyjs"</span>, <span class="st">"shinyFiles"</span>,</span>
+<span>  <span class="st">"shinyvalidate"</span>, <span class="st">"shinycssloaders"</span>, <span class="st">"ggiraph"</span>, <span class="st">"glue"</span></span>
+<span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="launch-the-app">Launch the app<a class="anchor" aria-label="anchor" href="#launch-the-app"></a>
+</h3>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">metamet</span><span class="fu">::</span><span class="fu"><a href="reference/run_shiny.html">run_shiny</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="app-workflow-overview">App workflow overview<a class="anchor" aria-label="anchor" href="#app-workflow-overview"></a>
+</h3>
+<p>The app guides you through a four-stage workflow:</p>
+<ol style="list-style-type: decimal">
+<li><p><strong>Create or open a <code>metamet</code> object</strong> – Use the <em>Create new Metamet object</em> wizard to import a raw data file (CSV, Campbell TOA5, old Campbell <code>.dat</code>/<code>.dld</code>, or CEDA BADC-CSV), map variables to ICOS names, set QC ranges, and optionally attach ERA5 reference data. The wizard saves the result as a <code>.rds</code> file. Alternatively, use <em>Open existing Metamet object</em> to load a previously saved <code>.rds</code>.</p></li>
+<li><p><strong>Select date range and QA/QC</strong> – Choose a start and end date/time, click <em>Retrieve from database</em>, then inspect each variable in its own interactive plot tab. Select suspect data points with the lasso tool, pick a gap-filling method (time interpolation, regression, ERA5 substitution, or others), add an optional comment explaining the change, and click <em>Impute selection</em>. Click <em>Finished checking variable</em> when a variable is signed off.</p></li>
+<li><p><strong>Save changes</strong> – Click <em>Save changes</em> to write a new <code>.rds</code> file (named with your system username and today’s date) plus a CEDA-formatted output in the same directory as the source file.</p></li>
+<li><p><strong>Download processed data</strong> – Export Level 1, Level 2, or CEDA-formatted data as <code>.csv</code> (or <code>.zip</code> for Level 1/2) from the <em>Download processed data</em> tab.</p></li>
+</ol>
+<p>For a detailed walkthrough see the <a href="https://nerc-ceh.github.io/metamet/articles/app_user_guide.html">App User Guide</a>.</p>
+</div>
 </div>
 <div class="section level2">
-<h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
+<h2 id="basic-metamet-workflow---create-a-metamet-object-without-the-app">Basic metamet workflow - create a metamet object without the app<a class="anchor" aria-label="anchor" href="#basic-metamet-workflow---create-a-metamet-object-without-the-app"></a>
 </h2>
 <p>Basic usage is to first create <code>metamet</code> objects from files or pre-existing data frames or data tables. Because all the metadata describing the observations is available in the structure, objects can be processed relatively easily so as to:</p>
 <ul>
@@ -110,12 +138,8 @@
 <li>apply quality control</li>
 <li>impute missing data.</li>
 </ul>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://nerc-ceh.github.io/metamet/">metamet</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; Loading required package: data.table</span></span>
-<span><span class="co">#&gt; data.table 1.17.8 using 7 threads (see ?getDTthreads).  Latest news: r-datatable.com</span></span>
-<span><span class="co">#&gt; Loading required package: ggplot2</span></span>
-<span><span class="co">#&gt; Warning: package 'ggplot2' was built under R version 4.5.2</span></span>
 <span><span class="va">fname_dt</span> <span class="op">&lt;-</span> <span class="fu">testthat</span><span class="fu">::</span><span class="fu"><a href="https://testthat.r-lib.org/reference/test_path.html" class="external-link">test_path</a></span><span class="op">(</span><span class="st">"data-raw/UK-AMO/UK-AMO_BM_dt_2026.csv"</span><span class="op">)</span></span>
 <span><span class="va">fname_meta</span> <span class="op">&lt;-</span> <span class="fu">testthat</span><span class="fu">::</span><span class="fu"><a href="https://testthat.r-lib.org/reference/test_path.html" class="external-link">test_path</a></span><span class="op">(</span><span class="st">"data-raw/dt_meta.xlsx"</span><span class="op">)</span></span>
 <span><span class="va">fname_site</span> <span class="op">&lt;-</span> <span class="fu">testthat</span><span class="fu">::</span><span class="fu"><a href="https://testthat.r-lib.org/reference/test_path.html" class="external-link">test_path</a></span><span class="op">(</span><span class="st">"data-raw/dt_site.csv"</span><span class="op">)</span></span>
@@ -127,49 +151,15 @@
 <span>  site_id <span class="op">=</span> <span class="st">"UK-AMO"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Loading file: tests/testthat/data-raw/UK-AMO/UK-AMO_BM_dt_2026.csv</span></span>
-<span><span class="co">#&gt; Reading data table ...</span></span>
+<span><span class="co">#&gt; Error in `read_obs_autodetect()`:</span></span>
+<span><span class="co">#&gt; ! file.exists(path) is not TRUE</span></span>
 <span></span>
 <span><span class="co"># print the outline strucutre:</span></span>
 <span><span class="va">mm</span></span>
-<span><span class="co">#&gt; metamet object</span></span>
-<span><span class="co">#&gt; -------------</span></span>
-<span><span class="co">#&gt; Data table (dt) - first 6 cols:</span></span>
-<span><span class="co">#&gt;                    DATECT       TS      SWC          G         WTD WTD_4_1_1</span></span>
-<span><span class="co">#&gt;                    &lt;POSc&gt;    &lt;num&gt;    &lt;num&gt;      &lt;num&gt;       &lt;num&gt;     &lt;num&gt;</span></span>
-<span><span class="co">#&gt;    1: 2026-01-01 00:30:00 4.704447 66.78342 -5.2438167  0.03166667        NA</span></span>
-<span><span class="co">#&gt;    2: 2026-01-01 01:00:00 4.710880 66.78225 -5.1350167  0.03091667        NA</span></span>
-<span><span class="co">#&gt;    3: 2026-01-01 01:30:00 4.716867 66.78408 -5.0469667  0.02978333        NA</span></span>
-<span><span class="co">#&gt;    4: 2026-01-01 02:00:00 4.722013 66.78121 -4.9933833  0.02945000        NA</span></span>
-<span><span class="co">#&gt;    5: 2026-01-01 02:30:00 4.726623 66.78179 -4.9702167  0.02666667        NA</span></span>
-<span><span class="co">#&gt;   ---                                                                       </span></span>
-<span><span class="co">#&gt; 1484: 2026-01-31 22:00:00 4.702524 53.85774 -0.9039389 -0.18318600  -0.60073</span></span>
-<span><span class="co">#&gt; 1485: 2026-01-31 22:30:00 4.743937 53.84866 -0.9908333 -0.18335267  -0.60073</span></span>
-<span><span class="co">#&gt; 1486: 2026-01-31 23:00:00 4.773235 53.84151 -1.0347333 -0.18363933  -0.60073</span></span>
-<span><span class="co">#&gt; 1487: 2026-01-31 23:30:00 4.783013 53.83243 -1.0497611 -0.18391933  -0.60073</span></span>
-<span><span class="co">#&gt; 1488: 2026-02-01 00:00:00 4.785532 53.82335 -1.0490556 -0.18402600  -0.60073</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Metadata (dt_meta) - first 6 cols:</span></span>
-<span><span class="co">#&gt;      site start_date   end_date name_dt name_local long_name_local</span></span>
-<span><span class="co">#&gt;    &lt;char&gt;     &lt;POSc&gt;     &lt;POSc&gt;  &lt;char&gt;     &lt;char&gt;          &lt;char&gt;</span></span>
-<span><span class="co">#&gt; 1: UK-AMO 1995-01-01 2030-01-01    site       site            site</span></span>
-<span><span class="co">#&gt; 2: UK-AMO 1995-01-01 2030-01-01  D_SNOW     D_SNOW      Snow depth</span></span>
-<span><span class="co">#&gt; 3: UK-AMO 1995-01-01 2030-01-01  DATECT     DATECT       timestamp</span></span>
-<span><span class="co">#&gt; 4: UK-AMO 1995-01-01 2030-01-01       G          G  Soil heat flux</span></span>
-<span><span class="co">#&gt; 5: UK-AMO 1995-01-01 2030-01-01 G_4_1_1    G_4_1_1  Soil heat flux</span></span>
-<span><span class="co">#&gt; 6: UK-AMO 1995-01-01 2030-01-01 G_4_1_2    G_4_1_2  Soil heat flux</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Site information (dt_site):</span></span>
-<span><span class="co">#&gt;      site        long_name    lon     lat  elev</span></span>
-<span><span class="co">#&gt;    &lt;char&gt;           &lt;char&gt;  &lt;num&gt;   &lt;num&gt; &lt;int&gt;</span></span>
-<span><span class="co">#&gt; 1: UK-AMO Auchencorth Moss -3.243 55.7923   120</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; QC information (dt_qc) - first 6 cols:</span></span>
-<span><span class="co">#&gt; NULL</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Reference data (dt_ref) - first 6 cols:</span></span>
-<span><span class="co">#&gt; NULL</span></span></code></pre></div>
+<span><span class="co">#&gt; Error:</span></span>
+<span><span class="co">#&gt; ! object 'mm' not found</span></span></code></pre></div>
 <p>A typical workflow would go on to perform tasks such as adding reference data from ECMWF ERA5 reanalysis, join with other <code>metamet</code> objects, apply quality control algorithms, impute missing values by various algorithms, and check the data manually for additional QC. This is illustrated below.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mm</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/add_era5.html">add_era5</a></span><span class="op">(</span></span>
 <span>  <span class="va">mm</span>,</span>
 <span>  fname_era5 <span class="op">=</span> <span class="fu">testthat</span><span class="fu">::</span><span class="fu"><a href="https://testthat.r-lib.org/reference/test_path.html" class="external-link">test_path</a></span><span class="op">(</span><span class="st">"data-raw/dt_era5.csv"</span><span class="op">)</span></span>

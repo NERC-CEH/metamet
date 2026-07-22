@@ -17,6 +17,24 @@
 mod_metadata_maker_ui <- function(id) {
   ns <- NS(id)
   tagList(
+    tags$style(HTML(
+      ".shiny-table { white-space: nowrap; }"
+    )),
+    tags$script(HTML(
+      "
+      Shiny.addCustomMessageHandler('resetFileInput', function(message) {
+        var el = $('#' + message.id + '_progress');
+        if (el.length) el.remove();
+        $('#' + message.id).val('');
+      });
+      Shiny.addCustomMessageHandler('click', function(message) {
+        $('#' + message.id).click();
+      });
+      "
+    )),
+    uiOutput(ns("loaded_file_banner")),
+    uiOutput(ns("reset_button_ui")),
+    br(),
     # ---- Step 1: load file ---------------------------------------------------
     div(
       id = ns("step1"),
@@ -51,9 +69,15 @@ mod_metadata_maker_ui <- function(id) {
             multiple = FALSE
           )
         ),
-        br(),
-        br(),
-        actionButton(ns("load_file"), "Load & preview"),
+        div(
+          id = ns("loading_spinner"),
+          style = "display:none; margin-top:10px;",
+          shinycssloaders::withSpinner(
+            div(style = "height:40px;"),
+            type = 4,
+            color = "#0072B2"
+          )
+        ),
         br(),
         br(),
         uiOutput(ns("table_select_ui")),
@@ -283,6 +307,11 @@ mod_metadata_maker_ui <- function(id) {
           width = 12,
           uiOutput(ns("summary_ui")),
           br(),
+          p(
+            "You can now download your metamet object as an .rds file.",
+            "This file can be opened in the 'Open existing Metamet object' tab",
+            "to visualise and quality-control the data."
+          ),
           downloadButton(ns("save_rds"), "Download as metamet .rds"),
           br(),
           br(),
@@ -348,6 +377,7 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
 
     # ---- reactive state ------------------------------------------------------
     rv <- reactiveValues(
+      loaded_files = NULL,
       format = NULL,
       dt_raw = NULL,
       l_raw_tables = NULL,
@@ -438,14 +468,60 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
       defaultPath = ""
     )
 
+    # ---- reset handler -------------------------------------------------------
+    observeEvent(input$reset_files, {
+      rv$loaded_files <- NULL
+      rv$dt_raw <- NULL
+      rv$l_raw_tables <- NULL
+      rv$multiple_tables <- FALSE
+      rv$v_data_cols <- NULL
+      rv$v_mapped_cols <- NULL
+      rv$v_mapping <- NULL
+      rv$dt_meta <- NULL
+      rv$dt_site <- NULL
+      rv$dt_site_from_file <- NULL
+      rv$dt_meta_from_file <- NULL
+      rv$skipped_step4 <- FALSE
+      rv$era5_path <- NULL
+      rv$format <- "csv"
+      updateRadioButtons(session, "format", selected = "csv")
+      shinyjs::enable("format")
+      shinyjs::enable("dat_file")
+      shinyjs::enable("dld_file")
+      session$sendCustomMessage("resetFileInput", list(id = ns("dat_file")))
+      session$sendCustomMessage("resetFileInput", list(id = ns("dld_file")))
+      go_to(1L)
+    })
+
     # ---- step 1: load file --------------------------------------------------
-    observeEvent(input$load_file, {
+    load_selected_files <- function() {
+      shinyjs::show(id = ns("loading_spinner"), asis = TRUE)
+      on.exit(
+        shinyjs::hide(id = ns("loading_spinner"), asis = TRUE),
+        add = TRUE
+      )
+
       req(input$dat_file)
       dat_info <- parseFilePaths(v_roots, input$dat_file)
       req(nrow(dat_info) > 0)
       dat_path <- as.character(dat_info$datapath)
       fmt <- input$format
       rv$format <- fmt
+
+      shinyjs::disable("format")
+      shinyjs::disable("dat_file")
+      shinyjs::disable("dld_file")
+
+      v_files <- basename(dat_info$datapath)
+      if (fmt == "oldcampbell") {
+        dld_info <- parseFilePaths(v_roots, input$dld_file)
+        validate(need(
+          nrow(dld_info) > 0,
+          "Please also select the .dld metadata file."
+        ))
+        v_files <- c(v_files, basename(dld_info$datapath))
+      }
+      rv$loaded_files <- v_files
 
       dt_loaded <- tryCatch(
         {
@@ -459,10 +535,6 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
             metamet:::import_campbell_data(dat_path)
           } else if (fmt == "oldcampbell") {
             dld_info <- parseFilePaths(v_roots, input$dld_file)
-            validate(need(
-              nrow(dld_info) > 0,
-              "Please also select the .dld metadata file."
-            ))
             metamet::read_old_campbell_dat(
               dat_path,
               as.character(dld_info$datapath)
@@ -498,6 +570,51 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
       if (fmt != "csv") {
         rv$v_data_cols <- setdiff(names(rv$dt_raw), "TIMESTAMP")
       }
+    }
+
+    observeEvent(input$dat_file, {
+      req(input$format)
+      fmt <- input$format
+      dat_ok <- nrow(parseFilePaths(v_roots, input$dat_file)) > 0
+      dld_ok <- nrow(parseFilePaths(v_roots, input$dld_file)) > 0
+      if (fmt %in% c("csv", "toa5", "ceda") && dat_ok) {
+        load_selected_files()
+      }
+      if (fmt == "oldcampbell" && dat_ok && dld_ok) {
+        load_selected_files()
+      }
+    })
+
+    observeEvent(input$dld_file, {
+      req(input$format == "oldcampbell")
+      dat_ok <- nrow(parseFilePaths(v_roots, input$dat_file)) > 0
+      dld_ok <- nrow(parseFilePaths(v_roots, input$dld_file)) > 0
+      if (dat_ok && dld_ok) {
+        load_selected_files()
+      }
+    })
+
+    output$loaded_file_banner <- renderUI({
+      req(rv$loaded_files)
+      box(
+        width = 12,
+        status = "success",
+        solidHeader = TRUE,
+        title = tags$span(icon("file"), "Loaded file(s)"),
+        div(
+          style = "font-size:16px; font-weight:600; margin-bottom:10px;",
+          lapply(rv$loaded_files, function(f) tags$div(icon("file-alt"), f))
+        )
+      )
+    })
+
+    output$reset_button_ui <- renderUI({
+      req(rv$loaded_files)
+      actionButton(
+        ns("reset_files"),
+        "Remove and load other files",
+        class = "btn-warning"
+      )
     })
 
     # Table selector (old Campbell with multiple output tables)

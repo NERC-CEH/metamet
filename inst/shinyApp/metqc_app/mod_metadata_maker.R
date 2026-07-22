@@ -17,33 +17,6 @@
 mod_metadata_maker_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    # prevents column headers from wrapping in the preview table; also applies to mapping and details tables in later steps
-    tags$style(HTML(
-      "
-      .shiny-table {
-        white-space: nowrap;
-      }
-    "
-    )),
-    tags$script(HTML(
-      "
-  Shiny.addCustomMessageHandler('resetFileInput', function(message) {
-    var el = $('#' + message.id + '_progress');
-    if (el.length) el.remove();
-    $('#' + message.id).val('');
-  });
-    "
-    )),
-    tags$script(HTML(
-      "
-  Shiny.addCustomMessageHandler('click', function(message) {
-    $('#' + message.id).click();
-  });
-"
-    )),
-    uiOutput(ns("loaded_file_banner")),
-    uiOutput(ns("reset_button_ui")),
-    br(),
     # ---- Step 1: load file ---------------------------------------------------
     div(
       id = ns("step1"),
@@ -78,15 +51,9 @@ mod_metadata_maker_ui <- function(id) {
             multiple = FALSE
           )
         ),
-        div(
-          id = ns("loading_spinner"),
-          style = "display:none; margin-top:10px;",
-          shinycssloaders::withSpinner(
-            div(style = "height:40px;"),
-            type = 4,
-            color = "#0072B2"
-          )
-        ),
+        br(),
+        br(),
+        actionButton(ns("load_file"), "Load & preview"),
         br(),
         br(),
         uiOutput(ns("table_select_ui")),
@@ -316,11 +283,6 @@ mod_metadata_maker_ui <- function(id) {
           width = 12,
           uiOutput(ns("summary_ui")),
           br(),
-          p(
-            "You can now download your metamet object as an .rds file. ",
-            "This file can be open in the Open existing Metamet object sidetab of this app,
-            allowing you to visualise and impute the data."
-          ),
           downloadButton(ns("save_rds"), "Download as metamet .rds"),
           br(),
           br(),
@@ -386,7 +348,6 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
 
     # ---- reactive state ------------------------------------------------------
     rv <- reactiveValues(
-      loaded_files = NULL,
       format = NULL,
       dt_raw = NULL,
       l_raw_tables = NULL,
@@ -477,79 +438,14 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
       defaultPath = ""
     )
 
-    # resetting state when clicking remove button
-    observeEvent(input$reset_files, {
-      # 1. Clear reactive state
-      rv$loaded_files <- NULL
-      rv$dt_raw <- NULL
-      rv$l_raw_tables <- NULL
-      rv$multiple_tables <- FALSE
-      rv$v_data_cols <- NULL
-      rv$v_mapped_cols <- NULL
-      rv$v_mapping <- NULL
-      rv$dt_meta <- NULL
-      rv$dt_site <- NULL
-      rv$dt_site_from_file <- NULL
-      rv$dt_meta_from_file <- NULL
-      rv$skipped_step4 <- FALSE
-      rv$era5_path <- NULL
-
-      rv$format <- "csv"
-      updateRadioButtons(session, "format", selected = "csv")
-
-      # 2. Re‑enable controls
-      shinyjs::enable("format")
-      shinyjs::enable("dat_file")
-      shinyjs::enable("dld_file")
-
-      # 3. Clear UI outputs & shiny inputs
-      session$sendInputMessage(ns("dat_file"), NULL)
-      session$sendInputMessage(ns("dld_file"), NULL)
-      session$sendCustomMessage("resetFileInput", list(id = ns("dat_file")))
-      session$sendCustomMessage("resetFileInput", list(id = ns("dld_file")))
-
-      # 4. Back to step 1
-      go_to(1L)
-    })
-
     # ---- step 1: load file --------------------------------------------------
-    load_selected_files <- function() {
-      cat("DEBUG: ENTER load_selected_files()\n")
-      # loading spinner
-      shinyjs::show(id = ns("loading_spinner"))
-
-      on.exit(
-        {
-          shinyjs::hide(id = ns("loading_spinner"))
-        },
-        add = TRUE
-      )
+    observeEvent(input$load_file, {
       req(input$dat_file)
       dat_info <- parseFilePaths(v_roots, input$dat_file)
       req(nrow(dat_info) > 0)
       dat_path <- as.character(dat_info$datapath)
       fmt <- input$format
       rv$format <- fmt
-
-      # debugging
-      cat("DEBUG: Selected file =", dat_info$datapath, "\n")
-      cat("DEBUG: Selected format =", fmt, "\n")
-      cat("DEBUG: nrow(dat_info) =", nrow(dat_info), "\n")
-
-      shinyjs::disable("format")
-      shinyjs::disable("dat_file")
-      shinyjs::disable("dld_file")
-
-      v_files <- basename(dat_info$datapath)
-      if (fmt == "oldcampbell") {
-        dld_info <- parseFilePaths(v_roots, input$dld_file)
-        validate(need(
-          nrow(dld_info) > 0,
-          "Please also select the .dld metadata file."
-        ))
-        v_files <- c(v_files, basename(dld_info$datapath))
-      }
-      rv$loaded_files <- v_files
 
       dt_loaded <- tryCatch(
         {
@@ -563,6 +459,10 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
             metamet:::import_campbell_data(dat_path)
           } else if (fmt == "oldcampbell") {
             dld_info <- parseFilePaths(v_roots, input$dld_file)
+            validate(need(
+              nrow(dld_info) > 0,
+              "Please also select the .dld metadata file."
+            ))
             metamet::read_old_campbell_dat(
               dat_path,
               as.character(dld_info$datapath)
@@ -581,29 +481,11 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
         }
       )
 
-      # file debugging
-      if (!is.null(dt_loaded)) {
-        if (is.data.frame(dt_loaded)) {
-          cat(
-            "DEBUG: Loaded data frame with",
-            nrow(dt_loaded),
-            "rows and",
-            ncol(dt_loaded),
-            "columns\n"
-          )
-        } else if (is.list(dt_loaded)) {
-          cat("DEBUG: Loaded list of", length(dt_loaded), "tables\n")
-          lapply(names(dt_loaded), function(nm) {
-            cat("  - Table", nm, ":", nrow(dt_loaded[[nm]]), "rows\n")
-          })
-        }
-      }
-      ########################
-
       if (is.null(dt_loaded)) {
         return()
       }
 
+      # Old Campbell returns a named list of data.tables
       if (is.list(dt_loaded) && !is.data.frame(dt_loaded)) {
         rv$l_raw_tables <- dt_loaded
         rv$dt_raw <- dt_loaded[[1L]]
@@ -615,33 +497,6 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
 
       if (fmt != "csv") {
         rv$v_data_cols <- setdiff(names(rv$dt_raw), "TIMESTAMP")
-      }
-    }
-
-    observeEvent(input$dat_file, {
-      req(input$format)
-
-      fmt <- input$format
-      dat_ok <- nrow(parseFilePaths(v_roots, input$dat_file)) > 0
-      dld_ok <- nrow(parseFilePaths(v_roots, input$dld_file)) > 0
-
-      if (fmt %in% c("csv", "toa5", "ceda") && dat_ok) {
-        load_selected_files()
-      }
-
-      if (fmt == "oldcampbell" && dat_ok && dld_ok) {
-        load_selected_files()
-      }
-    })
-
-    observeEvent(input$dld_file, {
-      req(input$format == "oldcampbell")
-
-      dat_ok <- nrow(parseFilePaths(v_roots, input$dat_file)) > 0
-      dld_ok <- nrow(parseFilePaths(v_roots, input$dld_file)) > 0
-
-      if (dat_ok && dld_ok) {
-        load_selected_files()
       }
     })
 
@@ -659,38 +514,10 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
       )
     })
 
-    # render banner with filenames
-    output$loaded_file_banner <- renderUI({
-      req(rv$loaded_files)
-
-      tagList(
-        box(
-          width = 12,
-          status = "success",
-          solidHeader = TRUE,
-          title = tags$span(icon("file"), "Loaded file(s)"),
-          div(
-            style = "font-size:16px; font-weight:600; margin-bottom:10px;",
-            lapply(rv$loaded_files, function(f) {
-              tags$div(icon("file"), f)
-            })
-          )
-        )
-      )
-    })
-
     observeEvent(input$use_table, {
       req(rv$l_raw_tables, input$table_select)
-      dt <- rv$l_raw_tables[[input$table_select]]
-      if (!"TIMESTAMP" %in% names(dt)) {
-        showNotification(
-          "Selected table has no TIMESTAMP column.",
-          type = "error"
-        )
-        return()
-      }
-      rv$dt_raw <- dt
-      rv$v_data_cols <- setdiff(names(dt), "TIMESTAMP")
+      rv$dt_raw <- rv$l_raw_tables[[input$table_select]]
+      rv$v_data_cols <- setdiff(names(rv$dt_raw), "TIMESTAMP")
     })
 
     # Timestamp column selector (plain CSV only)
@@ -721,49 +548,24 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
 
     # Data preview
     output$preview_ui <- renderUI({
-      # debug table visibility
-      cat(
-        "DEBUG: preview_ui called — dt_raw is",
-        if (is.null(rv$dt_raw)) "NULL\n" else "NOT NULL\n"
-      )
-      #############################
       req(rv$dt_raw)
       tagList(
         hr(),
         h5("Preview (first 6 rows):"),
-        div(
-          style = "max-width: 100%; overflow-x: auto; border: 1px solid #ddd; padding: 5px;",
-          tableOutput(ns("preview_table"))
-        )
+        tableOutput(ns("preview_table"))
       )
     })
 
     output$preview_table <- renderTable({
-      cat("DEBUG: preview_table called\n")
       req(rv$dt_raw)
-
-      cat(
-        "DEBUG: preview_table — dt_raw has",
-        nrow(rv$dt_raw),
-        "rows and",
-        ncol(rv$dt_raw),
-        "columns\n"
-      )
-
       dt <- head(rv$dt_raw, 6L)
       # integer64 columns (e.g. compact timestamps) display as 0 in renderTable;
       # convert to character so the raw values are visible
       v_i64 <- names(dt)[vapply(dt, bit64::is.integer64, logical(1L))]
       if (length(v_i64)) {
-        cat(
-          "DEBUG: preview_table — converting integer64 columns:",
-          paste(v_i64, collapse = ", "),
-          "\n"
-        )
         dt <- data.table::copy(dt)
         dt[, (v_i64) := lapply(.SD, as.character), .SDcols = v_i64]
       }
-
       dt
     })
 
@@ -774,7 +576,7 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
         hr(),
         actionButton(
           ns("next_1"),
-          "Confirm",
+          "Continue to site information",
           class = "btn-primary"
         )
       )
@@ -989,16 +791,6 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
       rv$dt_meta_from_file <- dt
     })
 
-    #reset button
-    output$reset_button_ui <- renderUI({
-      req(rv$loaded_files)
-      actionButton(
-        ns("reset_files"),
-        "Remove and load other files",
-        class = "btn-warning"
-      )
-    })
-
     # Match summary for file-loaded dt_meta
     output$meta_load_ui <- renderUI({
       req(rv$dt_meta_from_file, rv$dt_raw)
@@ -1142,7 +934,7 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
           column(2, tags$b("Units")),
           column(2, tags$b("Range min")),
           column(2, tags$b("Range max")),
-          column(2, tags$b("Default Imputation method"))
+          column(2, tags$b("Imputation method"))
         ),
         hr(),
         lapply(rv$v_mapped_cols, function(col_nm) {
@@ -1392,9 +1184,6 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
     observeEvent(input$back_6, go_to(5L))
 
     observeEvent(input$restart, {
-      go_to(1L)
-      # clear loaded files so the banner disappears
-      rv$loaded_files <- NULL
       rv$format <- NULL
       rv$dt_raw <- NULL
       rv$l_raw_tables <- NULL
@@ -1408,6 +1197,7 @@ mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
       rv$dt_meta_from_file <- NULL
       rv$skipped_step4 <- FALSE
       rv$era5_path <- NULL
+      go_to(1L)
     })
 
     output$summary_ui <- renderUI({

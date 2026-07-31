@@ -9,7 +9,11 @@ suffixes.
 ## Usage
 
 ``` r
-change_naming_convention(mm_in, name_convention = "name_era5")
+change_naming_convention(
+  mm_in,
+  name_convention = "name_era5",
+  convert_units = TRUE
+)
 ```
 
 ## Arguments
@@ -28,6 +32,14 @@ change_naming_convention(mm_in, name_convention = "name_era5")
 
   A character string giving the column in \`dt_meta\` that contains the
   base names to use (default: \`"name_era5"\`).
+
+- convert_units:
+
+  Controls which numeric columns are unit-converted when the source and
+  target conventions carry different \`units\_\*\` values in
+  \`dt_meta\`. \`TRUE\` (default) converts both observations (\`value\`)
+  and reference data (\`ref\`); \`FALSE\` converts neither; \`"obs"\`
+  converts observations only; \`"ref"\` converts reference data only.
 
 ## Value
 

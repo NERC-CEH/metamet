@@ -8,6 +8,8 @@
   : Apply Quality Control Checks to Meteorological Data
 - [`change_naming_convention()`](https://nerc-ceh.github.io/metamet/reference/change_naming_convention.md)
   : Change the naming convention of measurement variables
+- [`check_dt_meta()`](https://nerc-ceh.github.io/metamet/reference/check_dt_meta.md)
+  : Check dt_meta convention columns for consistency
 - [`convert_sum_to_rate()`](https://nerc-ceh.github.io/metamet/reference/convert_sum_to_rate.md)
   : Convert a summed variable to a rate
 - [`detect_gaps()`](https://nerc-ceh.github.io/metamet/reference/detect_gaps.md)
@@ -18,6 +20,8 @@
   Impute missing values in meteorological data
 - [`join()`](https://nerc-ceh.github.io/metamet/reference/join.md) :
   Join two \`metamet\` objects
+- [`l_conventions`](https://nerc-ceh.github.io/metamet/reference/l_conventions.md)
+  : Convention registry for ICOS and ERA5 variable names and units
 - [`metamet()`](https://nerc-ceh.github.io/metamet/reference/metamet.md)
   : Create a \`metamet\` object from various input types
 - [`metamet_reshape()`](https://nerc-ceh.github.io/metamet/reference/metamet_reshape.md)
@@ -32,6 +36,8 @@
   : pad_data
 - [`polar_map()`](https://nerc-ceh.github.io/metamet/reference/polar_map.md)
   : Create a Polar Plot Map for a Selected Variable
+- [`populate_convention_cols()`](https://nerc-ceh.github.io/metamet/reference/populate_convention_cols.md)
+  : Populate convention columns in dt_meta from the package registry
 - [`rbind_metamet()`](https://nerc-ceh.github.io/metamet/reference/rbind_metamet.md)
   : Combine metamet objects or data-table lists into a single metamet
   object

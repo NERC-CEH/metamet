@@ -18,6 +18,7 @@
 <url><loc>https://nerc-ceh.github.io/metamet/reference/add_era5.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/apply_qc.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/change_naming_convention.html</loc></url>
+<url><loc>https://nerc-ceh.github.io/metamet/reference/check_dt_meta.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/convert_sum_to_rate.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/detect_gaps.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/dot-parse_campbell_dld.html</loc></url>
@@ -25,6 +26,7 @@
 <url><loc>https://nerc-ceh.github.io/metamet/reference/impute.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/index.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/join.html</loc></url>
+<url><loc>https://nerc-ceh.github.io/metamet/reference/l_conventions.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/metamet-package.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/metamet.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/metamet_reshape.html</loc></url>
@@ -33,6 +35,7 @@
 <url><loc>https://nerc-ceh.github.io/metamet/reference/pad_data.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/plot_heatmap_calendar.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/polar_map.html</loc></url>
+<url><loc>https://nerc-ceh.github.io/metamet/reference/populate_convention_cols.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/rbind_metamet.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/read_ceda_csv.html</loc></url>
 <url><loc>https://nerc-ceh.github.io/metamet/reference/read_obs_autodetect.html</loc></url>

@@ -49,11 +49,24 @@ ui <- dashboardPage(
       ),
       menuItem(
         "Help and Documentation",
-        tabName = "information",
         icon = icon('info'),
-        menuSubItem('Gap-fill methods', tabName = 'gapfill_guide'),
-        menuSubItem('App guide', tabName = 'app_guide'),
-        menuSubItem('Data process guide', tabName = 'data_guide')
+        startExpanded = FALSE,
+        tags$li(
+          actionButton(
+            "open_app_guide",
+            tagList(icon("file-alt"), "App user guide"),
+            class = "btn-link",
+            style = "color:white; background:none; border:none; text-align:left; width:100%; padding:5px 5px 5px 15px;"
+          )
+        ),
+        tags$li(
+          actionButton(
+            "open_gapfill_guide",
+            tagList(icon("book"), "Gap-fill methods"),
+            class = "btn-link",
+            style = "color:white; background:none; border:none; text-align:left; width:100%; padding:5px 5px 5px 15px;"
+          )
+        )
       )
     ),
     tags$ul(
@@ -68,6 +81,21 @@ ui <- dashboardPage(
   ),
   dashboardBody(
     shinyjs::useShinyjs(),
+    tags$style(HTML(
+      "
+      .sidebar-menu a.disabled {
+        color: #999 !important;
+        background-color: #e6e6e6 !important;
+        cursor: not-allowed !important;
+        pointer-events: none !important;
+        opacity: 0.6 !important;
+      }
+      .sidebar-menu a.disabled:hover {
+        background-color: #e6e6e6 !important;
+        color: #999 !important;
+      }
+    "
+    )),
     tabItems(
       tabItem(
         tabName = "dashboard",
@@ -168,7 +196,7 @@ ui <- dashboardPage(
               actionButton("impute", label = "Impute selection"),
               actionButton(
                 "finished_check",
-                label = "Finished checking variable for date range."
+                label = "Mark variable as checked for date range"
               ),
               checkboxGroupInput(
                 "qc_tokeep",
@@ -195,7 +223,8 @@ ui <- dashboardPage(
           multiple = FALSE
         ),
         br(),
-        verbatimTextOutput("status")
+        verbatimTextOutput("status"),
+        uiOutput("loaded_file_banner")
       ),
       tabItem(
         tabName = "metadata_maker",
@@ -225,20 +254,8 @@ ui <- dashboardPage(
       tabItem(
         tabName = "information",
       ),
-      tabItem(
-        tabName = "gapfill_guide"
-        # includeMarkdown(here::here("vignettes/gap_fill_methods.md"))
-      ),
-      tabItem(
-        tabName = "app_guide"
-        # includeMarkdown(here::here("vignettes/app_user_guide.md"))
-      ) # ,
-      # tabItem(
-      #   tabName = "data_guide",
-      #   includeHTML(
-      #     here::here("vignettes/metdb_shiny_version.html")
-      #   )
-      # )
+      tabItem(tabName = "app_guide"),
+      tabItem(tabName = "gapfill_guide")
     )
   )
 )
@@ -327,6 +344,43 @@ server <- function(input, output, session) {
     paste("Loaded file:", basename(uploaded()$fname))
   })
 
+  output$loaded_file_banner <- renderUI({
+    req(uploaded())
+    tagList(
+      br(),
+      box(
+        width = 12,
+        status = "success",
+        solidHeader = TRUE,
+        title = tags$span(icon("file"), "Loaded file"),
+        div(
+          style = "font-size:16px; font-weight:600; margin-bottom:10px;",
+          basename(uploaded()$fname)
+        ),
+        actionButton(
+          "remove_file",
+          "Remove file and start again",
+          icon = icon("trash"),
+          class = "btn btn-danger"
+        )
+      )
+    )
+  })
+
+  observeEvent(input$remove_file, {
+    mm_qry <<- NULL
+    shinyjs::hide("extracted_data")
+    # resetting input$file causes uploaded() to return NULL via req(input$file)
+    shinyjs::reset("file")
+    shinyjs::enable(selector = "a[data-value='metadata_maker']")
+    shinyjs::enable(selector = "a[data-value='upload']")
+    updateTabItems(session, "tabs", "upload")
+    showNotification(
+      "Metamet file removed. You can now load a new one.",
+      type = "message"
+    )
+  })
+
   # confirms upload was succesful and then switches to calendar selection
   observeEvent(uploaded(), {
     showNotification(
@@ -348,10 +402,21 @@ server <- function(input, output, session) {
 
   # save the username
   username <<- Sys.info()[["user"]]
-  print(paste("Proceeding with", username, "as data validator"))
 
   observeEvent(input$stop_app, {
     stopApp()
+  })
+
+  observeEvent(input$open_app_guide, {
+    browseURL(
+      "https://nerc-ceh.github.io/metamet/articles/app_user_guide.html"
+    )
+  })
+
+  observeEvent(input$open_gapfill_guide, {
+    browseURL(
+      "https://nerc-ceh.github.io/metamet/articles/gap_fill_methods.html"
+    )
   })
 
   session$onSessionEnded(function() {
@@ -394,7 +459,6 @@ server <- function(input, output, session) {
 
   # Create a date input for the user to select start date
   output$start_date <- renderUI({
-    print(as.Date(uploaded()$date_of_first_new_record, tz = "UTC"))
     dateInput(
       "sdate",
       value = as.Date(uploaded()$date_of_first_new_record, tz = "UTC"),
@@ -406,7 +470,6 @@ server <- function(input, output, session) {
 
   # Create a date input for the user to select end date
   output$end_date <- renderUI({
-    print(as.Date(uploaded()$date_of_last_new_record, tz = "UTC"))
     dateInput(
       "edate",
       value = as.Date(uploaded()$date_of_last_new_record, tz = "UTC"),
@@ -711,17 +774,24 @@ server <- function(input, output, session) {
       }
     },
     content = function(file) {
+      # Build the full validated metamet object from the query subset:
+      # copy to avoid modifying mm_qry in place; strip app-internal tracking
+      # columns before merging back into the full date-range dataset.
+      mm_qry_save <- data.table::copy(mm_qry)
+      mm_qry_save$dt[, c("row_name", "datect_num") := NULL]
+      mm <- join(uploaded()$mm, mm_qry_save)
+
       if (input$download_file == 'lev2') {
         runjs(
           'document.getElementById("download_data").textContent="Preparing download...";'
         )
         shinyjs::disable("download_data")
-        tmpdir <- tempdir()
-        setwd(tempdir())
-        fs <- c('level_2-data.csv', 'level_2-qc.csv')
-        data.table::fwrite(mm$dt, 'level_2-data.csv')
-        data.table::fwrite(mm$dt_qc, 'level_2-qc.csv')
-        zip(zipfile = file, files = fs)
+        withr::with_dir(tempdir(), {
+          fs <- c('level_2-data.csv', 'level_2-qc.csv')
+          data.table::fwrite(mm$dt, 'level_2-data.csv')
+          data.table::fwrite(mm$dt_qc, 'level_2-qc.csv')
+          zip(zipfile = file, files = fs)
+        })
         runjs(
           'document.getElementById("download_data").textContent="Download";'
         )
@@ -731,12 +801,12 @@ server <- function(input, output, session) {
           'document.getElementById("download_data").textContent="Preparing download...";'
         )
         shinyjs::disable("download_data")
-        tmpdir <- tempdir()
-        setwd(tempdir())
-        fs <- c('ceda-data.csv')
-        df_ceda <- metamet:::format_for_ceda(mm)
-        data.table::fwrite(df_ceda, 'ceda-data.csv')
-        zip(zipfile = file, files = fs)
+        withr::with_dir(tempdir(), {
+          fs <- c('ceda-data.csv')
+          df_ceda <- metamet:::format_for_ceda(mm)
+          data.table::fwrite(df_ceda, 'ceda-data.csv')
+          zip(zipfile = file, files = fs)
+        })
         runjs(
           'document.getElementById("download_data").textContent="Download";'
         )
@@ -795,7 +865,6 @@ server <- function(input, output, session) {
     mm <- join(uploaded()$mm, mm_qry_save)
 
     fname <- uploaded()$fname
-    print(uploaded()$fname)
     saveRDS(
       mm,
       file = paste0(

@@ -13,7 +13,7 @@ time_average(
 }
 \arguments{
 \item{mm_in}{A `metamet` object containing at least `dt`, `dt_meta`, and
-`dt_site`.}
+`dt_site`. Optional tables: `dt_qc`, `dt_ref`.}
 
 \item{avg.time}{Time interval for averaging; passed to
 `openair::timeAverage()`. Default is `"30 min"`.}
@@ -31,14 +31,20 @@ A `metamet` object with time-averaged `dt`, `dt_qc`, and `dt_ref`
 }
 \description{
 Aggregates meteorological data in a `metamet` object over specified time
-intervals. The function handles different variable types appropriately:
-precipitation is summed, and other variables (temperature, wind speed, etc.)
-are averaged. Wind direction is vector-averaged if present.
+intervals. The function supports per-variable statistics:
+if `dt_meta` contains a `statistic` column, those values are used; otherwise
+precipitation variables default to `"sum"` and all others to `"mean"`.
 }
 \details{
+Wind direction is vector-averaged when both wind direction and wind speed
+variables are present in the same statistic group.
+
 The function uses `openair::timeAverage()` for the aggregation and preserves
 the structure of the input object, including quality control (`dt_qc`) and
 reference (`dt_ref`) tables if present.
+
+Timestamps in the output represent either the start or end of the averaging
+interval depending on `report_end_interval`.
 }
 \examples{
 # mm_avg <- time_average(mm, avg.time = "1 hour")

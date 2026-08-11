@@ -47,6 +47,133 @@ time_average <- function(
   wd_name <- mm$dt_meta[type == "wind direction", name_dt]
   ws_name <- mm$dt_meta[type == "wind speed" | type == "windspeed", name_dt]
 
+  # Build a per-variable statistic map:
+  # - If a `statistic` column exists in dt_meta use it.
+  # - Otherwise default: precipitation: "sum", others: "mean".
+  v_meta <- mm$dt_meta
+  v_all_names <- intersect(v_meta$name_dt, colnames(mm$dt))
+  if ("statistic" %in% names(v_meta)) {
+    stats_map <- setNames(as.character(v_meta$statistic), v_meta$name_dt)
+  } else {
+    stats_map <- character(0)
+  }
+
+  # helper to get statistic for a variable name
+  get_stat_for <- function(varname) {
+    if (
+      length(stats_map) > 0L &&
+        varname %in% names(stats_map) &&
+        !is.na(stats_map[[varname]]) &&
+        nzchar(stats_map[[varname]])
+    ) {
+      stats_map[[varname]]
+    } else if (
+      !is.null(precip_name) &&
+        length(precip_name) > 0L &&
+        varname %in% precip_name
+    ) {
+      "sum"
+    } else {
+      "mean"
+    }
+  }
+
+  # Helper to average a wide-ish data.table according to per-variable statistics.
+  # Returns an averaged data.table with site + time_name + averaged cols.
+  average_wide_by_stat <- function(
+    dt_in,
+    time_name_local,
+    wd_nm,
+    ws_nm,
+    fill_na = FALSE
+  ) {
+    dt_cols <- intersect(
+      colnames(dt_in),
+      c(time_name_local, "site", v_all_names)
+    )
+    # remove timestamp and site from set of variable names to group by statistic
+    var_cols <- setdiff(dt_cols, c(time_name_local, "site"))
+    if (length(var_cols) == 0L) {
+      # nothing to average, return trimmed dt_in with site+time only (but ensure no duplicate times)
+      out <- unique(dt_in[, ..c("site", time_name_local)])
+      return(out)
+    }
+
+    # Group variable names by required statistic
+    v_stats_for_vars <- vapply(
+      var_cols,
+      get_stat_for,
+      FUN.VALUE = character(1),
+      USE.NAMES = TRUE
+    )
+    stats_unique <- unique(v_stats_for_vars)
+
+    l_out <- list()
+    for (st in stats_unique) {
+      vars_for_st <- names(v_stats_for_vars)[v_stats_for_vars == st]
+      cols_to_use <- c("site", time_name_local, vars_for_st)
+      dt_sub <- dt_in[, ..cols_to_use]
+
+      # determine whether to pass wd/ws - only if both present and match exactly
+      wd_pass <- if (
+        !is.null(wd_nm) &&
+          length(wd_nm) == 1L &&
+          !is.na(wd_nm) &&
+          wd_nm %in% vars_for_st
+      ) {
+        wd_nm
+      } else {
+        NULL
+      }
+      ws_pass <- if (
+        !is.null(ws_nm) &&
+          length(ws_nm) == 1L &&
+          !is.na(ws_nm) &&
+          ws_nm %in% vars_for_st
+      ) {
+        ws_nm
+      } else {
+        NULL
+      }
+
+      dt_avg <- time_average_dt(
+        dt_sub,
+        avg.time = avg.time,
+        statistic = st,
+        first_date = min(mm$dt[, get(time_name)]),
+        last_date = max(mm$dt[, get(time_name)]),
+        time_name = time_name_local,
+        wd_name = wd_pass,
+        ws_name = ws_pass,
+        report_end_interval = report_end_interval,
+        extra_rows = extra_rows,
+        fill_na = fill_na
+      )
+      # ensure consistent column order
+      data.table::setcolorder(
+        dt_avg,
+        c(
+          "site",
+          time_name_local,
+          setdiff(colnames(dt_avg), c("site", time_name_local))
+        )
+      )
+      l_out[[st]] <- dt_avg
+    }
+
+    # merge result tables on site + time_name_local
+    if (length(l_out) == 1L) {
+      return(l_out[[1]])
+    }
+    dt_merged <- Reduce(
+      function(x, y) merge(x, y, by = c("site", time_name_local), all = TRUE),
+      l_out
+    )
+    # order by time
+    data.table::setorderv(dt_merged, time_name_local)
+    return(dt_merged)
+  }
+
   # call the function to perform averaging as necessary
   if (!is.null(mm$dt_qc)) {
     if ("var_name" %in% names(mm$dt_qc)) {
@@ -78,6 +205,7 @@ time_average <- function(
       mm$dt_qc[, validator := NA_character_]
       mm$dt_qc[, comment := NA_character_]
     } else {
+      # long-format dt_qc already; time-average as-is using median (preserve existing behaviour)
       mm$dt_qc <- time_average_dt(
         mm$dt_qc,
         avg.time = avg.time,
@@ -95,34 +223,27 @@ time_average <- function(
     }
   }
 
+  # Average dt_ref (reference data) using per-variable statistic when provided,
+  # falling back to defaults. ERA5 is hourly so fill_na = TRUE is useful.
   if (!is.null(mm$dt_ref)) {
-    mm$dt_ref <- time_average_dt(
+    mm$dt_ref <- average_wide_by_stat(
       mm$dt_ref,
-      avg.time = avg.time,
-      statistic = "median", # use "median" for qc codes
-      first_date = min(mm$dt[, get(time_name)]),
-      last_date = max(mm$dt[, get(time_name)]),
-      time_name = time_name,
-      wd_name = wd_name,
-      ws_name = ws_name,
-      report_end_interval = report_end_interval,
-      extra_rows = extra_rows,
-      fill_na = TRUE # ERA5 is hourly; fill sub-hourly gaps by carrying forward
+      time_name,
+      wd_name,
+      ws_name,
+      fill_na = TRUE
     )
   }
 
   # do dt last as first_date/last_date are based on this and we do not want to
   # use the time-averaged start/end
-  mm$dt <- time_average_dt(
+  mm$dt <- average_wide_by_stat(
     mm$dt,
-    avg.time = avg.time,
-    first_date = min(mm$dt[, get(time_name)]),
-    last_date = max(mm$dt[, get(time_name)]),
-    time_name = time_name,
-    wd_name = wd_name,
-    ws_name = ws_name,
-    report_end_interval = report_end_interval,
-    extra_rows = extra_rows
+    time_name,
+    wd_name,
+    ws_name,
+    fill_na = FALSE
   )
+
   return(mm)
 }

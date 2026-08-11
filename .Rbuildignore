@@ -5,7 +5,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^CONTRIBUTING\.md$
-
 ^\.vscode$
 ^[.]?air[.]toml$
 ^data-raw$
@@ -15,3 +14,5 @@
 ^pkgdown$
 ^\.positai$
 ^\.claude$
+^\.ipynb_checkpoints$
+^\.vs$

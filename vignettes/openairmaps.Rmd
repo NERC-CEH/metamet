@@ -13,7 +13,7 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.path = "man/figures/README-",
+  fig.path = "man/figures",
   out.width = "100%",
   warning = FALSE,
   message = FALSE,
@@ -37,7 +37,7 @@ function shown below
 here::i_am("vignettes/openairmaps.Rmd")
 library(metamet)
 
-fname_site <- here::here("data-raw/dt_site.csv")
+fname_site <- here::here("inst/extdata/dt_site.csv")
 dt_site <- data.table::fread(fname_site)
 network_map(dt_site)
 ```
@@ -50,9 +50,9 @@ fields from a metamet object, and produces a leaflet-based polar map.
 for a varible `var_name` chosen to be mapped.
 
 ```{r}
-fname_dt <- here::here("data-raw/UK-AMO/UK-AMO_BM_dt_2026.csv")
-  fname_meta <- here::here("data-raw/dt_meta.xlsx")
-  fname_site <- here::here("data-raw/dt_site.csv")
+fname_dt <- here::here("inst/extdata/UK-AMO/UK-AMO_BM_dt_2026.csv")
+  fname_meta <- here::here("inst/extdata/dt_meta.csv")
+  fname_site <- here::here("inst/extdata/dt_site.csv")
   # half-hourly data
   mm <- metamet(
     dt = fname_dt,

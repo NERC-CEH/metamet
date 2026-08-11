@@ -6,17 +6,33 @@ test_that("time_average works", {
     time_name = "TIMESTAMP"
   )
 
-  P_mean_raw <- mean(mm3$dt$P_12_1_1, na.rm = TRUE)
+  # raw means for non-precip variables
   D_mean_raw <- mean(mm3$dt$D_SNOW_4_1_1, na.rm = TRUE)
-  names(mm3$dt)
-  summary(mm3$dt)
-  mm_avg <- time_average(mm3, avg.time = "1 hour")
-  summary(mm_avg$dt)
-  names(mm3$dt)
-  P_mean_avg <- mean(mm_avg$dt$P_12_1_1, na.rm = TRUE)
-  D_mean_avg <- mean(mm_avg$dt$D_SNOW_4_1_1, na.rm = TRUE)
 
-  expect_equal(round(P_mean_raw * 1e5, 2), round(P_mean_avg * 1e5, 2))
-  # means do not match exactly
+  # compute expected hourly precipitation sums
+  dt <- copy(mm3$dt)
+  dt[, TIMESTAMP := as.POSIXct(TIMESTAMP)]
+  expected_precip <- dt[,
+    .(
+      P_hourly_sum = sum(P_12_1_1, na.rm = TRUE)
+    ),
+    by = .(hour = lubridate::floor_date(TIMESTAMP, "hour"))
+  ]
+  # run averaging
+  mm_avg <- time_average(mm3, avg.time = "1 hour")
+  # extract averaged precip
+  avg_precip <- mm_avg$dt[,
+    .(
+      P_hourly_sum = sum(P_12_1_1, na.rm = TRUE)
+    ),
+    by = TIMESTAMP
+  ]
+  # precipitation: sum check
+  expect_equal(
+    round(expected_precip$P_hourly_sum, 4),
+    round(avg_precip$P_hourly_sum, 4)
+  )
+  # non-precip variable: mean check
+  D_mean_avg <- mean(mm_avg$dt$D_SNOW_4_1_1, na.rm = TRUE)
   expect_equal(round(D_mean_raw, 4), round(D_mean_avg, 4))
 })

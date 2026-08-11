@@ -5,7 +5,7 @@ Authors@R: person("Peter", "Levy",
                   email = "plevy@ceh.ac.uk", 
                   role = c("aut", "cre", "cph"),
                   comment=c(ORCID = "https://orcid.org/0000-0002-8505-1901"))
-Description: This package is defines a data structure for met data and its meta 
+Description: This package defines a data structure for met data and its meta 
   data, and functions for manipulation and quality control. 
 License: MIT + file LICENSE
 LazyData: true
@@ -23,7 +23,6 @@ Suggests:
     glue,
     shinydashboard,
     shinyvalidate,
-    ggiraph,
     shinyFiles,
     openairmaps,
     leaflet,
@@ -33,6 +32,7 @@ Depends:
     R (>= 4.1.0)
 Imports:
     data.table,
+    ggiraph,
     ggplot2,
     fs (>= 1.5.0),
     openair,

@@ -1,155 +1,155 @@
-site,start_date,end_date,name_dt,name_local,long_name_local,units_local,type,time_char_format,horizontal_id,vertical_id,replicate_id,sensor_make,sensor_model,range_min,range_max,diff_ref_max,imputation_method,name_era5,long_name_era5,units_era5,name_icos,long_name_icos,units_icos
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,site,site,site,,site,,,,,,,,,,,site,site,,site,site,
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,D_SNOW,D_SNOW,Snow depth,cm,height,,,,,Campbell,CS-101,0,100,100,zero,sd,sd,cm,D_SNOW,Snow depth,cm
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,D_SNOW_4_1_1,D_SNOW_4_1_1,Snow depth,cm,height,,4,1,1,Campbell,CS-101,0,100,100,zero,sd,sd,cm,D_SNOW,Snow depth,cm
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,DATECT,DATECT,timestamp,,time,%Y-%m-%d %H:%M:%S,,,,,,,,,,time,time,,TIMESTAMP,timestamp,
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,G,G,Soil heat flux,W/m^2,energy flux,,,,,Campbell,CS-101,-30,30,100,era5,ssrd,ssrd,W/m^2,G,Soil heat flux,W/m^2
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,G_4_1_1,G_4_1_1,Soil heat flux,W/m^2,energy flux,,4,1,1,Campbell,CS-101,-30,30,100,era5,ssrd,ssrd,W/m^2,G,Soil heat flux,W/m^2
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,G_4_1_2,G_4_1_2,Soil heat flux,W/m^2,energy flux,,4,1,2,Campbell,CS-101,-30,30,100,era5,ssrd,ssrd,W/m^2,G,Soil heat flux,W/m^2
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,LW_IN,LW_IN,LongWave incoming radiation,W/m^2,arbitrary,,,,,Campbell,CS-101,0,1200,100,era5,strd,strd,W/m^2,LW_IN,LongWave incoming radiation,W/m^2
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,LW_IN_5_1_1,LW_IN_5_1_1,LongWave incoming radiation,W/m^2,arbitrary,,5,1,1,Campbell,CS-101,0,1200,100,era5,strd,strd,W/m^2,LW_IN,LongWave incoming radiation,W/m^2
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,LW_OUT,LW_OUT,LongWave outgoing radiation,W/m^2,energy flux,,,,,Campbell,CS-101,0,1000,100,era5,stru,stru,W/m^2,LW_OUT,LongWave outgoing radiation,W/m^2
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,LW_OUT_5_1_1,LW_OUT_5_1_1,LongWave outgoing radiation,W/m^2,energy flux,,5,1,1,Campbell,CS-101,0,1000,100,era5,stru,stru,W/m^2,LW_OUT,LongWave outgoing radiation,W/m^2
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,LWS_4_1_1,LWS_4_1_1,Leaf Wetness,1,arbitrary,,4,1,1,Campbell,CS-101,-99999,99999,100,era5,rh,rh,1,LWS,Leaf Wetness,1
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,LWS_4_1_2,LWS_4_1_2,Leaf Wetness,1,arbitrary,,4,1,2,Campbell,CS-101,-99999,99999,100,era5,rh,rh,1,LWS,Leaf Wetness,1
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,NDVI_649IN_5_1_1,NDVI_649IN_5_1_1,Photosynthetic photon flux density incoming @649 nm,umol/m^2/s,energy flux,,5,1,1,Campbell,CS-101,0,500,100,nightzero,ssrd,ssrd,umol/m^2/s,NDVI_649IN,Photosynthetic photon flux density incoming @649 nm,umol/m^2/s
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,NDVI_649OUT_5_1_1,NDVI_649OUT_5_1_1,Photosynthetic photon flux density reflected @649 nm,umol/m^2/s,energy flux,,5,1,1,Campbell,CS-101,0,500,100,nightzero,ssru,ssru,umol/m^2/s,NDVI_649OUT,Photosynthetic photon flux density reflected @649 nm,umol/m^2/s
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,NDVI_797IN_5_1_1,NDVI_797IN_5_1_1,Photosynthetic photon flux density incoming @797 nm,umol/m^2/s,energy flux,,5,1,1,Campbell,CS-101,0,500,100,nightzero,ssrd,ssrd,umol/m^2/s,NDVI_797IN,Photosynthetic photon flux density incoming @797 nm,umol/m^2/s
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,NDVI_797OUT_5_1_1,NDVI_797OUT_5_1_1,Photosynthetic photon flux density reflected @797 nm,umol/m^2/s,energy flux,,5,1,1,Campbell,CS-101,0,500,100,nightzero,ssru,ssru,umol/m^2/s,NDVI_797OUT,Photosynthetic photon flux density reflected @797 nm,umol/m^2/s
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,P_12_1_1,P_12_1_1,Precipitation,mm,precipitation,,12,1,1,Campbell,CS-101,0,50,100,era5,tp,tp,mm,P,Precipitation,mm
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,P_13_1_1,P_13_1_1,Precipitation,mm,precipitation,,13,1,1,Campbell,CS-101,0,50,100,era5,tp,tp,mm,P,Precipitation,mm
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,PA_4_1_1,PA_4_1_1,Atmospheric pressure,kPa,pressure,,4,1,1,Campbell,CS-101,90,130,100,era5,sp,sp,kPa,PA,Atmospheric pressure,kPa
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,PPFD_DIF,PPFD_DIF,Photosynthetic photon flux density diffuse,umol/m^2/s,energy flux,,,,,Campbell,CS-101,0,2200,100,era5,fdif,fdif,umol/m^2/s,PPFD_DIF,Photosynthetic photon flux density diffuse,umol/m^2/s
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,PPFD_DIF_4_1_1,PPFD_DIF_4_1_1,Photosynthetic photon flux density diffuse,umol/m^2/s,energy flux,,4,1,1,Campbell,CS-101,0,2200,100,era5,fdif,fdif,umol/m^2/s,PPFD_DIF,Photosynthetic photon flux density diffuse,umol/m^2/s
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,PPFD_IN_4_1_1,PPFD_IN_4_1_1,Photosynthetic photon flux density incoming,umol/m^2/s,energy flux,,4,1,1,Campbell,CS-101,0,2200,100,era5,ssrd,ssrd,umol/m^2/s,PPFD_IN,Photosynthetic photon flux density incoming,umol/m^2/s
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,PPFD_IN_5_1_1,PPFD_IN_5_1_1,Photosynthetic photon flux density incoming,umol/m^2/s,energy flux,,5,1,1,Campbell,CS-101,0,2200,100,era5,ssrd,ssrd,umol/m^2/s,PPFD_IN,Photosynthetic photon flux density incoming,umol/m^2/s
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,PPFD_IN_5_1_2,PPFD_IN_5_1_2,Photosynthetic photon flux density incoming,umol/m^2/s,energy flux,,5,1,2,Campbell,CS-101,0,2200,100,era5,ssrd,ssrd,umol/m^2/s,PPFD_IN,Photosynthetic photon flux density incoming,umol/m^2/s
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,PPFD_OUT,PPFD_OUT,Photosynthetic photon flux density outgoing,umol/m^2/s,energy flux,,,,,Campbell,CS-101,0,2200,100,era5,ssru,ssru,umol/m^2/s,PPFD_OUT,Photosynthetic photon flux density outgoing,umol/m^2/s
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,PPFD_OUT_5_1_1,PPFD_OUT_5_1_1,Photosynthetic photon flux density outgoing,umol/m^2/s,energy flux,,5,1,1,Campbell,CS-101,0,2200,100,era5,ssru,ssru,umol/m^2/s,PPFD_OUT,Photosynthetic photon flux density outgoing,umol/m^2/s
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,RG_4_1_0,RG_4_1_0,Total global radiation,W/m^2,energy flux,,4,1,0,Campbell,CS-101,0,1200,100,era5,ssrd,ssrd,W/m^2,RG,Total global radiation,W/m^2
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,RH_2_1_1,RH_2_1_1,Relative humidity,%,humidity,,2,1,1,Campbell,CS-101,30,120,100,era5,rh,rh,%,RH,Relative humidity,%
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,RH_4_1_1,RH_4_1_1,Relative humidity,%,humidity,,4,1,1,Campbell,CS-101,30,120,100,era5,rh,rh,%,RH,Relative humidity,%
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,RH_7_1_1,RH_7_1_1,Relative humidity,%,humidity,,7,1,1,Campbell,CS-101,30,120,100,era5,rh,rh,%,RH,Relative humidity,%
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,RN_5_1_1,RN_5_1_1,Net radiation,W/m^2,energy flux,,5,1,1,Campbell,CS-101,-500,1200,100,era5,rn,rn,W/m^2,RN,Net radiation,W/m^2
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SW_IN,SW_IN,Shortwave incoming radiation,W/m^2,energy flux,,,,,Campbell,CS-101,0,1200,100,era5,ssrd,ssrd,W/m^2,SW_IN,Shortwave incoming radiation,W/m^2
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SW_IN_5_1_1,SW_IN_5_1_1,Shortwave incoming radiation,W/m^2,energy flux,,5,1,1,Campbell,CS-101,0,1200,100,era5,ssrd,ssrd,W/m^2,SW_IN,Shortwave incoming radiation,W/m^2
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SW_IN_7_1_1,SW_IN_7_1_1,Shortwave incoming radiation,W/m^2,energy flux,,7,1,1,Campbell,CS-101,0,1200,100,era5,ssrd,ssrd,W/m^2,SW_IN,Shortwave incoming radiation,W/m^2
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SW_OUT,SW_OUT,Shortwave outgoing radiation,W/m^2,energy flux,,,,,Campbell,CS-101,0,300,100,era5,ssru,ssru,W/m^2,SW_OUT,Shortwave outgoing radiation,W/m^2
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SW_OUT_5_1_1,SW_OUT_5_1_1,Shortwave outgoing radiation,W/m^2,energy flux,,5,1,1,Campbell,CS-101,0,300,100,era5,ssru,ssru,W/m^2,SW_OUT,Shortwave outgoing radiation,W/m^2
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC,SWC,Soil water content,%,soil moisture,,,,,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_4_1_1,SWC_4_1_1,Soil water content,%,soil moisture,,4,1,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_4_2_1,SWC_4_2_1,Soil water content,%,soil moisture,,4,2,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_4_3_1,SWC_4_3_1,Soil water content,%,soil moisture,,4,3,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_4_4_1,SWC_4_4_1,Soil water content,%,soil moisture,,4,4,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TA_2_1_1,TA_2_1_1,Air temperature,degC,temperature,,2,1,1,Campbell,CS-101,-40,50,100,era5,t2m,t2m,degC,TA,Air temperature,degC
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TA_4_1_1,TA_4_1_1,Air temperature,degC,temperature,,4,1,1,Campbell,CS-101,-40,50,100,era5,t2m,t2m,degC,TA,Air temperature,degC
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TA_7_1_1,TA_7_1_1,Air temperature,degC,temperature,,7,1,1,Campbell,CS-101,-40,50,100,era5,t2m,t2m,degC,TA,Air temperature,degC
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TIMESTAMP,TIMESTAMP,timestamp,,time,%Y%m%d%H%M%S,,,,,,,,,,time,time,,TIMESTAMP,timestamp,
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,WD_6_1_1,WD_6_1_1,Wind direction,degree,wind direction,,6,1,1,Campbell,CS-101,0,360,100,era5,wd,wd,degree,WD,Wind direction,degree
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,WS_6_1_1,WS_6_1_1,Wind speed,m/s,wind speed,,6,1,1,Campbell,CS-101,0,30,100,era5,ws,ws,m/s,WS,Wind speed,m/s
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,WD_7_1_1,WD_7_1_1,Wind direction,degree,wind direction,,7,1,1,Campbell,CS-101,0,360,100,era5,wd,wd,degree,WD,Wind direction,degree
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,WS_7_1_1,WS_7_1_1,Wind speed,m/s,wind speed,,7,1,1,Campbell,CS-101,0,30,100,era5,ws,ws,m/s,WS,Wind speed,m/s
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,WTD,WTD,Water table depth,m,height,,,,,Campbell,CS-101,-10,10,100,era5,swvl1,swvl1,m,WTD,Water table depth,m
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,WTD_4_1_1,WTD_4_1_1,Water table depth,m,height,,4,1,1,Campbell,CS-101,-10,10,100,era5,swvl1,swvl1,m,WTD,Water table depth,m
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS,TS,Soil temperature,degC,temperature,,,,,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_4_1_1,TS_4_1_1,Soil temperature,degC,temperature,,4,1,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_4_2_1,TS_4_2_1,Soil temperature,degC,temperature,,4,2,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_4_3_1,TS_4_3_1,Soil temperature,degC,temperature,,4,3,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_4_4_1,TS_4_4_1,Soil temperature,degC,temperature,,4,4,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_8_1_1,TS_8_1_1,Soil temperature,degC,temperature,,8,1,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_8_2_1,TS_8_2_1,Soil temperature,degC,temperature,,8,2,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_8_3_1,TS_8_3_1,Soil temperature,degC,temperature,,8,3,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_8_4_1,TS_8_4_1,Soil temperature,degC,temperature,,8,4,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_8_5_1,TS_8_5_1,Soil temperature,degC,temperature,,8,5,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_9_1_1,TS_9_1_1,Soil temperature,degC,temperature,,9,1,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_9_2_1,TS_9_2_1,Soil temperature,degC,temperature,,9,2,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_9_3_1,TS_9_3_1,Soil temperature,degC,temperature,,9,3,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_9_4_1,TS_9_4_1,Soil temperature,degC,temperature,,9,4,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_9_5_1,TS_9_5_1,Soil temperature,degC,temperature,,9,5,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,G_8_1_1,G_8_1_1,Soil heat flux,W/m^2,energy flux,,8,1,1,Campbell,CS-101,-30,30,100,era5,ssrd,ssrd,W/m^2,G,Soil heat flux,W/m^2
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,G_9_1_1,G_9_1_1,Soil heat flux,W/m^2,energy flux,,9,1,1,Campbell,CS-101,-30,30,100,era5,ssrd,ssrd,W/m^2,G,Soil heat flux,W/m^2
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,G_10_1_1,G_10_1_1,Soil heat flux,W/m^2,energy flux,,10,1,1,Campbell,CS-101,-30,30,100,era5,ssrd,ssrd,W/m^2,G,Soil heat flux,W/m^2
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,G_11_1_1,G_11_1_1,Soil heat flux,W/m^2,energy flux,,11,1,1,Campbell,CS-101,-30,30,100,era5,ssrd,ssrd,W/m^2,G,Soil heat flux,W/m^2
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,WTD_8_1_1,WTD_8_1_1,Water table depth,m,height,,8,1,1,Campbell,CS-101,-10,10,100,era5,swvl1,swvl1,m,WTD,Water table depth,m
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,WTD_9_1_1,WTD_9_1_1,Water table depth,m,height,,9,1,1,Campbell,CS-101,-10,10,100,era5,swvl1,swvl1,m,WTD,Water table depth,m
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,WTD_10_1_1,WTD_10_1_1,Water table depth,m,height,,10,1,1,Campbell,CS-101,-10,10,100,era5,swvl1,swvl1,m,WTD,Water table depth,m
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,WTD_11_1_1,WTD_11_1_1,Water table depth,m,height,,11,1,1,Campbell,CS-101,-10,10,100,era5,swvl1,swvl1,m,WTD,Water table depth,m
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_8_1_1,SWC_8_1_1,Soil water content,%,soil moisture,,8,1,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_8_2_1,SWC_8_2_1,Soil water content,%,soil moisture,,8,2,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_8_3_1,SWC_8_3_1,Soil water content,%,soil moisture,,8,3,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_8_4_1,SWC_8_4_1,Soil water content,%,soil moisture,,8,4,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_9_1_1,SWC_9_1_1,Soil water content,%,soil moisture,,9,1,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_9_2_1,SWC_9_2_1,Soil water content,%,soil moisture,,9,2,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_9_3_1,SWC_9_3_1,Soil water content,%,soil moisture,,9,3,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_9_4_1,SWC_9_4_1,Soil water content,%,soil moisture,,9,4,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_10_1_1,TS_10_1_1,Soil temperature,degC,temperature,,10,1,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_10_2_1,TS_10_2_1,Soil temperature,degC,temperature,,10,2,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_10_3_1,TS_10_3_1,Soil temperature,degC,temperature,,10,3,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_10_4_1,TS_10_4_1,Soil temperature,degC,temperature,,10,4,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_10_5_1,TS_10_5_1,Soil temperature,degC,temperature,,10,5,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_11_1_1,TS_11_1_1,Soil temperature,degC,temperature,,11,1,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_11_2_1,TS_11_2_1,Soil temperature,degC,temperature,,11,2,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_11_3_1,TS_11_3_1,Soil temperature,degC,temperature,,11,3,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_11_4_1,TS_11_4_1,Soil temperature,degC,temperature,,11,4,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_11_5_1,TS_11_5_1,Soil temperature,degC,temperature,,11,5,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_10_1_1,SWC_10_1_1,Soil water content,%,soil moisture,,10,1,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_10_2_1,SWC_10_2_1,Soil water content,%,soil moisture,,10,2,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_10_3_1,SWC_10_3_1,Soil water content,%,soil moisture,,10,3,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_10_4_1,SWC_10_4_1,Soil water content,%,soil moisture,,10,4,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_11_1_1,SWC_11_1_1,Soil water content,%,soil moisture,,11,1,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_11_2_1,SWC_11_2_1,Soil water content,%,soil moisture,,11,2,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_11_3_1,SWC_11_3_1,Soil water content,%,soil moisture,,11,3,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%
-UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_11_4_1,SWC_11_4_1,Soil water content,%,soil moisture,,11,4,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%
-UK-WHM,01/01/2002 00:00,01/01/2030 00:00,site,site,site,,site,,,,,Campbell,CS-101,,,100,era5,site,site,,site,site,
-UK-WHM,01/01/2002 00:00,01/01/2030 00:00,Timestamp,Timestamp,timestamp,,time,%d/%m/%Y %H:%M,,,,Campbell,CS-101,,,,,time,time,,TIMESTAMP,timestamp,
-UK-WHM,01/01/2002 00:00,01/01/2030 00:00,Rain,Rain,Precipitation,mm,precipitation,,1,1,1,Campbell,CS-101,0,50,100,era5,tp,tp,mm,P,Precipitation,mm
-UK-WHM,01/01/2002 00:00,01/01/2030 00:00,LWS,LWS,Leaf Wetness,1,arbitrary,,1,1,1,Campbell,CS-101,-99999,99999,100,era5,rh,rh,1,LWS,Leaf Wetness,1
-UK-WHM,01/01/2002 00:00,01/01/2030 00:00,AirT,AirT,Air temperature,degC,temperature,,1,1,1,Campbell,CS-101,-40,50,100,era5,t2m,t2m,degC,TA,Air temperature,degC
-UK-WHM,01/01/2002 00:00,01/01/2030 00:00,RH,RH,Relative humidity,%,humidity,,1,1,1,Campbell,CS-101,30,120,100,era5,rh,rh,%,RH,Relative humidity,%
-UK-WHM,01/01/2002 00:00,01/01/2030 00:00,PAR,PAR,Photosynthetic photon flux density incoming,umol/m^2/s,energy flux,,1,1,1,Campbell,CS-101,0,2200,100,era5,ssrd,ssrd,umol/m^2/s,PPFD_IN,Photosynthetic photon flux density incoming,umol/m^2/s
-UK-WHM,01/01/2002 00:00,01/01/2030 00:00,Total_solar,Total_solar,Shortwave incoming radiation,W/m^2,energy flux,,1,1,1,Campbell,CS-101,0,1200,100,era5,ssrd,ssrd,W/m^2,SW_IN,Shortwave incoming radiation,W/m^2
-UK-WHM,01/01/2002 00:00,01/01/2030 00:00,Net_rad,Net_rad,Net radiation,W/m^2,energy flux,,1,1,1,Campbell,CS-101,-500,1200,100,era5,rn,rn,W/m^2,RN,Net radiation,W/m^2
-UK-WHM,01/01/2002 00:00,01/01/2030 00:00,WS,WS,Wind speed,m/s,wind speed,,1,1,1,Campbell,CS-101,0,30,100,era5,ws,ws,m/s,WS,Wind speed,m/s
-UK-WHM,01/01/2002 00:00,01/01/2030 00:00,WD,WD,Wind direction,degree,wind direction,,1,1,1,Campbell,CS-101,0,360,100,era5,wd,wd,degree,WD,Wind direction,degree
-UK-WHM,01/01/2002 00:00,01/01/2030 00:00,Soil_VWC,Soil_VWC,Soil water content,%,soil moisture,,1,1,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%
-UK-WHM,01/01/2002 00:00,01/01/2030 00:00,Soil_T1,Soil_T1,Soil temperature,degC,temperature,,1,1,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-WHM,01/01/2002 00:00,01/01/2030 00:00,Soil_T2,Soil_T2,Soil temperature,degC,temperature,,2,1,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-WHM,01/01/2002 00:00,01/01/2030 00:00,WTD,WTD,Water table depth,cm,height,,1,1,1,Campbell,CS-101,-10,10,100,era5,swvl1,swvl1,m,WTD,Water table depth,m
-UK-EBU,01/08/2023 13:00,01/01/2024 00:00,site,site,site,,site,,,,,,,,,,,site,site,,site,site,
-UK-EBU,01/08/2023 13:00,01/01/2024 00:00,TIMESTAMP,TIMESTAMP,timestamp,,time,%Y-%m-%dT%H:%M:%SZ,,,,Campbell,CS-101,,,,,time,time,,TIMESTAMP,timestamp,
-UK-EBU,01/08/2023 13:00,01/01/2024 00:00,RH_EB_1_1_1_Avg,RH_EB_1_1_1_Avg,Relative humidity,%,humidity,,1,1,1,Campbell,CS-101,30,120,100,era5,rh,rh,%,RH,Relative humidity,%
-UK-EBU,01/08/2023 13:00,01/01/2024 00:00,TA_EB_1_1_1_Avg,TA_EB_1_1_1_Avg,Air temperature,degC,temperature,,1,1,1,Campbell,CS-101,-40,50,100,era5,t2m,t2m,degC,TA,Air temperature,degC
-UK-EBU,01/08/2023 13:00,01/01/2024 00:00,LWS_EB_7_1_1_Avg,LWS_EB_7_1_1_Avg,Leaf Wetness,1,arbitrary,,7,1,1,Campbell,CS-101,-99999,99999,100,era5,rh,rh,1,LWS,Leaf Wetness,1
-UK-EBU,01/08/2023 13:00,01/01/2024 00:00,PA_EB_1_1_1_Avg,PA_EB_1_1_1_Avg,Atmospheric pressure,kPa,pressure,,1,1,1,Campbell,CS-101,90,130,100,era5,sp,sp,kPa,PA,Atmospheric pressure,kPa
-UK-EBU,01/08/2023 13:00,01/01/2024 00:00,P_EB_1_1_1_Tot,P_EB_1_1_1_Tot,Precipitation,mm,precipitation,,1,1,1,Campbell,CS-101,0,50,100,era5,tp,tp,mm,P,Precipitation,mm
-UK-EBU,01/08/2023 13:00,01/01/2024 00:00,RN_EB_7_1_1,RN_EB_7_1_1,Net radiation,W/m^2,energy flux,,7,1,1,Campbell,CS-101,-500,1200,100,era5,rn,rn,W/m^2,RN,Net radiation,W/m^2
-UK-EBU,01/08/2023 13:00,01/01/2024 00:00,SW_IN_EB_1_1_1,SW_IN_EB_1_1_1,Shortwave incoming radiation,W/m^2,energy flux,,1,1,1,Campbell,CS-101,0,1200,100,era5,ssrd,ssrd,W/m^2,SW_IN,Shortwave incoming radiation,W/m^2
-UK-EBU,01/08/2023 13:00,01/01/2024 00:00,PPFD_IN_EB_1_1_1,PPFD_IN_EB_1_1_1,Photosynthetic photon flux density incoming,umol/m^2/s,energy flux,,1,1,1,Campbell,CS-101,0,2200,100,era5,ssrd,ssrd,umol/m^2/s,PPFD_IN,Photosynthetic photon flux density incoming,umol/m^2/s
-UK-EBU,01/08/2023 13:00,01/01/2024 00:00,SWC_EB_5_1_1,SWC_EB_5_1_1,Soil water content,%,soil moisture,,5,1,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%
-UK-EBU,01/08/2023 13:00,01/01/2024 00:00,SWC_EB_5_2_1,SWC_EB_5_2_1,Soil water content,%,soil moisture,,5,2,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%
-UK-EBU,01/08/2023 13:00,01/01/2024 00:00,SWC_EB_5_3_1,SWC_EB_5_3_1,Soil water content,%,soil moisture,,5,3,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%
-UK-EBU,01/08/2023 13:00,01/01/2024 00:00,SWC_EB_5_4_1,SWC_EB_5_4_1,Soil water content,%,soil moisture,,5,4,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%
-UK-EBU,01/08/2023 13:00,01/01/2024 00:00,TS_EB_5_1_1,TS_EB_5_1_1,Soil temperature,degC,temperature,,5,1,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-EBU,01/08/2023 13:00,01/01/2024 00:00,TS_EB_5_2_1,TS_EB_5_2_1,Soil temperature,degC,temperature,,5,2,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-EBU,01/08/2023 13:00,01/01/2024 00:00,TS_EB_5_3_1,TS_EB_5_3_1,Soil temperature,degC,temperature,,5,3,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-EBU,01/08/2023 13:00,01/01/2024 00:00,TS_EB_5_4_1,TS_EB_5_4_1,Soil temperature,degC,temperature,,5,4,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC
-UK-EBU,01/08/2023 13:00,01/01/2024 00:00,G_EB_5_1_1,G_EB_5_1_1,Soil heat flux,W/m^2,energy flux,,5,1,1,Campbell,CS-101,-30,30,100,era5,ssrd,ssrd,W/m^2,G,Soil heat flux,W/m^2
-UK-EBU,01/08/2023 13:00,01/01/2024 00:00,G_EB_5_2_1,G_EB_5_2_1,Soil heat flux,W/m^2,energy flux,,5,2,1,Campbell,CS-101,-30,30,100,era5,ssrd,ssrd,W/m^2,G,Soil heat flux,W/m^2
-UK-EBU,01/08/2023 13:00,01/01/2024 00:00,WTD_EB_5_1_1,WTD_EB_5_1_1,Water table depth,cm,height,,5,1,1,Campbell,CS-101,-10,10,100,era5,swvl1,swvl1,m,WTD,Water table depth,m
-UK-BUC,08/09/2023 14:00,01/01/2030 00:00,site,site,site,,site,,,,,Campbell,CS-101,,,100,era5,site,site,,site,site,
-UK-BUC,08/09/2023 14:00,01/01/2030 00:00,TIMESTAMP,TIMESTAMP,TIMESTAMP,,time,%Y-%m-%dT%H:%M:%SZ,,,,Campbell,CS-101,,,,,time,time,,TIMESTAMP,timestamp,
-UK-BUC,09/09/2023 14:00,02/01/2030 00:00,AURN_O3_4_1_1_Avg,AURN_O3_4_1_1_Avg,Ozone mixing ratio,nmol/mol,mixing ratio,,4,1,1,Campbell,CS-101,-5,100,100,time,,,,chi_o3,mixing ratio of O3,nmol/mol
-UK-BUC,10/09/2023 14:00,03/01/2030 00:00,AURN_NOx_4_1_1_Avg,AURN_NOx_4_1_1_Avg,NOx mixing ratio,nmol/mol,mixing ratio,,4,1,1,Campbell,CS-101,-5,150,100,time,,,,chi_nox,mixing ratio of NOx,nmol/mol
-UK-BUC,11/09/2023 14:00,04/01/2030 00:00,AURN_NO_4_1_1_Avg,AURN_NO_4_1_1_Avg,NO mixing ratio,nmol/mol,mixing ratio,,4,1,1,Campbell,CS-101,-5,100,100,time,,,,chi_no,mixing ratio of NO,nmol/mol
-UK-BUC,08/09/2023 14:00,01/01/2030 00:00,RG_BU_1_1_1_Avg,RG_BU_1_1_1_Avg,Total global radiation,W/m^2,energy flux,,1,1,1,Campbell,CS-101,0,1200,100,era5,ssrd,ssrd,W/m^2,RG,Total global radiation,W/m^2
-UK-BUC,08/09/2023 14:00,01/01/2030 00:00,TA_BU_1_1_1_Avg,TA_BU_1_1_1_Avg,Air temperature,degC,temperature,,1,1,1,Campbell,CS-101,-40,50,100,era5,t2m,t2m,degC,TA,Air temperature,degC
-UK-BUC,08/09/2023 14:00,01/01/2030 00:00,TA_BU_1_1_2_Avg,TA_BU_1_1_2_Avg,Air temperature,degC,temperature,,1,1,2,Campbell,CS-101,-40,50,100,era5,t2m,t2m,degC,TA,Air temperature,degC
-UK-BUC,08/09/2023 14:00,01/01/2030 00:00,RH_BU_1_1_1_Avg,RH_BU_1_1_1_Avg,Relative humidity,%,humidity,,1,1,1,Campbell,CS-101,30,120,100,era5,rh,rh,%,RH,Relative humidity,%
-UK-BUC,08/09/2023 14:00,01/01/2030 00:00,PA_BU_3_1_1_Avg,PA_BU_3_1_1_Avg,Atmospheric pressure,mbar,pressure,,3,1,1,Campbell,CS-101,900,1300,100,era5,sp,sp,kPa,PA,Atmospheric pressure,kPa
-UK-BUC,08/09/2023 14:00,01/01/2030 00:00,P_BU_2_1_1_Tot,P_BU_2_1_1_Tot,Precipitation,mm,precipitation,,2,1,1,Campbell,CS-101,0,50,100,era5,tp,tp,mm,P,Precipitation,mm
-UK-BUC,08/09/2023 14:00,01/01/2030 00:00,WS_BU_1_1_1_WVc(1),WS_BU_1_1_1_WVc(1),Wind direction,degree,wind direction,,1,1,1,Campbell,CS-101,0,360,100,era5,wd,wd,degree,WD,Wind direction,degree
-UK-BUC,08/09/2023 14:00,01/01/2030 00:00,WS_BU_1_1_1_Avg,WS_BU_1_1_1_Avg,Wind speed,m/s,wind speed,,1,1,1,Campbell,CS-101,0,30,100,era5,ws,ws,m/s,WS,Wind speed,m/s
-UK-BUC,08/09/2023 14:00,01/01/2030 00:00,TA_BU_1_1_3_Avg,TA_BU_1_1_3_Avg,Air temperature,degC,temperature,,1,1,3,Campbell,CS-101,-40,50,100,era5,t2m,t2m,degC,TA,Air temperature,degC
-UK-BUC,08/09/2023 14:00,01/01/2030 00:00,RH_BU_1_1_2_Avg,RH_BU_1_1_2_Avg,Relative humidity,%,humidity,,1,1,2,Campbell,CS-101,30,120,100,era5,rh,rh,%,RH,Relative humidity,%
-UK-BUC,08/09/2023 14:00,01/01/2030 00:00,PA_BU_1_1_2_Avg,PA_BU_1_1_2_Avg,Atmospheric pressure,hPa,pressure,,1,1,2,Campbell,CS-101,900,1300,100,era5,sp,sp,kPa,PA,Atmospheric pressure,kPa
-UK-BUC,08/09/2023 14:00,01/01/2030 00:00,P_BU_1_1_1_Tot,P_BU_1_1_1_Tot,Precipitation,mm,precipitation,,1,1,1,Campbell,CS-101,0,50,100,era5,tp,tp,mm,P,Precipitation,mm
+site,start_date,end_date,name_dt,name_local,long_name_local,units_local,type,time_char_format,horizontal_id,vertical_id,replicate_id,sensor_make,sensor_model,range_min,range_max,diff_ref_max,imputation_method,name_era5,long_name_era5,units_era5,name_icos,long_name_icos,units_icos,statistic
+UK-WHM,01/01/2002 00:00,01/01/2030 00:00,AirT,AirT,Air temperature,degC,temperature,,1,1,1,Campbell,CS-101,-40,50,100,era5,t2m,t2m,degC,TA,Air temperature,degC,mean
+UK-BUC,11/09/2023 14:00,04/01/2030 00:00,AURN_NO_4_1_1_Avg,AURN_NO_4_1_1_Avg,NO mixing ratio,nmol/mol,mixing ratio,,4,1,1,Campbell,CS-101,-5,100,100,time,,,,chi_no,mixing ratio of NO,nmol/mol,mean
+UK-BUC,10/09/2023 14:00,03/01/2030 00:00,AURN_NOx_4_1_1_Avg,AURN_NOx_4_1_1_Avg,NOx mixing ratio,nmol/mol,mixing ratio,,4,1,1,Campbell,CS-101,-5,150,100,time,,,,chi_nox,mixing ratio of NOx,nmol/mol,mean
+UK-BUC,09/09/2023 14:00,02/01/2030 00:00,AURN_O3_4_1_1_Avg,AURN_O3_4_1_1_Avg,Ozone mixing ratio,nmol/mol,mixing ratio,,4,1,1,Campbell,CS-101,-5,100,100,time,,,,chi_o3,mixing ratio of O3,nmol/mol,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,D_SNOW,D_SNOW,Snow depth,cm,height,,,,,Campbell,CS-101,0,100,100,zero,sd,sd,cm,D_SNOW,Snow depth,cm,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,D_SNOW_4_1_1,D_SNOW_4_1_1,Snow depth,cm,height,,4,1,1,Campbell,CS-101,0,100,100,zero,sd,sd,cm,D_SNOW,Snow depth,cm,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,DATECT,DATECT,timestamp,,time,%Y-%m-%d %H:%M:%S,,,,,,,,,,time,time,,TIMESTAMP,timestamp,,sample
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,G,G,Soil heat flux,W/m^2,energy flux,,,,,Campbell,CS-101,-30,30,100,era5,ssrd,ssrd,W/m^2,G,Soil heat flux,W/m^2,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,G_10_1_1,G_10_1_1,Soil heat flux,W/m^2,energy flux,,10,1,1,Campbell,CS-101,-30,30,100,era5,ssrd,ssrd,W/m^2,G,Soil heat flux,W/m^2,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,G_11_1_1,G_11_1_1,Soil heat flux,W/m^2,energy flux,,11,1,1,Campbell,CS-101,-30,30,100,era5,ssrd,ssrd,W/m^2,G,Soil heat flux,W/m^2,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,G_4_1_1,G_4_1_1,Soil heat flux,W/m^2,energy flux,,4,1,1,Campbell,CS-101,-30,30,100,era5,ssrd,ssrd,W/m^2,G,Soil heat flux,W/m^2,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,G_4_1_2,G_4_1_2,Soil heat flux,W/m^2,energy flux,,4,1,2,Campbell,CS-101,-30,30,100,era5,ssrd,ssrd,W/m^2,G,Soil heat flux,W/m^2,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,G_8_1_1,G_8_1_1,Soil heat flux,W/m^2,energy flux,,8,1,1,Campbell,CS-101,-30,30,100,era5,ssrd,ssrd,W/m^2,G,Soil heat flux,W/m^2,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,G_9_1_1,G_9_1_1,Soil heat flux,W/m^2,energy flux,,9,1,1,Campbell,CS-101,-30,30,100,era5,ssrd,ssrd,W/m^2,G,Soil heat flux,W/m^2,mean
+UK-EBU,01/08/2023 13:00,01/01/2024 00:00,G_EB_5_1_1,G_EB_5_1_1,Soil heat flux,W/m^2,energy flux,,5,1,1,Campbell,CS-101,-30,30,100,era5,ssrd,ssrd,W/m^2,G,Soil heat flux,W/m^2,mean
+UK-EBU,01/08/2023 13:00,01/01/2024 00:00,G_EB_5_2_1,G_EB_5_2_1,Soil heat flux,W/m^2,energy flux,,5,2,1,Campbell,CS-101,-30,30,100,era5,ssrd,ssrd,W/m^2,G,Soil heat flux,W/m^2,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,LW_IN,LW_IN,LongWave incoming radiation,W/m^2,arbitrary,,,,,Campbell,CS-101,0,1200,100,era5,strd,strd,W/m^2,LW_IN,LongWave incoming radiation,W/m^2,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,LW_IN_5_1_1,LW_IN_5_1_1,LongWave incoming radiation,W/m^2,arbitrary,,5,1,1,Campbell,CS-101,0,1200,100,era5,strd,strd,W/m^2,LW_IN,LongWave incoming radiation,W/m^2,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,LW_OUT,LW_OUT,LongWave outgoing radiation,W/m^2,energy flux,,,,,Campbell,CS-101,0,1000,100,era5,stru,stru,W/m^2,LW_OUT,LongWave outgoing radiation,W/m^2,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,LW_OUT_5_1_1,LW_OUT_5_1_1,LongWave outgoing radiation,W/m^2,energy flux,,5,1,1,Campbell,CS-101,0,1000,100,era5,stru,stru,W/m^2,LW_OUT,LongWave outgoing radiation,W/m^2,mean
+UK-WHM,01/01/2002 00:00,01/01/2030 00:00,LWS,LWS,Leaf Wetness,1,arbitrary,,1,1,1,Campbell,CS-101,-99999,99999,100,era5,rh,rh,1,LWS,Leaf Wetness,1,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,LWS_4_1_1,LWS_4_1_1,Leaf Wetness,1,arbitrary,,4,1,1,Campbell,CS-101,-99999,99999,100,era5,rh,rh,1,LWS,Leaf Wetness,1,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,LWS_4_1_2,LWS_4_1_2,Leaf Wetness,1,arbitrary,,4,1,2,Campbell,CS-101,-99999,99999,100,era5,rh,rh,1,LWS,Leaf Wetness,1,mean
+UK-EBU,01/08/2023 13:00,01/01/2024 00:00,LWS_EB_7_1_1_Avg,LWS_EB_7_1_1_Avg,Leaf Wetness,1,arbitrary,,7,1,1,Campbell,CS-101,-99999,99999,100,era5,rh,rh,1,LWS,Leaf Wetness,1,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,NDVI_649IN_5_1_1,NDVI_649IN_5_1_1,Photosynthetic photon flux density incoming @649 nm,umol/m^2/s,energy flux,,5,1,1,Campbell,CS-101,0,500,100,nightzero,ssrd,ssrd,umol/m^2/s,NDVI_649IN,Photosynthetic photon flux density incoming @649 nm,umol/m^2/s,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,NDVI_649OUT_5_1_1,NDVI_649OUT_5_1_1,Photosynthetic photon flux density reflected @649 nm,umol/m^2/s,energy flux,,5,1,1,Campbell,CS-101,0,500,100,nightzero,ssru,ssru,umol/m^2/s,NDVI_649OUT,Photosynthetic photon flux density reflected @649 nm,umol/m^2/s,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,NDVI_797IN_5_1_1,NDVI_797IN_5_1_1,Photosynthetic photon flux density incoming @797 nm,umol/m^2/s,energy flux,,5,1,1,Campbell,CS-101,0,500,100,nightzero,ssrd,ssrd,umol/m^2/s,NDVI_797IN,Photosynthetic photon flux density incoming @797 nm,umol/m^2/s,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,NDVI_797OUT_5_1_1,NDVI_797OUT_5_1_1,Photosynthetic photon flux density reflected @797 nm,umol/m^2/s,energy flux,,5,1,1,Campbell,CS-101,0,500,100,nightzero,ssru,ssru,umol/m^2/s,NDVI_797OUT,Photosynthetic photon flux density reflected @797 nm,umol/m^2/s,mean
+UK-WHM,01/01/2002 00:00,01/01/2030 00:00,Net_rad,Net_rad,Net radiation,W/m^2,energy flux,,1,1,1,Campbell,CS-101,-500,1200,100,era5,rn,rn,W/m^2,RN,Net radiation,W/m^2,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,P_12_1_1,P_12_1_1,Precipitation,mm,precipitation,,12,1,1,Campbell,CS-101,0,50,100,era5,tp,tp,mm,P,Precipitation,mm,sum
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,P_13_1_1,P_13_1_1,Precipitation,mm,precipitation,,13,1,1,Campbell,CS-101,0,50,100,era5,tp,tp,mm,P,Precipitation,mm,sum
+UK-BUC,08/09/2023 14:00,01/01/2030 00:00,P_BU_1_1_1_Tot,P_BU_1_1_1_Tot,Precipitation,mm,precipitation,,1,1,1,Campbell,CS-101,0,50,100,era5,tp,tp,mm,P,Precipitation,mm,sum
+UK-BUC,08/09/2023 14:00,01/01/2030 00:00,P_BU_2_1_1_Tot,P_BU_2_1_1_Tot,Precipitation,mm,precipitation,,2,1,1,Campbell,CS-101,0,50,100,era5,tp,tp,mm,P,Precipitation,mm,sum
+UK-EBU,01/08/2023 13:00,01/01/2024 00:00,P_EB_1_1_1_Tot,P_EB_1_1_1_Tot,Precipitation,mm,precipitation,,1,1,1,Campbell,CS-101,0,50,100,era5,tp,tp,mm,P,Precipitation,mm,sum
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,PA_4_1_1,PA_4_1_1,Atmospheric pressure,kPa,pressure,,4,1,1,Campbell,CS-101,90,130,100,era5,sp,sp,kPa,PA,Atmospheric pressure,kPa,mean
+UK-BUC,08/09/2023 14:00,01/01/2030 00:00,PA_BU_1_1_2_Avg,PA_BU_1_1_2_Avg,Atmospheric pressure,hPa,pressure,,1,1,2,Campbell,CS-101,900,1300,100,era5,sp,sp,kPa,PA,Atmospheric pressure,kPa,mean
+UK-BUC,08/09/2023 14:00,01/01/2030 00:00,PA_BU_3_1_1_Avg,PA_BU_3_1_1_Avg,Atmospheric pressure,mbar,pressure,,3,1,1,Campbell,CS-101,900,1300,100,era5,sp,sp,kPa,PA,Atmospheric pressure,kPa,mean
+UK-EBU,01/08/2023 13:00,01/01/2024 00:00,PA_EB_1_1_1_Avg,PA_EB_1_1_1_Avg,Atmospheric pressure,kPa,pressure,,1,1,1,Campbell,CS-101,90,130,100,era5,sp,sp,kPa,PA,Atmospheric pressure,kPa,mean
+UK-WHM,01/01/2002 00:00,01/01/2030 00:00,PAR,PAR,Photosynthetic photon flux density incoming,umol/m^2/s,energy flux,,1,1,1,Campbell,CS-101,0,2200,100,era5,ssrd,ssrd,umol/m^2/s,PPFD_IN,Photosynthetic photon flux density incoming,umol/m^2/s,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,PPFD_DIF,PPFD_DIF,Photosynthetic photon flux density diffuse,umol/m^2/s,energy flux,,,,,Campbell,CS-101,0,2200,100,era5,fdif,fdif,umol/m^2/s,PPFD_DIF,Photosynthetic photon flux density diffuse,umol/m^2/s,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,PPFD_DIF_4_1_1,PPFD_DIF_4_1_1,Photosynthetic photon flux density diffuse,umol/m^2/s,energy flux,,4,1,1,Campbell,CS-101,0,2200,100,era5,fdif,fdif,umol/m^2/s,PPFD_DIF,Photosynthetic photon flux density diffuse,umol/m^2/s,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,PPFD_IN_4_1_1,PPFD_IN_4_1_1,Photosynthetic photon flux density incoming,umol/m^2/s,energy flux,,4,1,1,Campbell,CS-101,0,2200,100,era5,ssrd,ssrd,umol/m^2/s,PPFD_IN,Photosynthetic photon flux density incoming,umol/m^2/s,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,PPFD_IN_5_1_1,PPFD_IN_5_1_1,Photosynthetic photon flux density incoming,umol/m^2/s,energy flux,,5,1,1,Campbell,CS-101,0,2200,100,era5,ssrd,ssrd,umol/m^2/s,PPFD_IN,Photosynthetic photon flux density incoming,umol/m^2/s,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,PPFD_IN_5_1_2,PPFD_IN_5_1_2,Photosynthetic photon flux density incoming,umol/m^2/s,energy flux,,5,1,2,Campbell,CS-101,0,2200,100,era5,ssrd,ssrd,umol/m^2/s,PPFD_IN,Photosynthetic photon flux density incoming,umol/m^2/s,mean
+UK-EBU,01/08/2023 13:00,01/01/2024 00:00,PPFD_IN_EB_1_1_1,PPFD_IN_EB_1_1_1,Photosynthetic photon flux density incoming,umol/m^2/s,energy flux,,1,1,1,Campbell,CS-101,0,2200,100,era5,ssrd,ssrd,umol/m^2/s,PPFD_IN,Photosynthetic photon flux density incoming,umol/m^2/s,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,PPFD_OUT,PPFD_OUT,Photosynthetic photon flux density outgoing,umol/m^2/s,energy flux,,,,,Campbell,CS-101,0,2200,100,era5,ssru,ssru,umol/m^2/s,PPFD_OUT,Photosynthetic photon flux density outgoing,umol/m^2/s,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,PPFD_OUT_5_1_1,PPFD_OUT_5_1_1,Photosynthetic photon flux density outgoing,umol/m^2/s,energy flux,,5,1,1,Campbell,CS-101,0,2200,100,era5,ssru,ssru,umol/m^2/s,PPFD_OUT,Photosynthetic photon flux density outgoing,umol/m^2/s,mean
+UK-WHM,01/01/2002 00:00,01/01/2030 00:00,Rain,Rain,Precipitation,mm,precipitation,,1,1,1,Campbell,CS-101,0,50,100,era5,tp,tp,mm,P,Precipitation,mm,sum
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,RG_4_1_0,RG_4_1_0,Total global radiation,W/m^2,energy flux,,4,1,0,Campbell,CS-101,0,1200,100,era5,ssrd,ssrd,W/m^2,RG,Total global radiation,W/m^2,mean
+UK-BUC,08/09/2023 14:00,01/01/2030 00:00,RG_BU_1_1_1_Avg,RG_BU_1_1_1_Avg,Total global radiation,W/m^2,energy flux,,1,1,1,Campbell,CS-101,0,1200,100,era5,ssrd,ssrd,W/m^2,RG,Total global radiation,W/m^2,mean
+UK-WHM,01/01/2002 00:00,01/01/2030 00:00,RH,RH,Relative humidity,%,humidity,,1,1,1,Campbell,CS-101,30,120,100,era5,rh,rh,%,RH,Relative humidity,%,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,RH_2_1_1,RH_2_1_1,Relative humidity,%,humidity,,2,1,1,Campbell,CS-101,30,120,100,era5,rh,rh,%,RH,Relative humidity,%,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,RH_4_1_1,RH_4_1_1,Relative humidity,%,humidity,,4,1,1,Campbell,CS-101,30,120,100,era5,rh,rh,%,RH,Relative humidity,%,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,RH_7_1_1,RH_7_1_1,Relative humidity,%,humidity,,7,1,1,Campbell,CS-101,30,120,100,era5,rh,rh,%,RH,Relative humidity,%,mean
+UK-BUC,08/09/2023 14:00,01/01/2030 00:00,RH_BU_1_1_1_Avg,RH_BU_1_1_1_Avg,Relative humidity,%,humidity,,1,1,1,Campbell,CS-101,30,120,100,era5,rh,rh,%,RH,Relative humidity,%,mean
+UK-BUC,08/09/2023 14:00,01/01/2030 00:00,RH_BU_1_1_2_Avg,RH_BU_1_1_2_Avg,Relative humidity,%,humidity,,1,1,2,Campbell,CS-101,30,120,100,era5,rh,rh,%,RH,Relative humidity,%,mean
+UK-EBU,01/08/2023 13:00,01/01/2024 00:00,RH_EB_1_1_1_Avg,RH_EB_1_1_1_Avg,Relative humidity,%,humidity,,1,1,1,Campbell,CS-101,30,120,100,era5,rh,rh,%,RH,Relative humidity,%,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,RN_5_1_1,RN_5_1_1,Net radiation,W/m^2,energy flux,,5,1,1,Campbell,CS-101,-500,1200,100,era5,rn,rn,W/m^2,RN,Net radiation,W/m^2,mean
+UK-EBU,01/08/2023 13:00,01/01/2024 00:00,RN_EB_7_1_1,RN_EB_7_1_1,Net radiation,W/m^2,energy flux,,7,1,1,Campbell,CS-101,-500,1200,100,era5,rn,rn,W/m^2,RN,Net radiation,W/m^2,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,site,site,site,,site,,,,,,,,,,,site,site,,site,site,,sample
+UK-WHM,01/01/2002 00:00,01/01/2030 00:00,site,site,site,,site,,,,,Campbell,CS-101,,,100,era5,site,site,,site,site,,sample
+UK-EBU,01/08/2023 13:00,01/01/2024 00:00,site,site,site,,site,,,,,,,,,,,site,site,,site,site,,sample
+UK-BUC,08/09/2023 14:00,01/01/2030 00:00,site,site,site,,site,,,,,Campbell,CS-101,,,100,era5,site,site,,site,site,,sample
+UK-WHM,01/01/2002 00:00,01/01/2030 00:00,Soil_T1,Soil_T1,Soil temperature,degC,temperature,,1,1,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-WHM,01/01/2002 00:00,01/01/2030 00:00,Soil_T2,Soil_T2,Soil temperature,degC,temperature,,2,1,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-WHM,01/01/2002 00:00,01/01/2030 00:00,Soil_VWC,Soil_VWC,Soil water content,%,soil moisture,,1,1,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SW_IN,SW_IN,Shortwave incoming radiation,W/m^2,energy flux,,,,,Campbell,CS-101,0,1200,100,era5,ssrd,ssrd,W/m^2,SW_IN,Shortwave incoming radiation,W/m^2,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SW_IN_5_1_1,SW_IN_5_1_1,Shortwave incoming radiation,W/m^2,energy flux,,5,1,1,Campbell,CS-101,0,1200,100,era5,ssrd,ssrd,W/m^2,SW_IN,Shortwave incoming radiation,W/m^2,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SW_IN_7_1_1,SW_IN_7_1_1,Shortwave incoming radiation,W/m^2,energy flux,,7,1,1,Campbell,CS-101,0,1200,100,era5,ssrd,ssrd,W/m^2,SW_IN,Shortwave incoming radiation,W/m^2,mean
+UK-EBU,01/08/2023 13:00,01/01/2024 00:00,SW_IN_EB_1_1_1,SW_IN_EB_1_1_1,Shortwave incoming radiation,W/m^2,energy flux,,1,1,1,Campbell,CS-101,0,1200,100,era5,ssrd,ssrd,W/m^2,SW_IN,Shortwave incoming radiation,W/m^2,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SW_OUT,SW_OUT,Shortwave outgoing radiation,W/m^2,energy flux,,,,,Campbell,CS-101,0,300,100,era5,ssru,ssru,W/m^2,SW_OUT,Shortwave outgoing radiation,W/m^2,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SW_OUT_5_1_1,SW_OUT_5_1_1,Shortwave outgoing radiation,W/m^2,energy flux,,5,1,1,Campbell,CS-101,0,300,100,era5,ssru,ssru,W/m^2,SW_OUT,Shortwave outgoing radiation,W/m^2,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC,SWC,Soil water content,%,soil moisture,,,,,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_10_1_1,SWC_10_1_1,Soil water content,%,soil moisture,,10,1,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_10_2_1,SWC_10_2_1,Soil water content,%,soil moisture,,10,2,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_10_3_1,SWC_10_3_1,Soil water content,%,soil moisture,,10,3,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_10_4_1,SWC_10_4_1,Soil water content,%,soil moisture,,10,4,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_11_1_1,SWC_11_1_1,Soil water content,%,soil moisture,,11,1,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_11_2_1,SWC_11_2_1,Soil water content,%,soil moisture,,11,2,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_11_3_1,SWC_11_3_1,Soil water content,%,soil moisture,,11,3,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_11_4_1,SWC_11_4_1,Soil water content,%,soil moisture,,11,4,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_4_1_1,SWC_4_1_1,Soil water content,%,soil moisture,,4,1,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_4_2_1,SWC_4_2_1,Soil water content,%,soil moisture,,4,2,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_4_3_1,SWC_4_3_1,Soil water content,%,soil moisture,,4,3,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_4_4_1,SWC_4_4_1,Soil water content,%,soil moisture,,4,4,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_8_1_1,SWC_8_1_1,Soil water content,%,soil moisture,,8,1,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_8_2_1,SWC_8_2_1,Soil water content,%,soil moisture,,8,2,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_8_3_1,SWC_8_3_1,Soil water content,%,soil moisture,,8,3,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_8_4_1,SWC_8_4_1,Soil water content,%,soil moisture,,8,4,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_9_1_1,SWC_9_1_1,Soil water content,%,soil moisture,,9,1,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_9_2_1,SWC_9_2_1,Soil water content,%,soil moisture,,9,2,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_9_3_1,SWC_9_3_1,Soil water content,%,soil moisture,,9,3,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,SWC_9_4_1,SWC_9_4_1,Soil water content,%,soil moisture,,9,4,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%,mean
+UK-EBU,01/08/2023 13:00,01/01/2024 00:00,SWC_EB_5_1_1,SWC_EB_5_1_1,Soil water content,%,soil moisture,,5,1,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%,mean
+UK-EBU,01/08/2023 13:00,01/01/2024 00:00,SWC_EB_5_2_1,SWC_EB_5_2_1,Soil water content,%,soil moisture,,5,2,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%,mean
+UK-EBU,01/08/2023 13:00,01/01/2024 00:00,SWC_EB_5_3_1,SWC_EB_5_3_1,Soil water content,%,soil moisture,,5,3,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%,mean
+UK-EBU,01/08/2023 13:00,01/01/2024 00:00,SWC_EB_5_4_1,SWC_EB_5_4_1,Soil water content,%,soil moisture,,5,4,1,Campbell,CS-101,0,100,100,era5,swvl1,swvl1,%,SWC,Soil water content,%,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TA_2_1_1,TA_2_1_1,Air temperature,degC,temperature,,2,1,1,Campbell,CS-101,-40,50,100,era5,t2m,t2m,degC,TA,Air temperature,degC,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TA_4_1_1,TA_4_1_1,Air temperature,degC,temperature,,4,1,1,Campbell,CS-101,-40,50,100,era5,t2m,t2m,degC,TA,Air temperature,degC,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TA_7_1_1,TA_7_1_1,Air temperature,degC,temperature,,7,1,1,Campbell,CS-101,-40,50,100,era5,t2m,t2m,degC,TA,Air temperature,degC,mean
+UK-BUC,08/09/2023 14:00,01/01/2030 00:00,TA_BU_1_1_1_Avg,TA_BU_1_1_1_Avg,Air temperature,degC,temperature,,1,1,1,Campbell,CS-101,-40,50,100,era5,t2m,t2m,degC,TA,Air temperature,degC,mean
+UK-BUC,08/09/2023 14:00,01/01/2030 00:00,TA_BU_1_1_2_Avg,TA_BU_1_1_2_Avg,Air temperature,degC,temperature,,1,1,2,Campbell,CS-101,-40,50,100,era5,t2m,t2m,degC,TA,Air temperature,degC,mean
+UK-BUC,08/09/2023 14:00,01/01/2030 00:00,TA_BU_1_1_3_Avg,TA_BU_1_1_3_Avg,Air temperature,degC,temperature,,1,1,3,Campbell,CS-101,-40,50,100,era5,t2m,t2m,degC,TA,Air temperature,degC,mean
+UK-EBU,01/08/2023 13:00,01/01/2024 00:00,TA_EB_1_1_1_Avg,TA_EB_1_1_1_Avg,Air temperature,degC,temperature,,1,1,1,Campbell,CS-101,-40,50,100,era5,t2m,t2m,degC,TA,Air temperature,degC,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TIMESTAMP,TIMESTAMP,timestamp,,time,%Y%m%d%H%M%S,,,,,,,,,,time,time,,TIMESTAMP,timestamp,,sample
+UK-WHM,01/01/2002 00:00,01/01/2030 00:00,Timestamp,Timestamp,timestamp,,time,%d/%m/%Y %H:%M,,,,Campbell,CS-101,,,,,time,time,,TIMESTAMP,timestamp,,sample
+UK-EBU,01/08/2023 13:00,01/01/2024 00:00,TIMESTAMP,TIMESTAMP,timestamp,,time,%Y-%m-%dT%H:%M:%SZ,,,,Campbell,CS-101,,,,,time,time,,TIMESTAMP,timestamp,,sample
+UK-BUC,08/09/2023 14:00,01/01/2030 00:00,TIMESTAMP,TIMESTAMP,TIMESTAMP,,time,%Y-%m-%dT%H:%M:%SZ,,,,Campbell,CS-101,,,,,time,time,,TIMESTAMP,timestamp,,sample
+UK-WHM,01/01/2002 00:00,01/01/2030 00:00,Total_solar,Total_solar,Shortwave incoming radiation,W/m^2,energy flux,,1,1,1,Campbell,CS-101,0,1200,100,era5,ssrd,ssrd,W/m^2,SW_IN,Shortwave incoming radiation,W/m^2,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS,TS,Soil temperature,degC,temperature,,,,,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_10_1_1,TS_10_1_1,Soil temperature,degC,temperature,,10,1,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_10_2_1,TS_10_2_1,Soil temperature,degC,temperature,,10,2,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_10_3_1,TS_10_3_1,Soil temperature,degC,temperature,,10,3,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_10_4_1,TS_10_4_1,Soil temperature,degC,temperature,,10,4,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_10_5_1,TS_10_5_1,Soil temperature,degC,temperature,,10,5,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_11_1_1,TS_11_1_1,Soil temperature,degC,temperature,,11,1,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_11_2_1,TS_11_2_1,Soil temperature,degC,temperature,,11,2,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_11_3_1,TS_11_3_1,Soil temperature,degC,temperature,,11,3,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_11_4_1,TS_11_4_1,Soil temperature,degC,temperature,,11,4,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_11_5_1,TS_11_5_1,Soil temperature,degC,temperature,,11,5,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_4_1_1,TS_4_1_1,Soil temperature,degC,temperature,,4,1,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_4_2_1,TS_4_2_1,Soil temperature,degC,temperature,,4,2,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_4_3_1,TS_4_3_1,Soil temperature,degC,temperature,,4,3,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_4_4_1,TS_4_4_1,Soil temperature,degC,temperature,,4,4,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_8_1_1,TS_8_1_1,Soil temperature,degC,temperature,,8,1,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_8_2_1,TS_8_2_1,Soil temperature,degC,temperature,,8,2,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_8_3_1,TS_8_3_1,Soil temperature,degC,temperature,,8,3,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_8_4_1,TS_8_4_1,Soil temperature,degC,temperature,,8,4,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_8_5_1,TS_8_5_1,Soil temperature,degC,temperature,,8,5,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_9_1_1,TS_9_1_1,Soil temperature,degC,temperature,,9,1,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_9_2_1,TS_9_2_1,Soil temperature,degC,temperature,,9,2,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_9_3_1,TS_9_3_1,Soil temperature,degC,temperature,,9,3,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_9_4_1,TS_9_4_1,Soil temperature,degC,temperature,,9,4,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,TS_9_5_1,TS_9_5_1,Soil temperature,degC,temperature,,9,5,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-EBU,01/08/2023 13:00,01/01/2024 00:00,TS_EB_5_1_1,TS_EB_5_1_1,Soil temperature,degC,temperature,,5,1,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-EBU,01/08/2023 13:00,01/01/2024 00:00,TS_EB_5_2_1,TS_EB_5_2_1,Soil temperature,degC,temperature,,5,2,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-EBU,01/08/2023 13:00,01/01/2024 00:00,TS_EB_5_3_1,TS_EB_5_3_1,Soil temperature,degC,temperature,,5,3,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-EBU,01/08/2023 13:00,01/01/2024 00:00,TS_EB_5_4_1,TS_EB_5_4_1,Soil temperature,degC,temperature,,5,4,1,Campbell,CS-101,-20,50,100,era5,stl1,stl1,degC,TS,Soil temperature,degC,mean
+UK-WHM,01/01/2002 00:00,01/01/2030 00:00,WD,WD,Wind direction,degree,wind direction,,1,1,1,Campbell,CS-101,0,360,100,era5,wd,wd,degree,WD,Wind direction,degree,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,WD_6_1_1,WD_6_1_1,Wind direction,degree,wind direction,,6,1,1,Campbell,CS-101,0,360,100,era5,wd,wd,degree,WD,Wind direction,degree,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,WD_7_1_1,WD_7_1_1,Wind direction,degree,wind direction,,7,1,1,Campbell,CS-101,0,360,100,era5,wd,wd,degree,WD,Wind direction,degree,mean
+UK-WHM,01/01/2002 00:00,01/01/2030 00:00,WS,WS,Wind speed,m/s,wind speed,,1,1,1,Campbell,CS-101,0,30,100,era5,ws,ws,m/s,WS,Wind speed,m/s,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,WS_6_1_1,WS_6_1_1,Wind speed,m/s,wind speed,,6,1,1,Campbell,CS-101,0,30,100,era5,ws,ws,m/s,WS,Wind speed,m/s,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,WS_7_1_1,WS_7_1_1,Wind speed,m/s,wind speed,,7,1,1,Campbell,CS-101,0,30,100,era5,ws,ws,m/s,WS,Wind speed,m/s,mean
+UK-BUC,08/09/2023 14:00,01/01/2030 00:00,WS_BU_1_1_1_Avg,WS_BU_1_1_1_Avg,Wind speed,m/s,wind speed,,1,1,1,Campbell,CS-101,0,30,100,era5,ws,ws,m/s,WS,Wind speed,m/s,mean
+UK-BUC,08/09/2023 14:00,01/01/2030 00:00,WS_BU_1_1_1_WVc(1),WS_BU_1_1_1_WVc(1),Wind direction,degree,wind direction,,1,1,1,Campbell,CS-101,0,360,100,era5,wd,wd,degree,WD,Wind direction,degree,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,WTD,WTD,Water table depth,m,height,,,,,Campbell,CS-101,-10,10,100,era5,swvl1,swvl1,m,WTD,Water table depth,m,mean
+UK-WHM,01/01/2002 00:00,01/01/2030 00:00,WTD,WTD,Water table depth,cm,height,,1,1,1,Campbell,CS-101,-10,10,100,era5,swvl1,swvl1,m,WTD,Water table depth,m,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,WTD_10_1_1,WTD_10_1_1,Water table depth,m,height,,10,1,1,Campbell,CS-101,-10,10,100,era5,swvl1,swvl1,m,WTD,Water table depth,m,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,WTD_11_1_1,WTD_11_1_1,Water table depth,m,height,,11,1,1,Campbell,CS-101,-10,10,100,era5,swvl1,swvl1,m,WTD,Water table depth,m,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,WTD_4_1_1,WTD_4_1_1,Water table depth,m,height,,4,1,1,Campbell,CS-101,-10,10,100,era5,swvl1,swvl1,m,WTD,Water table depth,m,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,WTD_8_1_1,WTD_8_1_1,Water table depth,m,height,,8,1,1,Campbell,CS-101,-10,10,100,era5,swvl1,swvl1,m,WTD,Water table depth,m,mean
+UK-AMO,01/01/1995 00:00,01/01/2030 00:00,WTD_9_1_1,WTD_9_1_1,Water table depth,m,height,,9,1,1,Campbell,CS-101,-10,10,100,era5,swvl1,swvl1,m,WTD,Water table depth,m,mean
+UK-EBU,01/08/2023 13:00,01/01/2024 00:00,WTD_EB_5_1_1,WTD_EB_5_1_1,Water table depth,cm,height,,5,1,1,Campbell,CS-101,-10,10,100,era5,swvl1,swvl1,m,WTD,Water table depth,m,mean

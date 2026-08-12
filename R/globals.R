@@ -49,7 +49,31 @@ utils::globalVariables(c(
   "var_name",
   "value",
   "N",
-  "TIMESTAMP"
+  "TIMESTAMP",
+
+  # others
+  ".",
+  "..comment",
+  "..qc",
+  "..time_name",
+  "..v_name_dt",
+  ".rmax",
+  ".rmin",
+  ".std_units",
+  ".u_from",
+  ".u_to",
+  "coef",
+  "colorRampPalette",
+  "daylight",
+  "is_selected",
+  "l_conventions",
+  "long_name",
+  "n_units",
+  "name",
+  "pred",
+  "row_name",
+  "statistic",
+  "var"
   # "..date_field", # these probably better changed in code so they don't appear
   # "..input_variable",
   # "..time_name",

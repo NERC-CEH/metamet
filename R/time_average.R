@@ -100,7 +100,8 @@ time_average <- function(
     var_cols <- setdiff(dt_cols, c(time_name_local, "site"))
     if (length(var_cols) == 0L) {
       # nothing to average, return trimmed dt_in with site+time only (but ensure no duplicate times)
-      out <- unique(dt_in[, ..c("site", time_name_local)])
+      cols_to_keep <- c("site", time_name_local)
+      out <- unique(dt_in[, ..cols_to_keep])
       return(out)
     }
 

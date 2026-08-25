@@ -28,10 +28,11 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
         with:
           token: ${{ secrets.UNTIL12APR }} # `UNTIL12APR` is a secret that contains your PAT
           ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
 
       - name: Install
         uses: posit-dev/setup-air@v1

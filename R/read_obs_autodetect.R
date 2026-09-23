@@ -30,6 +30,9 @@ read_obs_autodetect <- function(
   # Strip UTF-8 BOM if present (rare, but can break matching)
   first_line <- sub("^\ufeff", "", first_line)
 
+  # Biral VPF750 Present Weather Sensor files start with "PWS_VPF750"
+  is_pws_vfp750 <- grepl('^\\s*PWS_VPF750', first_line)
+
   # TRUE if the line starts with TOA5 as the first CSV field,
   # allowing optional quotes and whitespace, and requiring a comma or EOL after it.
   is_toa5 <- grepl('^\\s*"?TOA5"?(\\s*,|\\s*$)', first_line)
@@ -37,6 +40,8 @@ read_obs_autodetect <- function(
   # Dispatch
   if (is_toa5) {
     do.call(import_campbell_data, c(list(path), campbell_args))
+  } else if (is_pws_vfp750) {
+    read_pws_csv(path)
   } else {
     do.call(data.table::fread, c(list(input = path), fread_args))
   }

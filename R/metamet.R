@@ -347,6 +347,20 @@ metamet.data.table <- function(
 
 # restrict dt and dt_meta variables to only those that occur in both
 restrict <- function(mm) {
+  # Rename name_local -> name_dt where they differ (e.g. PWS sensor data whose
+  # raw column names don't match the standard dt names).
+  local_to_dt <- mm$dt_meta[
+    !is.na(name_local) & !is.na(name_dt) & name_local != name_dt,
+    .(name_local, name_dt)
+  ]
+  for (i in seq_len(nrow(local_to_dt))) {
+    old_nm <- local_to_dt$name_local[i]
+    new_nm <- local_to_dt$name_dt[i]
+    if (old_nm %in% names(mm$dt) && !(new_nm %in% names(mm$dt))) {
+      data.table::setnames(mm$dt, old_nm, new_nm)
+    }
+  }
+
   v_site_dt <- unique(mm$dt[, site])
   v_name_meta <- mm$dt_meta$name_dt
   v_name_dt <- colnames(mm$dt)

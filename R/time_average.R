@@ -4,6 +4,8 @@
 ##' intervals. The function supports per-variable statistics:
 ##' if `dt_meta` contains a `statistic` column, those values are used; otherwise
 ##' precipitation variables default to `"sum"` and all others to `"mean"`.
+##' Use `"mode"` in the `statistic` column for categorical variables such as
+##' present-weather codes; mode aggregation is handled natively without openair.
 ##'
 ##' Wind direction is vector-averaged when both wind direction and wind speed
 ##' variables are present in the same statistic group.

@@ -4,12 +4,16 @@
 ##' Handles flexible variable naming, wind direction vector averaging, and
 ##' configurable reporting of interval start or end times. Uses \code{openair::timeAverage()}
 ##' for aggregation with support for custom statistics (mean, median, sum, etc.).
+##' The special statistic \code{"mode"} is handled natively (not via openair) and
+##' returns the most frequent non-NA value in each interval; it is intended for
+##' categorical variables such as present-weather codes.
 ##'
 ##' @param dt_in A data table containing meteorological observations with a time column.
 ##' @param avg.time Time interval for averaging (e.g., "30 min", "1 hour"). Default: "30 min".
-##'   Passed to \code{openair::timeAverage()}.
-##' @param statistic Character string specifying the aggregation statistic ("mean", "median", "sum", etc.).
-##'   Default: "mean". Use "median" for quality control codes.
+##'   Passed to \code{openair::timeAverage()} (except when \code{statistic = "mode"}).
+##' @param statistic Character string specifying the aggregation statistic ("mean", "median",
+##'   "sum", "mode", etc.). Default: "mean". Use \code{"mode"} for categorical/code variables.
+##'   Use \code{"median"} for quality control codes.
 ##' @param first_date Optional POSIXct date. Earliest date to include. If \code{NULL}, uses minimum date in data.
 ##' @param last_date Optional POSIXct date. Latest date to include. If \code{NULL}, uses maximum date in data.
 ##' @param time_name Character string. Name of the time column in \code{dt_in} (e.g., "time").
@@ -65,6 +69,40 @@ time_average_dt <- function(
   dt <- copy(dt_in)
 
   interval_length_s <- as.numeric(lubridate::duration(avg.time))
+
+  # Mode aggregation: openair::timeAverage() does not support "mode", so handle
+  # it directly with data.table before returning early.
+  if (statistic == "mode") {
+    if (is.null(first_date)) first_date <- min(dt[[time_name]], na.rm = TRUE)
+    if (is.null(last_date))  last_date  <- max(dt[[time_name]], na.rm = TRUE)
+
+    dt[, .time_bin := as.POSIXct(
+      floor(as.numeric(get(time_name)) / interval_length_s) * interval_length_s,
+      origin = "1970-01-01", tz = "UTC"
+    )]
+    if (report_end_interval) {
+      dt[, .time_bin := .time_bin + interval_length_s]
+    }
+
+    var_cols <- setdiff(names(dt), c(time_name, "site", ".time_bin"))
+
+    stat_mode_local <- function(x) {
+      x <- x[!is.na(x)]
+      if (length(x) == 0L) return(NA_real_)
+      ux <- unique(x)
+      as.numeric(ux[which.max(tabulate(match(x, ux)))])
+    }
+
+    result <- dt[
+      get(time_name) >= first_date & get(time_name) <= last_date,
+      c(list(site = site[1L]), lapply(.SD, stat_mode_local)),
+      .SDcols = var_cols,
+      by = .(.time_bin)
+    ]
+    data.table::setnames(result, ".time_bin", time_name)
+    data.table::setcolorder(result, c("site", time_name, var_cols))
+    return(result)
+  }
 
   # rename time variable with openair convention
   setnames(dt, eval(time_name), "date")

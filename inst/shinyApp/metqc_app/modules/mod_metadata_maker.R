@@ -10,10 +10,23 @@
 #   5. ERA5 reference data (optional)
 #   6. Review summary and download as metamet .rds
 
+#' NULL-coalescing operator
+#'
+#' Returns `x` if it is not `NULL`; otherwise returns `y`.
+#'
+#' @param x Object to test.
+#' @param y Fallback value.
+#'
+#' @return `x` or `y`.
+#' @keywords internal
 `%||%` <- function(x, y) if (!is.null(x)) x else y
 
-# ---- UI ---------------------------------------------------------------------
-
+#' @rdname mod_metadata_maker
+#'
+#' @param id Module id.
+#'
+#' @return A Shiny UI element.
+#' @noRd
 mod_metadata_maker_ui <- function(id) {
   ns <- NS(id)
   tagList(
@@ -326,8 +339,16 @@ mod_metadata_maker_ui <- function(id) {
   )
 }
 
-# ---- Server -----------------------------------------------------------------
-
+#' @rdname mod_metadata_maker
+#'
+#' @param id Module id.
+#' @param v_roots Named vector of root directories used by
+#'   `shinyFiles::shinyFileChoose()`.
+#' @param default_root Default root directory name.
+#'
+#' @return No explicit return value. Provides module server logic for
+#'   creating and exporting metamet objects.
+#' @noRd
 mod_metadata_maker_server <- function(id, v_roots, default_root = NULL) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns

@@ -1,3 +1,15 @@
+#' Upload module
+#'
+#' UI and server components for loading existing metamet `.rds` files.
+#'
+#' @name mod_upload
+NULL
+
+#' @rdname mod_upload
+#' @param id Module id.
+#'
+#' @return A Shiny UI element.
+#' @noRd
 mod_upload_ui <- function(id) {
   ns <- NS(id)
 
@@ -16,6 +28,17 @@ mod_upload_ui <- function(id) {
   )
 }
 
+#' @rdname mod_upload
+#' @param id Module id.
+#' @param roots Named vector of root directories used by
+#'   `shinyFiles::shinyFileChoose()`.
+#' @param default_root Default root directory name.
+#' @param root_session Parent Shiny session used for application-wide
+#'   navigation and updates.
+#'
+#' @return A reactive expression containing the uploaded metamet object
+#'   and associated metadata.
+#' @noRd
 mod_upload_server <- function(id, roots, default_root, root_session) {
   moduleServer(id, function(input, output, session) {
     shinyFileChoose(
@@ -97,6 +120,9 @@ mod_upload_server <- function(id, roots, default_root, root_session) {
 
     observeEvent(input$remove_file, {
       mm_qry <<- NULL
+      if (exists("mm_qry", envir = .GlobalEnv, inherits = FALSE)) {
+        rm("mm_qry", envir = .GlobalEnv)
+      }
 
       shinyjs::hide("extracted_data")
       shinyjs::reset(session$ns("file"))

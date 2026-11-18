@@ -5,6 +5,8 @@ library(shinyvalidate)
 library(shinyFiles)
 library(ggiraph)
 
+source("utils/app_config.R", local = TRUE)
+source("utils/date_utils.R", local = TRUE)
 source("modules/mod_upload.R", local = TRUE)
 source("modules/mod_metadata_maker.R", local = TRUE)
 source("modules/mod_download.R", local = TRUE)
@@ -227,27 +229,13 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output, session) {
-  # increase input file size limit to 200 MB
+  # Increase input file size limit to 200 MB.
   options(shiny.maxRequestSize = 200 * 1024^2)
 
-  # maps all drives that users have on windows
-  get_drives <- function() {
-    if (.Platform$OS.type == "windows") {
-      drives <- letters
-      drives <- paste0(drives, ":/")
-      drives <- drives[dir.exists(drives)]
-      return(setNames(drives, drives))
-    } else {
-      return(c(home = fs::path_home()))
-    }
-  }
-
-  roots <- get_drives()
-  v_extdata <- system.file("extdata", package = "metamet")
-  if (nzchar(v_extdata) && dir.exists(v_extdata)) {
-    roots <- c("Package data" = v_extdata, roots)
-  }
-  default_root <- names(roots)[1L]
+  app_roots <- get_app_roots()
+  roots <- app_roots$roots
+  default_root <- app_roots$default_root
+  username <- get_app_username()
 
   uploaded <- mod_upload_server(
     "upload",
@@ -267,30 +255,30 @@ server <- function(input, output, session) {
     default_root = default_root
   )
 
-  # Non-reactive code
-  # Format the start and end dates----
-  df_proc <- data.frame(
-    start_date = "1900/01/01 00:00",
-    end_date = "2026/12/31 00:00"
-  )
-  df_proc$start_date <- as.POSIXct(
-    df_proc$start_date,
-    format = "%Y/%m/%d %H:%M",
-    tz = "UTC"
-  )
-  df_proc$end_date <- as.POSIXct(Sys.Date() - 2, tz = "UTC")
+  mm_qry <- NULL
+
+  plot_qc_data <- function(input_variable, ...) {
+    assign(
+      "mm_qry",
+      mm_qry,
+      envir = .GlobalEnv
+    )
+
+    metamet:::ggiraph_plot(
+      input_variable,
+      ...
+    )
+  }
 
   ##########################
-  #shinyvalidate statements#
-  #########################
+  # shinyvalidate statements
+  ##########################
+
   iv <- InputValidator$new()
 
   iv$add_rule("sdate", sv_required())
   iv$add_rule("edate", sv_required())
   iv$enable()
-
-  # save the username
-  username <<- Sys.info()[["user"]]
 
   session$onSessionEnded(function() {
     stopApp()
@@ -351,6 +339,9 @@ server <- function(input, output, session) {
       label = "End date"
     )
   })
+
+  # from date_utils.R, get the default processing range for the data
+  df_proc <- default_processing_range()
 
   # Create a dataframe with the start and end dates,
   df_daterange <- eventReactive(input$retrieve_data, {
@@ -474,11 +465,11 @@ server <- function(input, output, session) {
     observe(
       lapply(paste(uploaded()$v_names), function(i) {
         output[[paste0(i, "_interactive_plot")]] <-
-          renderGirafe(metamet:::ggiraph_plot(
-            i,
+          renderGirafe(plot_qc_data(
+            input$plotTabs,
             scale_ref = input$scale_ref,
             point_size = input$point_size,
-            vars_to_show = input[[paste0(i, "_replicates")]]
+            vars_to_show = input[[paste0(input$plotTabs, "_replicates")]]
           ))
       })
     )
@@ -636,11 +627,16 @@ server <- function(input, output, session) {
     )
   })
 
-  #mod_download_server(
-  #  "download",
-  #  uploaded = uploaded,
-  #  edited_data = dashboard_state$edited_data
-  #)
+  edited_data <- function() {
+    req(mm_qry)
+    mm_qry
+  }
+
+  mod_download_server(
+    "download",
+    uploaded = uploaded,
+    edited_data = edited_data
+  )
 
   # Writing validated data to file---- From main Dashboard
   observeEvent(input$submitchanges, {

@@ -5,7 +5,10 @@ library(shinyvalidate)
 library(shinyFiles)
 library(ggiraph)
 
-source("mod_metadata_maker.R", local = TRUE)
+source("modules/mod_upload.R", local = TRUE)
+source("modules/mod_metadata_maker.R", local = TRUE)
+source("modules/mod_download.R", local = TRUE)
+source("modules/mod_help.R", local = TRUE)
 
 # Set the gap-filling methods and codes----
 gf_choices <- setNames(df_method$method, df_method$method_longname)
@@ -161,7 +164,7 @@ ui <- dashboardPage(
               )
             ),
             actionButton("retrieve_data", "Retrieve from database"),
-            actionButton("compare_vars", "Compare variables"),
+            actionButton("compare_vars", "Compare variables")
           )
         ),
         hidden(
@@ -213,49 +216,12 @@ ui <- dashboardPage(
       ),
 
       # upload file tab
-      tabItem(
-        tabName = "upload",
-        h4("Upload an existing metamet .rds file"),
-        shinyFilesButton(
-          id = "file",
-          label = "Browse for .rds file",
-          title = "Select a file",
-          multiple = FALSE
-        ),
-        br(),
-        verbatimTextOutput("status"),
-        uiOutput("loaded_file_banner")
-      ),
+      mod_upload_ui("upload"),
       tabItem(
         tabName = "metadata_maker",
         mod_metadata_maker_ui("mm_maker")
       ),
-      tabItem(
-        tabName = 'download',
-        fluidRow(
-          box(
-            id = 'download_box',
-            title = 'Data download',
-            status = "success",
-            solidHeader = TRUE,
-            selectInput(
-              'download_file',
-              'Data to download:',
-              choices = c(
-                'Level 1' = 'lev1',
-                'Level 2' = 'lev2',
-                'CEDA' = 'ceda'
-              )
-            ),
-            downloadButton('download_data', label = 'Download')
-          )
-        )
-      ),
-      tabItem(
-        tabName = "information",
-      ),
-      tabItem(tabName = "app_guide"),
-      tabItem(tabName = "gapfill_guide")
+      mod_download_ui("download")
     )
   )
 )
@@ -283,14 +249,16 @@ server <- function(input, output, session) {
   }
   default_root <- names(roots)[1L]
 
-  shinyFileChoose(
-    input,
-    "file",
+  uploaded <- mod_upload_server(
+    "upload",
     roots = roots,
-    session = session,
-    filetypes = c("rds"),
-    defaultRoot = default_root,
-    defaultPath = ""
+    default_root = default_root,
+    root_session = session
+  )
+
+  mod_help_server(
+    "help",
+    root_session = session
   )
 
   mod_metadata_maker_server(
@@ -312,85 +280,6 @@ server <- function(input, output, session) {
   )
   df_proc$end_date <- as.POSIXct(Sys.Date() - 2, tz = "UTC")
 
-  # Reactive expression to load the RDS file
-  uploaded <- reactive({
-    req(input$file)
-    fileinfo <- parseFilePaths(roots, input$file)
-    req(nrow(fileinfo) > 0)
-    fname <- as.character(fileinfo$datapath)
-    mm <- readRDS(fname)
-    if (!identical(attr(mm, "format"), "long")) {
-      mm <- metamet_reshape(mm, "long")
-    }
-    v_names <- unique(mm$dt_meta[type != "time" & type != "site", name_icos])
-    date_of_first_new_record <- mm$dt[, min(TIMESTAMP, na.rm = TRUE)]
-    date_of_last_new_record <- mm$dt[, max(TIMESTAMP, na.rm = TRUE)]
-    data.table::setkeyv(mm$dt, c("name_icos", "site", "TIMESTAMP"))
-    list(
-      mm = mm,
-      v_names = v_names,
-      date_of_first_new_record = date_of_first_new_record,
-      date_of_last_new_record = date_of_last_new_record,
-      fname = fname
-    )
-  })
-
-  # Simple status message instead of displaying the object
-  output$status <- renderText({
-    if (is.null(input$file)) {
-      return("No file selected yet.")
-    }
-    req(uploaded())
-    paste("Loaded file:", basename(uploaded()$fname))
-  })
-
-  output$loaded_file_banner <- renderUI({
-    req(uploaded())
-    tagList(
-      br(),
-      box(
-        width = 12,
-        status = "success",
-        solidHeader = TRUE,
-        title = tags$span(icon("file"), "Loaded file"),
-        div(
-          style = "font-size:16px; font-weight:600; margin-bottom:10px;",
-          basename(uploaded()$fname)
-        ),
-        actionButton(
-          "remove_file",
-          "Remove file and start again",
-          icon = icon("trash"),
-          class = "btn btn-danger"
-        )
-      )
-    )
-  })
-
-  observeEvent(input$remove_file, {
-    mm_qry <<- NULL
-    shinyjs::hide("extracted_data")
-    # resetting input$file causes uploaded() to return NULL via req(input$file)
-    shinyjs::reset("file")
-    shinyjs::enable(selector = "a[data-value='metadata_maker']")
-    shinyjs::enable(selector = "a[data-value='upload']")
-    updateTabItems(session, "tabs", "upload")
-    showNotification(
-      "Metamet file removed. You can now load a new one.",
-      type = "message"
-    )
-  })
-
-  # confirms upload was succesful and then switches to calendar selection
-  observeEvent(uploaded(), {
-    showNotification(
-      paste("Upload successful:", basename(uploaded()$fname)),
-      type = "message",
-      duration = 4
-    )
-    updateTabItems(session, "tabs", "dashboard")
-  })
-
   ##########################
   #shinyvalidate statements#
   #########################
@@ -402,22 +291,6 @@ server <- function(input, output, session) {
 
   # save the username
   username <<- Sys.info()[["user"]]
-
-  observeEvent(input$stop_app, {
-    stopApp()
-  })
-
-  observeEvent(input$open_app_guide, {
-    browseURL(
-      "https://nerc-ceh.github.io/metamet/articles/app_user_guide.html"
-    )
-  })
-
-  observeEvent(input$open_gapfill_guide, {
-    browseURL(
-      "https://nerc-ceh.github.io/metamet/articles/gap_fill_methods.html"
-    )
-  })
 
   session$onSessionEnded(function() {
     stopApp()
@@ -763,57 +636,11 @@ server <- function(input, output, session) {
     )
   })
 
-  output$download_data <- downloadHandler(
-    filename = function() {
-      if (input$download_file == 'lev1') {
-        paste("level_1-", Sys.Date(), ".zip", sep = "")
-      } else if (input$download_file == 'lev2') {
-        paste("level_2-", Sys.Date(), ".zip", sep = "")
-      } else if (input$download_file == 'ceda') {
-        paste("ceda-", Sys.Date(), ".zip", sep = "")
-      }
-    },
-    content = function(file) {
-      # Build the full validated metamet object from the query subset:
-      # copy to avoid modifying mm_qry in place; strip app-internal tracking
-      # columns before merging back into the full date-range dataset.
-      mm_qry_save <- data.table::copy(mm_qry)
-      mm_qry_save$dt[, c("row_name", "datect_num") := NULL]
-      mm <- join(uploaded()$mm, mm_qry_save)
-
-      if (input$download_file == 'lev2') {
-        runjs(
-          'document.getElementById("download_data").textContent="Preparing download...";'
-        )
-        shinyjs::disable("download_data")
-        withr::with_dir(tempdir(), {
-          fs <- c('level_2-data.csv', 'level_2-qc.csv')
-          data.table::fwrite(mm$dt, 'level_2-data.csv')
-          data.table::fwrite(mm$dt_qc, 'level_2-qc.csv')
-          zip(zipfile = file, files = fs)
-        })
-        runjs(
-          'document.getElementById("download_data").textContent="Download";'
-        )
-        shinyjs::enable("download_data")
-      } else if (input$download_file == 'ceda') {
-        runjs(
-          'document.getElementById("download_data").textContent="Preparing download...";'
-        )
-        shinyjs::disable("download_data")
-        withr::with_dir(tempdir(), {
-          fs <- c('ceda-data.csv')
-          df_ceda <- metamet:::format_for_ceda(mm)
-          data.table::fwrite(df_ceda, 'ceda-data.csv')
-          zip(zipfile = file, files = fs)
-        })
-        runjs(
-          'document.getElementById("download_data").textContent="Download";'
-        )
-        shinyjs::enable("download_data")
-      }
-    }
-  )
+  #mod_download_server(
+  #  "download",
+  #  uploaded = uploaded,
+  #  edited_data = dashboard_state$edited_data
+  #)
 
   # Writing validated data to file---- From main Dashboard
   observeEvent(input$submitchanges, {
